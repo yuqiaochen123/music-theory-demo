@@ -17,11 +17,13 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 - Rhythm notation must engrave the exact pitches used by playback. Create VexFlow beams before drawing the voice so grouped quavers use standard beams without leftover individual flags.
 - Apply VexFlow's optimal stem direction before creating rhythm beams: notes on or above the treble-clef middle B line stem down, while notes below it stem up.
 - For dense notation, calculate a minimum engraving width from its notes and modifiers. Use the full safe container width, then scale a wider virtual SVG inside that container rather than allowing noteheads, accidentals, or staves to overlap or overflow.
+- Scales must engrave and sound both ascending and descending paths. Melodic minor descends as natural minor; chromatic descent uses conventional flat spellings.
 - Keep irregular-metre alternatives inside one lesson card and hide their grouping choices until the learner requests them. Notation, explanation, one-bar playback, and continuous playback must all resolve from the same selected grouping variant.
 - In every side-by-side card layout, matching content and action rows must remain horizontally aligned even when labels wrap or optional controls open. Optional menus must not shift only one card's downstream content.
 
 When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.
 
 Execute implementation plans inline in the current task unless the user explicitly requests subagent-driven work.
+When the user has approved a scoped design, carry it through implementation, verification, and local merge without repeated approval prompts unless a real blocker or material scope decision arises.
 
 Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`, and `tests/sites-worker.test.mjs` intact so the same local prototype can be handed to Sites. Before a Sites handoff, run `npm run build` and `npm run test:sites`; the build must leave `dist/client/index.html`, `dist/server/index.js`, and `dist/.openai/hosting.json`.

@@ -108,15 +108,34 @@
 
   function renderScale(element, specification, options = {}) {
     const availableWidth = responsiveWidth(element, options.width || 820);
-    const width = scaleEngravingWidth(specification.notes, availableWidth);
-    const { context, stave } = prepare(element, width, 210, specification.key || null);
-    const notes = specification.notes.map((key) => staveNote([key], specification.showAccidentals !== false, "8"));
-    const voice = new VF.Voice({ numBeats: notes.length, beatValue: 8 });
-    voice.addTickables(notes);
-    const beams = VF.Beam.generateBeams(notes);
-    new VF.Formatter().joinVoices([voice]).formatToStave([voice], stave);
-    voice.draw(context, stave);
-    beams.forEach((beam) => beam.setContext(context).draw());
+    const descendingNotes = specification.descendingNotes || [...specification.notes].reverse();
+    const width = Math.max(
+      scaleEngravingWidth(specification.notes, availableWidth),
+      scaleEngravingWidth(descendingNotes, availableWidth),
+    );
+    requireVexFlow();
+    element.replaceChildren();
+    const renderer = new VF.Renderer(element, VF.Renderer.Backends.SVG);
+    renderer.resize(width, 210);
+    const context = renderer.getContext();
+    const ascendingStave = new VF.Stave(18, 20, width - 58);
+    const descendingStave = new VF.Stave(18, 124, width - 58);
+    [ascendingStave, descendingStave].forEach((stave) => {
+      stave.addClef("treble");
+      if (specification.key && specification.key !== "C") stave.addKeySignature(specification.key);
+      stave.setContext(context).draw();
+    });
+    function drawScalePath(keys, stave) {
+      const notes = keys.map((key) => staveNote([key], specification.showAccidentals !== false, "8"));
+      const voice = new VF.Voice({ numBeats: notes.length, beatValue: 8 });
+      voice.addTickables(notes);
+      const beams = VF.Beam.generateBeams(notes);
+      new VF.Formatter().joinVoices([voice]).formatToStave([voice], stave);
+      voice.draw(context, stave);
+      beams.forEach((beam) => beam.setContext(context).draw());
+    }
+    drawScalePath(specification.notes, ascendingStave);
+    drawScalePath(descendingNotes, descendingStave);
   }
 
   function render(element, specification, options) {

@@ -63,4 +63,10 @@ describe("new topic notation renderers",()=>{
     const scaleSource=source.slice(source.indexOf("function renderScale"),source.indexOf("function render(element"));
     assert.ok(scaleSource.indexOf("VF.Beam.generateBeams(notes)")<scaleSource.indexOf("voice.draw(context, stave)"));
   });
+
+  it("renders separate ascent and descent staves for scales",()=>{
+    const scaleSource=source.slice(source.indexOf("function renderScale"),source.indexOf("function render(element"));
+    assert.match(scaleSource,/specification\.descendingNotes/);
+    assert.match(scaleSource,/new VF\.Stave\(18, 124, width - 58\)/);
+  });
 });
