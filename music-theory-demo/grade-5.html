@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Listening Desk · Grade 5 contents</title>
+  <link rel="stylesheet" href="src/journey.css">
+  <style>
+    .curriculum-intro{display:grid;grid-template-columns:minmax(0,720px) auto;gap:28px;align-items:end;margin-bottom:52px}
+    .curriculum-intro .lead{margin-bottom:0}
+    .availability{margin:0;padding:11px 15px;border:1px solid var(--line);background:#fff;color:var(--blue);font-size:13px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
+    .curriculum{display:grid;gap:44px}
+    .curriculum-section{border-top:3px solid var(--ink);padding-top:17px}
+    .section-head{display:flex;justify-content:space-between;gap:18px;align-items:baseline;margin-bottom:17px}
+    .section-head h2{margin:0;font-size:23px;letter-spacing:-.03em}
+    .section-head span{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+    .topic-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .topic-card{position:relative;min-height:210px;padding:20px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);text-decoration:none;box-shadow:0 8px 22px rgba(28,66,143,.045)}
+    .topic-card h3{margin:40px 0 9px;font-size:20px;line-height:1.08;letter-spacing:-.035em}
+    .topic-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+    .module-number{position:absolute;top:18px;left:20px;color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.14em}
+    .status{position:absolute;top:16px;right:17px;padding:5px 7px;background:#eef3fc;color:#71809d;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+    .ready{border-color:#8fb3f5;background:linear-gradient(145deg,#fff 58%,#edf4ff)}
+    .ready .status{background:var(--blue);color:#fff}
+    .ready::after{content:'Explore →';margin-top:auto;padding-top:19px;color:var(--blue);font-size:13px;font-weight:900}
+    .ready:hover{border-color:var(--blue);transform:translateY(-3px)}
+    .upcoming{background:#fbfcff}
+    @media(prefers-reduced-motion:no-preference){.topic-card{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}.ready:hover{box-shadow:0 13px 26px rgba(15,92,226,.13)}}
+    @media(max-width:940px){.topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.curriculum-intro{grid-template-columns:1fr;align-items:start}.availability{justify-self:start}}
+    @media(max-width:560px){.topic-grid{grid-template-columns:1fr}.topic-card{min-height:178px}.section-head{align-items:flex-start;flex-direction:column;gap:6px}.curriculum{gap:36px}.curriculum-intro{margin-bottom:40px}}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="index.html">Listening Desk <span>♪</span></a>
+    <nav><a href="index.html">Grades</a><a class="active" href="grade-5.html">Grade 5</a></nav>
+  </header>
+  <main>
+    <p class="crumb"><a href="index.html">Grades</a> / Grade 5</p>
+    <p class="eyebrow">ABRSM Music Theory</p>
+    <h1>Grade 5<br><em>contents.</em></h1>
+    <div class="curriculum-intro">
+      <p class="lead">Grade 5 is cumulative: it brings together knowledge from the preceding grades and adds more advanced rhythm, transposition, harmony and score reading.</p>
+      <p class="availability">7 of 16 topics available</p>
+    </div>
+
+    <section class="grade-dashboard" aria-labelledby="grade-progress-heading">
+      <div class="grade-dashboard-head"><div><p class="eyebrow">Your learning history</p><h2 id="grade-progress-heading">Grade 5 progress</h2></div><p class="progress-sync" data-progress-sync aria-live="polite">Loading saved progress…</p></div>
+      <div data-grade-dashboard><p class="empty-activity">Loading your saved lessons and exercise results…</p></div>
+    </section>
+
+    <div class="curriculum">
+      <section class="curriculum-section" aria-labelledby="rhythm-heading">
+        <div class="section-head"><h2 id="rhythm-heading">Rhythm and notation</h2><span>Modules 01–06</span></div>
+        <div class="topic-grid">
+          <article class="topic-card upcoming"><span class="module-number">01</span><span class="status">Coming soon</span><h3>Rhythm and note values</h3><p>Notes, rests, ties, dots and irregular divisions.</p></article>
+          <a class="topic-card ready" href="topic.html?topic=time-signatures"><span class="module-number">02</span><span class="status">Available</span><h3>Time signatures and grouping</h3><p>Simple, compound and irregular time, with correct grouping.</p></a>
+          <article class="topic-card upcoming"><span class="module-number">03</span><span class="status">Coming soon</span><h3>Clefs and note reading</h3><p>Read treble, bass, alto and tenor clefs confidently.</p></article>
+          <article class="topic-card upcoming"><span class="module-number">04</span><span class="status">Coming soon</span><h3>Clef and octave transposition</h3><p>Move melodies accurately between all four clefs.</p></article>
+          <article class="topic-card upcoming"><span class="module-number">05</span><span class="status">Coming soon</span><h3>Transposing instruments</h3><p>Written and concert pitch for instruments in B-flat, A and F.</p></article>
+          <article class="topic-card upcoming"><span class="module-number">06</span><span class="status">Coming soon</span><h3>Accidentals and enharmonic equivalents</h3><p>Single and double accidentals, cancellation and equivalent spellings.</p></article>
+        </div>
+      </section>
+
+      <section class="curriculum-section" aria-labelledby="pitch-heading">
+        <div class="section-head"><h2 id="pitch-heading">Pitch and tonality</h2><span>Modules 07–10</span></div>
+        <div class="topic-grid">
+          <a class="topic-card ready" href="topic.html?topic=scales"><span class="module-number">07</span><span class="status">Available</span><h3>Major and minor scales</h3><p>Major, harmonic minor, melodic minor and chromatic scales.</p></a>
+          <a class="topic-card ready" href="topic.html?topic=key-signatures"><span class="module-number">08</span><span class="status">Available</span><h3>Key signatures and key relationships</h3><p>Keys through six sharps or flats and their relative keys.</p></a>
+          <a class="topic-card ready" href="topic.html?topic=scale-degrees"><span class="module-number">09</span><span class="status">Available</span><h3>Scale degrees and technical names</h3><p>Follow technical names in major and minor keys.</p></a>
+          <a class="topic-card ready" href="topic.html?topic=intervals"><span class="module-number">10</span><span class="status">Available</span><h3>Intervals</h3><p>See and hear every simple interval within an octave.</p></a>
+        </div>
+      </section>
+
+      <section class="curriculum-section" aria-labelledby="harmony-heading">
+        <div class="section-head"><h2 id="harmony-heading">Harmony</h2><span>Modules 11–12</span></div>
+        <div class="topic-grid">
+          <a class="topic-card ready" href="topic.html?topic=triads"><span class="module-number">11</span><span class="status">Available</span><h3>Triads and chords</h3><p>I, ii, IV and V in root position and both inversions.</p></a>
+          <a class="topic-card ready" href="topic.html?topic=cadences"><span class="module-number">12</span><span class="status">Available</span><h3>Cadences and chord selection</h3><p>Perfect, plagal and imperfect cadences with suitable chord choices.</p></a>
+        </div>
+      </section>
+
+      <section class="curriculum-section" aria-labelledby="language-heading">
+        <div class="section-head"><h2 id="language-heading">Musical language</h2><span>Modules 13–14</span></div>
+        <div class="topic-grid">
+          <article class="topic-card upcoming"><span class="module-number">13</span><span class="status">Coming soon</span><h3>Musical terms and signs</h3><p>Tempo, dynamics, articulation and performance directions.</p></article>
+          <article class="topic-card upcoming"><span class="module-number">14</span><span class="status">Coming soon</span><h3>Ornaments</h3><p>Trills, turns, mordents, acciaccaturas and appoggiaturas.</p></article>
+        </div>
+      </section>
+
+      <section class="curriculum-section" aria-labelledby="analysis-heading">
+        <div class="section-head"><h2 id="analysis-heading">Instruments and analysis</h2><span>Modules 15–16</span></div>
+        <div class="topic-grid">
+          <article class="topic-card upcoming"><span class="module-number">15</span><span class="status">Coming soon</span><h3>Voices and instruments</h3><p>Voice types, instrument families, clefs and sound production.</p></article>
+          <article class="topic-card upcoming"><span class="module-number">16</span><span class="status">Coming soon</span><h3>General musical observation</h3><p>Apply theoretical knowledge to passages of real music.</p></article>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer>Grade 5 · 7 of 16 topics available</footer>
+  <script src="vendor/supabase-2.111.0.js"></script>
+  <script type="module">
+    import { loadGradeDashboard } from './src/progress-ui.js';
+    loadGradeDashboard(5);
+  </script>
+</body>
+</html>

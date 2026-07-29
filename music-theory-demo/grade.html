@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Listening Desk · Grade progress</title>
+  <link rel="stylesheet" href="src/journey.css">
+</head>
+<body>
+  <header><a class="brand" href="index.html">Listening Desk <span>♪</span></a><nav><a href="index.html">Grades</a><a class="active" href="#" id="grade-nav">Grade</a></nav></header>
+  <main>
+    <p class="crumb"><a href="index.html">Grades</a> / <span id="grade-crumb">Grade</span></p>
+    <p class="eyebrow">ABRSM Music Theory</p>
+    <h1 id="grade-title">Grade</h1>
+    <p class="lead">Your saved learning history for this grade appears below. Lesson content is Coming soon.</p>
+    <section class="grade-dashboard" aria-labelledby="grade-progress-heading">
+      <div class="grade-dashboard-head"><div><p class="eyebrow">Your learning history</p><h2 id="grade-progress-heading">Progress</h2></div><p class="progress-sync" data-progress-sync aria-live="polite">Loading saved progress…</p></div>
+      <div data-grade-dashboard><p class="empty-activity">Loading your saved lessons and exercise results…</p></div>
+    </section>
+    <section class="coming-soon-panel"><p class="eyebrow">Coming soon</p><h2>Lessons for this grade are being prepared.</h2><p>When lessons become available, their progress will appear in this same dashboard.</p></section>
+  </main>
+  <footer id="grade-footer">Listening Desk</footer>
+  <script src="vendor/supabase-2.111.0.js"></script>
+  <script type="module">
+    import { loadGradeDashboard } from './src/progress-ui.js';
+    const requested=Number(new URLSearchParams(location.search).get('grade'));
+    const grade=requested>=1&&requested<=4?requested:1;
+    document.title=`Listening Desk · Grade ${grade}`;
+    document.querySelector('#grade-title').textContent=`Grade ${grade}`;
+    document.querySelector('#grade-crumb').textContent=`Grade ${grade}`;
+    document.querySelector('#grade-nav').textContent=`Grade ${grade}`;
+    document.querySelector('#grade-progress-heading').textContent=`Grade ${grade} progress`;
+    document.querySelector('#grade-footer').textContent=`Grade ${grade} · Coming soon`;
+    loadGradeDashboard(grade);
+  </script>
+</body>
+</html>

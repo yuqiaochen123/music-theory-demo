@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Listening Desk · Choose your grade</title>
+  <link rel="stylesheet" href="src/journey.css">
+</head>
+<body>
+  <header><a class="brand" href="index.html">Listening Desk <span>♪</span></a><nav><a class="active" href="index.html">Grades</a><a href="grade-5.html">Grade 5</a></nav></header>
+  <main class="home">
+    <p class="eyebrow">Music theory that you can hear</p>
+    <h1>Choose your<br><em>grade.</em></h1>
+    <p class="lead">Build a connection between written notation and real musical sound.</p>
+    <p class="progress-sync" data-progress-sync aria-live="polite">Loading saved progress…</p>
+    <section class="grade-grid" aria-label="Choose a music theory grade">
+      <a class="grade locked" data-grade="1" href="grade.html?grade=1"><b>Grade 1</b><span>Coming soon · View progress</span><small data-progress-summary>No learning activity yet</small></a>
+      <a class="grade locked" data-grade="2" href="grade.html?grade=2"><b>Grade 2</b><span>Coming soon · View progress</span><small data-progress-summary>No learning activity yet</small></a>
+      <a class="grade locked" data-grade="3" href="grade.html?grade=3"><b>Grade 3</b><span>Coming soon · View progress</span><small data-progress-summary>No learning activity yet</small></a>
+      <a class="grade locked" data-grade="4" href="grade.html?grade=4"><b>Grade 4</b><span>Coming soon · View progress</span><small data-progress-summary>No learning activity yet</small></a>
+      <a class="grade active-grade" data-grade="5" href="grade-5.html"><b>Grade 5</b><span>Start learning →</span><small data-progress-summary>No learning activity yet</small></a>
+    </section>
+  </main>
+  <footer>Start with what you can hear, then understand what you see.</footer>
+  <script src="vendor/supabase-2.111.0.js"></script>
+  <script type="module">
+    import { loadGradeOverview } from './src/progress-ui.js';
+    loadGradeOverview();
+  </script>
+</body>
+</html>
