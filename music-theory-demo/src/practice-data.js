@@ -36,7 +36,7 @@
     {answer:'V',prompt:'Which chord is this in D major?',choices:['I','ii','IV','V'],key:'D',roman:'V',quality:'major',inversion:2,root:'a',notes:['e/4','a/4','c#/5'],midis:[64,69,73]}
   ];
   const makeEvents=(count,duration,groups)=>{let group=1,used=0,limit=groups[0];return Array.from({length:count},()=>{const downbeat=used===0;const event={keys:[downbeat?'e/5':'c/5'],duration,group,accent:downbeat};used++;if(used===limit){group++;used=0;limit=groups[group-1]||Infinity}return event})};
-  const rhythm=(answer,meter,groups,duration,choices)=>{const events=makeEvents(meter[0],duration,groups);return {answer,prompt:'Which time signature matches this bar?',choices,meter,groups,durations:Array(meter[0]).fill(1),unit:meter[1],events,midis:events.map(event=>event.keys[0]==='e/5'?76:72)}};
+  const rhythm=(answer,meter,groups,duration,choices)=>{const events=makeEvents(meter[0],duration,groups);return {answer,prompt:'Which time signature matches this bar?',choices,meter,groups,durations:Array(meter[0]).fill(1),unit:meter[1],events,midis:events.map(event=>event.keys[0]==='e/5'?76:72),showTimeSignature:false}};
   const timeSignatures=[
     rhythm('2/4',[2,4],[1,1],'q',['2/4','3/4','4/4']),
     rhythm('3/4',[3,4],[1,1,1],'q',['2/4','3/4','4/4']),
@@ -73,6 +73,18 @@
     {answer:'Leading note',prompt:'In A harmonic minor, what is raised degree 7 called?',choices:['Leading note','Subtonic','Mediant'],notes:['a/3','b/3','c/4','d/4','e/4','f/4','g#/4','a/4'],descendingNotes:['a/4','g#/4','f/4','e/4','d/4','c/4','b/3','a/3'],midis:[57,59,60,62,64,65,68,69]},
     {answer:'Subtonic',prompt:'Descending A melodic minor uses G natural. What is degree 7 called?',choices:['Subtonic','Leading note','Supertonic'],notes:['a/3','b/3','c/4','d/4','e/4','f#/4','g#/4','a/4'],descendingNotes:['a/4','g/4','f/4','e/4','d/4','c/4','b/3','a/3'],midis:[57,59,60,62,64,66,68,69]}
   ];
+  const keySignatures=[
+    {id:'ks-1',answer:'G major / E minor',prompt:'Which relative keys share this signature?',choices:['G major / E minor','D major / B minor','F major / D minor'],notation:{type:'key-signature',key:'G'},midis:[67,69,71,72,74,76,78,79]},
+    {id:'ks-2',answer:'D major / B minor',prompt:'Which relative keys share this signature?',choices:['G major / E minor','D major / B minor','A major / F-sharp minor'],notation:{type:'key-signature',key:'D'},midis:[62,64,66,67,69,71,73,74]},
+    {id:'ks-3',answer:'A major / F-sharp minor',prompt:'Which relative keys share this signature?',choices:['D major / B minor','A major / F-sharp minor','E major / C-sharp minor'],notation:{type:'key-signature',key:'A'},midis:[69,71,73,74,76,78,80,81]},
+    {id:'ks-4',answer:'F major / D minor',prompt:'Which relative keys share this signature?',choices:['F major / D minor','B-flat major / G minor','C major / A minor'],notation:{type:'key-signature',key:'F'},midis:[65,67,69,70,72,74,76,77]},
+    {id:'ks-5',answer:'B-flat major / G minor',prompt:'Which relative keys share this signature?',choices:['F major / D minor','B-flat major / G minor','E-flat major / C minor'],notation:{type:'key-signature',key:'Bb'},midis:[70,72,74,75,77,79,81,82]},
+    {id:'ks-6',answer:'E-flat major / C minor',prompt:'Which relative keys share this signature?',choices:['B-flat major / G minor','E-flat major / C minor','A-flat major / F minor'],notation:{type:'key-signature',key:'Eb'},midis:[63,65,67,68,70,72,74,75]},
+    {id:'ks-7',answer:'B major / G-sharp minor',prompt:'Which relative keys share this signature?',choices:['E major / C-sharp minor','B major / G-sharp minor','F-sharp major / D-sharp minor'],notation:{type:'key-signature',key:'B'},midis:[59,61,63,64,66,68,70,71]},
+    {id:'ks-8',answer:'F-sharp major / D-sharp minor',prompt:'Which relative keys share this signature?',choices:['B major / G-sharp minor','F-sharp major / D-sharp minor','D-flat major / B-flat minor'],notation:{type:'key-signature',key:'F#'},midis:[66,68,70,71,73,75,77,78]},
+    {id:'ks-9',answer:'D-flat major / B-flat minor',prompt:'Which relative keys share this signature?',choices:['A-flat major / F minor','D-flat major / B-flat minor','G-flat major / E-flat minor'],notation:{type:'key-signature',key:'Db'},midis:[61,63,65,66,68,70,72,73]},
+    {id:'ks-10',answer:'G-flat major / E-flat minor',prompt:'Which relative keys share this signature?',choices:['D-flat major / B-flat minor','G-flat major / E-flat minor','F-sharp major / D-sharp minor'],notation:{type:'key-signature',key:'Gb'},midis:[66,68,70,71,73,75,77,78]}
+  ];
   window.ListeningDeskPractice = Object.freeze({
     "intervals": {name:'Intervals',title:'Identify the<br><em>interval.</em>',lead:'Use the staff notation and sound. Every written third appears once.',question:'What interval is this?',playLabel:'▶ Play interval',answers:[['major','Major third'],['minor','Minor third']],exercises:intervals},
     "cadences": {name:'Cadences',title:'Identify the<br><em>cadence.</em>',lead:'Read the key signature, then use the notation and sound to decide where the phrase leads.',question:'What cadence is this?',playLabel:'▶ Play cadence',answers:[['perfect','Perfect cadence'],['imperfect','Imperfect cadence']],exercises:cadences},
@@ -80,5 +92,6 @@
     "time-signatures": {name:'Time signatures and grouping',title:'Identify the<br><em>metre.</em>',lead:'Follow the written grouping and audible accents.',question:'What metre is this?',playLabel:'▶ Play rhythm',answers:[],exercises:timeSignatures},
     "scales": {name:'Major and minor scales',title:'Identify the<br><em>scale.</em>',lead:'Follow the written pitches and listen to the scale pattern.',question:'What scale is this?',playLabel:'▶ Play scale',answers:[],exercises:scales},
     "scale-degrees": {name:'Scale degrees and technical names',title:'Name the<br><em>scale degree.</em>',lead:'Read the complete scale, then identify the named degree in its major or minor context.',question:'What is this technical name?',playLabel:'▶ Play scale',answers:[],exercises:scaleDegrees}
+    ,"key-signatures": {name:'Key signatures and key relationships',title:'Read the<br><em>key signature.</em>',lead:'Read the signature, then connect its relative major and minor keys.',question:'Which keys share this signature?',playLabel:'▶ Play pitch collection',answers:[],exercises:keySignatures}
   });
 })();

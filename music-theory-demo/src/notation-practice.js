@@ -6,16 +6,17 @@ import { pitchFromStaffPoint } from "./clef-transposition-editor-ui.js";
 import { validateNotationAnswer } from "./notation-answer.js";
 
 export function createNotationPracticeState(exercise) {
+  const expected = exercise.expected || exercise.answer;
   return {
     source: { ...exercise.source, notes: [...exercise.source.notes] },
-    editor: { ...createEditorState([]), barCount: exercise.answer.barCount || exercise.source.barCount || 1 },
+    editor: { ...createEditorState([]), barCount: expected.barCount || exercise.source.barCount || 1 },
     duration: "q",
     accidental: "",
   };
 }
 
 export function checkNotationPractice(state, exercise) {
-  return validateNotationAnswer(state.editor, exercise.answer);
+  return validateNotationAnswer(state.editor, exercise.expected || exercise.answer);
 }
 
 function pitchLabel(pitch) {
@@ -39,7 +40,7 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
         <button type="button" data-add-note>Add note</button>
         <button type="button" data-delete-note>Delete note</button><button type="button" data-undo>Undo</button><button type="button" data-clear>Clear</button>
       </div>
-      <section class="notation-score notation-score--answer"><div class="notation-score__heading"><strong>Your answer · ${exercise.answer.key || "destination staff"}</strong><span>Click a staff height to enter the next note.</span></div><div data-answer-staff></div></section>
+      <section class="notation-score notation-score--answer"><div class="notation-score__heading"><strong>Your answer · ${(exercise.expected || exercise.answer).key || "destination staff"}</strong><span>Click a staff height to enter the next note.</span></div><div data-answer-staff></div></section>
       <div class="notation-practice__actions"><button type="button" data-play-answer>▶ Play your answer</button><button type="button" class="notation-check" data-check-answer>Check answer</button></div>
       <p class="notation-status" data-notation-status aria-live="polite">Write the complete answer on the staff, then check it.</p>
       <div class="notation-note-list" data-note-list aria-label="Entered notes"></div>
@@ -55,7 +56,7 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
     notation.renderMelody(sourceStaff, { ...state.source, clef: state.source.clef || "treble", rests: [] }, { width: 820 });
     notation.renderMelody(answerStaff, {
       notes: state.editor.notes, slots: state.editor.slots, durations: state.editor.durations,
-      clef: exercise.answer.clef || "treble", key: exercise.answer.key,
+      clef: (exercise.expected || exercise.answer).clef || "treble", key: (exercise.expected || exercise.answer).key,
       rests: rhythmicRests(state.editor), barCount: state.editor.barCount,
       cursorSlot: state.editor.cursorSlot, selectedIndex: state.editor.selectedIndex,
     }, { width: 820 });

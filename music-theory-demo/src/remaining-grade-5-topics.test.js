@@ -89,8 +89,18 @@ describe("remaining Grade 5 modules",()=>{
       for(const question of bank.exercises){
         assert.ok(question.prompt);
         assert.ok(question.answer);
-        assert.ok(question.choices.includes(question.answer));
-        assert.ok(question.notation||question.concept);
+        if(question.interaction==="notation-entry"){
+          assert.equal(question.answer,"correct");
+          assert.ok(question.source?.notes.length);
+          assert.ok(question.expected?.notes.length);
+        }else if(question.interaction==="matching"){
+          assert.equal(question.answer,"correct");
+          assert.ok(question.labels.length>=2);
+          assert.ok(question.targets.length>=2);
+        }else{
+          assert.ok(question.choices.includes(question.answer));
+          assert.ok(question.notation||question.concept);
+        }
       }
     }
   });

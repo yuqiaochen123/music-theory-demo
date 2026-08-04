@@ -17,9 +17,11 @@ describe("data-driven topic routing", () => {
       "accidentals", "musical-terms", "ornaments", "voices-instruments", "musical-observation",
     ]) {
       assert.match(topicData, new RegExp(`${JSON.stringify(slug)}\\s*:`));
-      assert.match(practiceData, new RegExp(`${JSON.stringify(slug)}\\s*:`));
+      const practiceKey = slug.includes("-") ? `["']${slug}["']` : `(?:["']${slug}["']|${slug})`;
+      assert.match(practiceData, new RegExp(`${practiceKey}\\s*:`));
     }
     assert.match(topicData, /"key-signatures"\s*:/);
+    assert.match(practiceData, /"key-signatures"\s*:/);
   });
 
   it("loads the registries on both route pages", () => {

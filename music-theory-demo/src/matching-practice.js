@@ -12,7 +12,8 @@ export function checkMatches(state, exercise) {
   if (Object.keys(state.assignments).length < exercise.targets.length) {
     return { correct: false, code: "incomplete", message: "Match every item before checking." };
   }
-  const correct = exercise.targets.every(target => state.assignments[target.id] === exercise.answer[target.id]);
+  const expected = exercise.expected || exercise.answer;
+  const correct = exercise.targets.every(target => state.assignments[target.id] === expected[target.id]);
   return correct
     ? { correct: true, code: "correct", message: "Correct — every musical clue is matched." }
     : { correct: false, code: "incorrect", message: "Some matches need another look. You can rearrange them and check again." };

@@ -1,115 +1,100 @@
 (function(){
-  const q=(id,prompt,answer,choices,symbol,detail)=>({id,prompt,answer,choices,concept:{symbol,kicker:'Question clue',detail}});
-  const bank=(name,noun,lead,items)=>({name,title:`Identify the<br><em>${noun}.</em>`,lead,question:`Identify the ${noun}.`,playLabel:'Review clue',answers:[],exercises:items});
-  const remaining={
-    "rhythm-note-values":bank('Rhythm and note values','rhythm','Calculate durations, ties, rests and tuplets.',[
-      q('rnv-1','How many quavers equal a dotted crotchet?','3',['2','3','4'],'♩.','A dot adds half the original duration.'),
-      q('rnv-2','How many crotchet beats equal a minim?','2',['1','2','4'],'𝅗𝅥','Count the full duration.'),
-      q('rnv-3','What does a tie do?','Joins durations of the same pitch',['Joins durations of the same pitch','Raises a pitch','Shortens a note'],'⌒','The tied notes sound as one.'),
-      q('rnv-4','Three quavers in the time of two form a…','Triplet',['Triplet','Duplet','Tie'],'3 : 2','Three equal divisions replace two.'),
-      q('rnv-5','How many semiquavers equal one crotchet?','4',['2','3','4'],'♬ ♬','Four quarter-beat divisions.'),
-      q('rnv-6','A dotted minim equals how many crotchets?','3',['2','3','4'],'𝅗𝅥.','Add half of two beats.'),
-      q('rnv-7','What does a rest measure?','Silence',['Silence','Pitch','Tempo'],'𝄽','Rests occupy exact durations.'),
-      q('rnv-8','Two tied crotchets equal which value?','Minim',['Quaver','Minim','Semibreve'],'♩⌒♩','Add the two durations.'),
-      q('rnv-9','A double dot adds what fractions?','One half and one quarter',['One half only','One half and one quarter','Two whole beats'],'..','The second dot adds half the first dot.'),
-      q('rnv-10','Which note value fills a 4/4 bar alone?','Semibreve',['Minim','Semibreve','Crotchet'],'𝅝','Four crotchet beats.')
-    ]),
-    "clefs":bank('Clefs and note reading','clef','Use each clef reference line to read pitch.',[
-      q('clef-1','Which clef curls around the G line?','Treble clef',['Treble clef','Bass clef','Alto clef'],'𝄞','The curl identifies G.'),
-      q('clef-2','Which clef has dots surrounding the F line?','Bass clef',['Bass clef','Tenor clef','Treble clef'],'𝄢','The dots frame F.'),
-      q('clef-3','Where is middle C in alto clef?','Third line',['Second line','Third line','Fourth line'],'𝄡','The centre of the C clef points to middle C.'),
-      q('clef-4','Where is middle C in tenor clef?','Fourth line',['Third line','Fourth line','Fifth line'],'𝄡','The C-clef centre moves up one line.'),
-      q('clef-5','Which clef is commonly used by viola?','Alto clef',['Alto clef','Bass clef','Treble clef'],'Viola','Its central register fits alto clef.'),
-      q('clef-6','Which clef is commonly used for cello low notes?','Bass clef',['Bass clef','Alto clef','Treble clef'],'Cello','Low register uses bass clef.'),
-      q('clef-7','The second line of treble clef is…','G',['F','G','A'],'𝄞 · line 2','Count from the clef reference.'),
-      q('clef-8','The fourth line of bass clef is…','F',['E','F','G'],'𝄢 · line 4','The bass-clef dots surround it.'),
-      q('clef-9','Which two are C clefs?','Alto and tenor',['Treble and bass','Alto and tenor','Bass and tenor'],'𝄡','Both point directly to middle C.'),
-      q('clef-10','Changing clef without transposing changes the sounding pitch?','No',['Yes','No','Only in minor keys'],'Same note','Only its staff position changes.')
-    ]),
-    "clef-transposition":bank('Clef and octave transposition','transposition','Preserve pitch or move it by an exact octave.',[
-      q('ct-1','Moving C4 to C5 is a…','Perfect octave',['Perfect fifth','Perfect octave','Major seventh'],'C4 → C5','Same letter, twelve semitones.'),
-      q('ct-2','When rewriting in another clef, what must stay unchanged?','Sounding pitch',['Staff line','Clef sign','Sounding pitch'],'𝄞 → 𝄢','Only notation position changes.'),
-      q('ct-3','An octave contains how many semitones?','12',['7','8','12'],'8ve','Chromatic distance.'),
-      q('ct-4','Transpose G4 down an octave.','G3',['F3','G3','G5'],'G4 ↓ 8','Keep the letter name.'),
-      q('ct-5','Transpose B3 up an octave.','B4',['A4','B4','C4'],'B3 ↑ 8','Keep accidental and letter.'),
-      q('ct-6','Does an octave transposition change rhythm?','No',['Yes','No','Only tied notes'],'♩ = ♩','Durations remain identical.'),
-      q('ct-7','Middle C is on which line in alto clef?','Third',['Second','Third','Fourth'],'𝄡','Use the C-clef centre.'),
-      q('ct-8','Middle C is on which line in tenor clef?','Fourth',['Third','Fourth','Fifth'],'𝄡','Use the C-clef centre.'),
-      q('ct-9','Transpose F-sharp up an octave. What happens to the sharp?','It remains',['It disappears','It remains','It becomes flat'],'F♯ ↑ 8','Preserve accidental spelling.'),
-      q('ct-10','A melody moved entirely up an octave keeps its…','Intervals',['Register','Intervals','Clef'],'same shape','Every pitch moves equally.')
-    ]),
-    "transposing-instruments":bank('Transposing instruments','concert pitch','Convert between written and sounding pitch.',[
-      q('ti-1','A B-flat instrument reads C. What sounds?','B-flat',['B-flat','C','D'],'Written C → B♭','Sound down a major second.'),
-      q('ti-2','A horn in F reads C. What sounds?','F',['F','G','C'],'Written C → F','Sound down a perfect fifth.'),
-      q('ti-3','A clarinet in A reads C. What sounds?','A',['A','B-flat','C'],'Written C → A','Sound down a minor third.'),
-      q('ti-4','Which is a B-flat instrument?','Trumpet in B-flat',['Flute','Trumpet in B-flat','Oboe'],'B♭','Its written C sounds B-flat.'),
-      q('ti-5','Which commonly sounds at concert pitch?','Flute',['Flute','Horn in F','Clarinet in A'],'C instrument','Written and sounding pitch agree.'),
-      q('ti-6','To write for B-flat clarinet from concert pitch, transpose…','Up a major second',['Down a major second','Up a major second','Up a fifth'],'Concert → written','Reverse its sounding transposition.'),
-      q('ti-7','To find horn in F concert pitch, transpose written pitch…','Down a perfect fifth',['Up a perfect fifth','Down a perfect fifth','Down an octave'],'Written → concert','The horn sounds lower.'),
-      q('ti-8','A B-flat trumpet reads D. Concert pitch is…','C',['C','D','E'],'D → C','Down one tone.'),
-      q('ti-9','An A clarinet reads E. Concert pitch is…','C-sharp',['C','C-sharp','E-flat'],'E → C♯','Down a minor third.'),
-      q('ti-10','Why transpose instrument parts?','So intended concert pitches sound',['To change rhythm','So intended concert pitches sound','To remove key signatures'],'score alignment','Written parts compensate for instrument pitch.')
-    ]),
-    "accidentals":bank('Accidentals and enharmonic equivalents','spelling','Apply accidentals and choose functional enharmonic names.',[
-      q('acc-1','A sharp raises a note by…','One semitone',['One semitone','Two semitones','One tone and a half'],'♯','Raise the written pitch.'),
-      q('acc-2','A double flat lowers a note by…','Two semitones',['One semitone','Two semitones','Three semitones'],'𝄫','Two chromatic steps.'),
-      q('acc-3','Which is enharmonic with F-sharp?','G-flat',['E-sharp','G-flat','A-flat'],'F♯ = G♭','Same sounding key.'),
-      q('acc-4','Which is enharmonic with B-sharp?','C',['B-flat','C','C-sharp'],'B♯ = C','Same sounding pitch.'),
-      q('acc-5','What does a natural sign do?','Cancels a sharp or flat',['Raises a semitone','Cancels a sharp or flat','Lowers two semitones'],'♮','Return to the unaltered letter.'),
-      q('acc-6','An accidental normally lasts until…','The end of the bar',['The next note','The end of the bar','The end of the piece'],'| barline','Same pitch and octave within the bar.'),
-      q('acc-7','Which is enharmonic with C-flat?','B',['B','B-flat','C'],'C♭ = B','Same sounding pitch.'),
-      q('acc-8','A double sharp raises by…','Two semitones',['One semitone','Two semitones','One octave'],'𝄪','Two chromatic steps.'),
-      q('acc-9','Why choose E-sharp instead of F in F-sharp major?','To preserve scale letter order',['To sound higher','To preserve scale letter order','To shorten the note'],'E♯ → F♯','Each scale degree needs a different letter.'),
-      q('acc-10','G double flat sounds like…','F',['F','F-sharp','G-flat'],'G𝄫 = F','Lower G twice.')
-    ]),
-    "musical-terms":bank('Musical terms and signs','term','Translate written directions into performance actions.',[
-      q('term-1','What does allegro mean?','Fast and lively',['Slow and broad','Fast and lively','Very soft'],'allegro','Tempo and character.'),
-      q('term-2','What does diminuendo mean?','Gradually softer',['Gradually louder','Gradually softer','Immediately fast'],'dim.','A gradual dynamic change.'),
-      q('term-3','What does cantabile mean?','In a singing style',['Detached','In a singing style','Very fast'],'cantabile','Shape a lyrical line.'),
-      q('term-4','What does staccato request?','Short and detached',['Smooth and connected','Short and detached','Louder'],'· · ·','Articulation changes note length.'),
-      q('term-5','What does legato request?','Smoothly connected',['Smoothly connected','Strongly accented','Slower'],'⌒','Connect the phrase.'),
-      q('term-6','What does a tempo mean?','Return to the previous tempo',['Become faster','Return to the previous tempo','Pause'],'a tempo','Cancel a temporary tempo change.'),
-      q('term-7','What does fortissimo mean?','Very loud',['Very soft','Moderately loud','Very loud'],'ff','Dynamic level.'),
-      q('term-8','What does ritardando mean?','Gradually slower',['Gradually slower','Suddenly slow','Gradually louder'],'rit.','Tempo changes over time.'),
-      q('term-9','What does marcato mean?','Marked and emphasized',['Fading away','Marked and emphasized','Sweetly'],'marcato','Give notes clear emphasis.'),
-      q('term-10','What does dolce mean?','Sweetly',['Angrily','Sweetly','Very quickly'],'dolce','Character direction.')
-    ]),
-    "ornaments":bank('Ornaments','ornament','Identify decorations and their auxiliary notes.',[
-      q('orn-1','Which ornament repeatedly alternates with the upper note?','Trill',['Trill','Mordent','Acciaccatura'],'tr','Rapid alternation.'),
-      q('orn-2','Which grace note is normally crushed very quickly?','Acciaccatura',['Appoggiatura','Acciaccatura','Turn'],'♪→♩','Very short before the principal note.'),
-      q('orn-3','Which ornament leans expressively on a grace note?','Appoggiatura',['Appoggiatura','Mordent','Trill'],'♫ → ♩','It takes time from the principal note.'),
-      q('orn-4','A mordent makes…','A rapid single turn',['Repeated alternation','A rapid single turn','A long pause'],'𝆝','Principal and neighbouring note.'),
-      q('orn-5','A turn circles around…','The principal note',['The tonic only','The principal note','The bass note'],'∽','Upper, principal, lower, principal.'),
-      q('orn-6','Auxiliary notes follow the…','Key signature and accidentals',['Tempo only','Key signature and accidentals','Dynamic marking'],'♯ ♭','Pitch spelling still applies.'),
-      q('orn-7','The structural note being decorated is the…','Principal note',['Passing note','Principal note','Pedal note'],'●','The ornament resolves around it.'),
-      q('orn-8','Which ornament usually has the symbol tr?','Trill',['Turn','Trill','Mordent'],'tr','Standard abbreviation.'),
-      q('orn-9','Which grace note usually has a slash?','Acciaccatura',['Acciaccatura','Appoggiatura','Trill'],'♪̸','The slash indicates crushed delivery.'),
-      q('orn-10','Ornaments mainly add…','Decoration and expression',['A new key signature','Decoration and expression','A new time signature'],'✨','They elaborate existing notes.')
-    ]),
-    "voices-instruments":bank('Voices and instruments','performer','Classify ranges, families, clefs and sound production.',[
-      q('vi-1','Which is the highest standard choir voice?','Soprano',['Soprano','Alto','Tenor'],'S A T B','High to low.'),
-      q('vi-2','Which is the lowest standard choir voice?','Bass',['Alto','Tenor','Bass'],'S A T B','High to low.'),
-      q('vi-3','A violin belongs to which family?','Strings',['Strings','Woodwind','Brass'],'Violin','Sound comes from vibrating strings.'),
-      q('vi-4','A saxophone belongs to which family?','Woodwind',['Woodwind','Brass','Percussion'],'Saxophone','It uses a reed.'),
-      q('vi-5','A trumpet belongs to which family?','Brass',['Woodwind','Brass','Strings'],'Trumpet','Buzzing lips excite the air column.'),
-      q('vi-6','A timpani belongs to which family?','Percussion',['Percussion','Brass','Strings'],'Timpani','Its membrane is struck.'),
-      q('vi-7','Which instrument commonly reads alto clef?','Viola',['Violin','Viola','Flute'],'𝄡','Its register suits the clef.'),
-      q('vi-8','Which instrument uses a double reed?','Oboe',['Clarinet','Oboe','Flute'],'Oboe','Two reeds vibrate together.'),
-      q('vi-9','Which voice lies between soprano and tenor?','Alto',['Alto','Bass','Baritone'],'S A T B','Standard choral order.'),
-      q('vi-10','Which family produces sound by buzzing lips?','Brass',['Brass','Woodwind','Percussion'],'Horn','Lips vibrate into a mouthpiece.')
-    ]),
-    "musical-observation":bank('General musical observation','observation','Use visible evidence to explain structure, texture and harmony.',[
-      q('mo-1','A short recurring musical idea is a…','Motif',['Motif','Cadence','Clef'],'a · a · a','A recognisable small unit.'),
-      q('mo-2','A pattern repeated at a new pitch level is a…','Sequence',['Sequence','Tie','Pedal'],'a → a↑','Shape repeats after transposition.'),
-      q('mo-3','One melody with chordal support is…','Melody and accompaniment',['Monophony','Melody and accompaniment','Imitation'],'line + chords','One line remains primary.'),
-      q('mo-4','Several independent melodic lines create…','Polyphonic texture',['Monophonic texture','Polyphonic texture','A key signature'],'lines ↕','Lines have separate identities.'),
-      q('mo-5','A phrase ending V–I uses a…','Perfect cadence',['Perfect cadence','Imperfect cadence','Sequence'],'V → I','Dominant resolves to tonic.'),
-      q('mo-6','A repeated bass note beneath changing harmony is a…','Pedal',['Pedal','Motif','Turn'],'G ———','One sustained or repeated pitch.'),
-      q('mo-7','Two performers moving in the same rhythm create…','Homorhythmic texture',['Imitation','Homorhythmic texture','Sequence'],'♩ ♩ / ♩ ♩','Rhythms align vertically.'),
-      q('mo-8','A melody passed between parts is…','Imitation',['Imitation','Staccato','Modulation'],'a → part 2','Another part copies the idea.'),
-      q('mo-9','Moving to a new key is called…','Modulation',['Transposition','Modulation','Inversion'],'Key A → Key B','The tonal centre changes.'),
-      q('mo-10','The strongest evidence for an analytical answer comes from…','Features visible in the score',['Personal preference','Features visible in the score','The page number'],'evidence','Name the exact musical feature.')
-    ])
-  };
-  window.ListeningDeskPractice=Object.freeze({...window.ListeningDeskPractice,...remaining});
+  const midi=pitch=>{const match=pitch.match(/^([a-g])(bb|##|b|#)?\/(\d)$/),pc={c:0,d:2,e:4,f:5,g:7,a:9,b:11},alter={bb:-2,b:-1,"":0,"#":1,"##":2};return 12*(Number(match[3])+1)+pc[match[1]]+alter[match[2]||""]};
+  const melody=(notes,clef='treble',key=null,durations=null)=>({type:'melody',notes,slots:notes.map((_,index)=>index*4),durations:durations||notes.map(()=>"q"),clef,key,barCount:Math.max(1,Math.ceil(notes.length/4))});
+  const rhythm=(events,meter=[4,4])=>({type:'rhythm',meter,events,showTimeSignature:true});
+  const score=(id,prompt,answer,choices,notation,midis)=>({id,prompt,answer,choices,notation,midis});
+  const q=(id,prompt,answer,choices,symbol,detail)=>({id,prompt,answer,choices,musical:false,concept:{symbol,kicker:'Question clue',detail}});
+  const matching=(id,prompt,labels,targets,expected)=>({id,prompt,answer:'correct',interaction:'matching',labels,targets,expected});
+  const entry=(id,prompt,instruction,source,expected)=>({id,prompt,instruction,answer:'correct',interaction:'notation-entry',source,expected});
+  const phrase=(notes,key='C',clef='treble')=>({...melody(notes,clef,key),key,clef});
+  const bank=(name,noun,lead,items)=>({name,title:`Identify the<br><em>${noun}.</em>`,lead,question:`Identify the ${noun}.`,playLabel:'▶ Play example',answers:[],exercises:items});
+
+  const rnv=[
+    score('rnv-1','How many quavers equal the dotted crotchet shown?','3',['2','3','4'],rhythm([{keys:['c/5'],duration:'q',dots:1},{rest:true,duration:'q'},{rest:true,duration:'8'}],[3,4]),[72]),
+    score('rnv-2','How many crotchet beats does the minim last?','2',['1','2','4'],rhythm([{keys:['d/5'],duration:'h'},{rest:true,duration:'h'}]),[74]),
+    score('rnv-3','What does the curved line between these notes do?','Joins durations of the same pitch',['Joins durations of the same pitch','Raises a pitch','Shortens a note'],rhythm([{keys:['e/5'],duration:'q',tieToNext:true},{keys:['e/5'],duration:'q'},{rest:true,duration:'h'}]),[76,76]),
+    score('rnv-4','The bracketed group forms a…','Triplet',['Triplet','Duplet','Tie'],rhythm([{keys:['c/5'],duration:'8',tuplet:true},{keys:['d/5'],duration:'8',tuplet:true},{keys:['e/5'],duration:'8',tuplet:true},{rest:true,duration:'h'},{rest:true,duration:'q'}]),[72,74,76]),
+    score('rnv-5','How many semiquavers fill one crotchet beat?','4',['2','3','4'],rhythm([{keys:['c/5'],duration:'16',group:1},{keys:['d/5'],duration:'16',group:1},{keys:['e/5'],duration:'16',group:1},{keys:['f/5'],duration:'16',group:1},{rest:true,duration:'h'},{rest:true,duration:'q'}]),[72,74,76,77]),
+    score('rnv-6','How many crotchet beats does the dotted minim last?','3',['2','3','4'],rhythm([{keys:['c/5'],duration:'h',dots:1},{rest:true,duration:'q'}]),[72]),
+    score('rnv-7','What does the engraved rest measure?','Silence',['Silence','Pitch','Tempo'],rhythm([{rest:true,duration:'q'},{keys:['g/4'],duration:'q'},{rest:true,duration:'h'}]),[67]),
+    score('rnv-8','The two tied crotchets equal which note value?','Minim',['Quaver','Minim','Semibreve'],rhythm([{keys:['g/4'],duration:'q',tieToNext:true},{keys:['g/4'],duration:'q'},{rest:true,duration:'h'}]),[67,67]),
+    score('rnv-9','A double dot adds what fractions to the original value?','One half and one quarter',['One half only','One half and one quarter','Two whole beats'],rhythm([{keys:['a/4'],duration:'h',dots:2},{rest:true,duration:'8'}]),[69]),
+    score('rnv-10','Which note value fills this 4/4 bar alone?','Semibreve',['Minim','Semibreve','Crotchet'],rhythm([{keys:['c/5'],duration:'w'}]),[72])
+  ];
+
+  const clefs=[
+    score('clef-1','Name the note shown in treble clef.','G4',['E4','G4','B4'],melody(['g/4']),[67]),
+    score('clef-2','Name the note shown in bass clef.','F3',['D3','F3','A3'],melody(['f/3'],'bass'),[53]),
+    score('clef-3','Name the note on the middle line of alto clef.','C4',['A3','C4','E4'],melody(['c/4'],'alto'),[60]),
+    score('clef-4','Name the note on the fourth line of tenor clef.','C4',['A3','C4','E4'],melody(['c/4'],'tenor'),[60]),
+    q('clef-5','Which clef is commonly used by viola?','Alto clef',['Alto clef','Bass clef','Treble clef'],'Viola','Its central register fits alto clef.'),
+    q('clef-6','Which clef is commonly used for cello low notes?','Bass clef',['Bass clef','Alto clef','Treble clef'],'Cello','Low register uses bass clef.'),
+    score('clef-7','Name this treble-clef note.','G4',['F4','G4','A4'],melody(['g/4']),[67]),
+    score('clef-8','Name this bass-clef note.','F3',['E3','F3','G3'],melody(['f/3'],'bass'),[53]),
+    score('clef-9','These two staves show the same sounding pitch. What is it?','C4',['B3','C4','D4'],melody(['c/4'],'alto'),[60]),
+    score('clef-10','Changing only the clef should preserve what?','Sounding pitch',['Staff line','Sounding pitch','Clef symbol'],melody(['c/4'],'tenor'),[60])
+  ];
+
+  const clefTransposition=[
+    entry('ct-1','Rewrite the extract one octave higher.','Transpose every note up one octave. Keep the rhythm unchanged.',phrase(['c/4','e/4','g/4']),phrase(['c/5','e/5','g/5'])),
+    entry('ct-2','Rewrite the extract in bass clef at the same sounding pitch.','Change the clef, not the sound or rhythm.',phrase(['c/4','d/4','g/4']),phrase(['c/4','d/4','g/4'],'C','bass')),
+    entry('ct-3','Rewrite the extract one octave higher.','Preserve each letter name, accidental, and note value.',phrase(['c/4','d/4','f#/4']),phrase(['c/5','d/5','f#/5'])),
+    score('ct-4','Which pitch is this note transposed down one octave?','G3',['F3','G3','G5'],melody(['g/4']),[67]),
+    score('ct-5','Which pitch is this note transposed up one octave?','B4',['A4','B4','C4'],melody(['b/3']),[59]),
+    q('ct-6','Does octave transposition change rhythm?','No',['Yes','No','Only tied notes'],'♩ = ♩','Durations remain identical.'),
+    score('ct-7','This note is middle C in alto clef. Which line is it on?','Third',['Second','Third','Fourth'],melody(['c/4'],'alto'),[60]),
+    score('ct-8','This note is middle C in tenor clef. Which line is it on?','Fourth',['Third','Fourth','Fifth'],melody(['c/4'],'tenor'),[60]),
+    score('ct-9','After octave transposition, what happens to the sharp?','It remains',['It disappears','It remains','It becomes flat'],melody(['f#/4']),[66]),
+    q('ct-10','A melody moved entirely up an octave keeps its…','Intervals',['Register','Intervals','Clef'],'same shape','Every pitch moves equally.')
+  ];
+
+  const transposingInstruments=[
+    entry('ti-1','Write the concert pitch for this B-flat instrument part.','Transpose the written extract down a major second.',phrase(['d/4','f#/4','a/4'],'D'),phrase(['c/4','e/4','g/4'],'C')),
+    entry('ti-2','Write the concert pitch for this horn in F part.','Transpose the written extract down a perfect fifth.',phrase(['g/4','b/4','d/5'],'G'),phrase(['c/4','e/4','g/4'],'C')),
+    entry('ti-3','Write a B-flat instrument part for this concert-pitch extract.','Transpose the concert extract up a major second.',phrase(['c/4','e/4','g/4'],'C'),phrase(['d/4','f#/4','a/4'],'D')),
+    q('ti-4','Which is a B-flat instrument?','Trumpet in B-flat',['Flute','Trumpet in B-flat','Oboe'],'B♭ trumpet','Its written C sounds B-flat.'),
+    q('ti-5','Which commonly sounds at concert pitch?','Flute',['Flute','Horn in F','Clarinet in A'],'Flute','Written and sounding pitch agree.'),
+    q('ti-6','To write for B-flat clarinet from concert pitch, transpose…','Up a major second',['Down a major second','Up a major second','Up a fifth'],'Concert → written','Reverse its sounding transposition.'),
+    q('ti-7','To find horn in F concert pitch, transpose written pitch…','Down a perfect fifth',['Up a perfect fifth','Down a perfect fifth','Down an octave'],'Written → concert','The horn sounds lower.'),
+    score('ti-8','A B-flat trumpet reads this D. What is the concert pitch?','C',['C','D','E'],melody(['d/4']),[62]),
+    score('ti-9','An A clarinet reads this E. What is the concert pitch?','C-sharp',['C','C-sharp','E-flat'],melody(['e/4']),[64]),
+    q('ti-10','Why transpose instrument parts?','So intended concert pitches sound',['To change rhythm','So intended concert pitches sound','To remove key signatures'],'score alignment','Written parts compensate for instrument pitch.')
+  ];
+
+  const accidentals=[
+    score('acc-1','What does the accidental do to this written note?','Raises it one semitone',['Raises it one semitone','Raises it two semitones','Lowers it one semitone'],melody(['f#/4']),[66]),
+    score('acc-2','How far does this double flat lower the note?','Two semitones',['One semitone','Two semitones','Three semitones'],melody(['gbb/4']),[65]),
+    score('acc-3','Which spelling is enharmonic with the shown F-sharp?','G-flat',['E-sharp','G-flat','A-flat'],melody(['f#/4']),[66]),
+    score('acc-4','Which natural pitch sounds the same as the shown B-sharp?','C',['B-flat','C','C-sharp'],melody(['b#/4']),[72]),
+    score('acc-5','What does the natural sign do here?','Cancels the sharp',['Raises a semitone','Cancels the sharp','Lowers two semitones'],melody(['f#/4','f/4']),[66,65]),
+    score('acc-6','How long does the first accidental normally remain in force?','To the end of the bar',['For one note only','To the end of the bar','To the end of the piece'],melody(['f#/4','f#/4']),[66,66]),
+    score('acc-7','Which natural pitch is enharmonic with C-flat?','B',['B','B-flat','C'],melody(['cb/4']),[59]),
+    score('acc-8','How far does the double sharp raise this note?','Two semitones',['One semitone','Two semitones','One octave'],melody(['f##/4']),[67]),
+    score('acc-9','Why is E-sharp the correct leading note in F-sharp major?','It preserves scale letter order',['It sounds higher than F','It preserves scale letter order','It shortens the note'],melody(['e#/5','f#/5'], 'treble','F#'),[77,78]),
+    score('acc-10','Which natural pitch sounds like G double flat?','F',['F','F-sharp','G-flat'],melody(['gbb/4']),[65])
+  ];
+
+  const termsMatch=matching('term-1','Match each direction to its performance meaning.',[{id:'allegro',text:'Allegro'},{id:'dim',text:'Diminuendo'},{id:'ff',text:'Fortissimo'},{id:'rit',text:'Ritardando'}],[{id:'fast',label:'Fast and lively'},{id:'softer',label:'Gradually softer'},{id:'loud',label:'Very loud'},{id:'slower',label:'Gradually slower'}],{fast:'allegro',softer:'dim',loud:'ff',slower:'rit'});
+  const musicalTerms=[termsMatch,q('term-2','What does cantabile mean?','In a singing style',['Detached','In a singing style','Very fast'],'cantabile','Shape a lyrical line.'),q('term-3','What does staccato request?','Short and detached',['Smooth and connected','Short and detached','Louder'],'· · ·','Articulation changes note length.'),q('term-4','What does legato request?','Smoothly connected',['Smoothly connected','Strongly accented','Slower'],'⌒','Connect the phrase.'),q('term-5','What does a tempo mean?','Return to the previous tempo',['Become faster','Return to the previous tempo','Pause'],'a tempo','Cancel a temporary tempo change.'),q('term-6','What does marcato mean?','Marked and emphasized',['Fading away','Marked and emphasized','Sweetly'],'marcato','Give notes clear emphasis.'),q('term-7','What does dolce mean?','Sweetly',['Angrily','Sweetly','Very quickly'],'dolce','Character direction.'),q('term-8','What does crescendo mean?','Gradually louder',['Gradually louder','Immediately loud','Gradually faster'],'cresc.','Dynamic change.'),q('term-9','What does adagio mean?','Slow',['Fast','Slow','Detached'],'adagio','Tempo direction.'),q('term-10','What does pianissimo mean?','Very soft',['Very soft','Moderately loud','Very loud'],'pp','Dynamic level.')];
+
+  const ornamentMatch=matching('orn-1','Match each ornament symbol to its name.',[{id:'trill',text:'Trill'},{id:'turn',text:'Turn'},{id:'mordent',text:'Mordent'},{id:'acciaccatura',text:'Acciaccatura'}],[{id:'tr',label:'tr'},{id:'turn-symbol',label:'∽'},{id:'mordent-symbol',label:'𝆝'},{id:'slash-note',label:'Slashed grace note'}],{tr:'trill','turn-symbol':'turn','mordent-symbol':'mordent','slash-note':'acciaccatura'});
+  const ornaments=[ornamentMatch,q('orn-2','Which grace note leans expressively on the principal note?','Appoggiatura',['Appoggiatura','Acciaccatura','Turn'],'♫ → ♩','It takes time from the principal note.'),q('orn-3','A mordent makes…','A rapid single turn',['Repeated alternation','A rapid single turn','A long pause'],'𝆝','Principal and neighbouring note.'),q('orn-4','A turn circles around…','The principal note',['The tonic only','The principal note','The bass note'],'∽','Upper, principal, lower, principal.'),q('orn-5','Auxiliary notes follow the…','Key signature and accidentals',['Tempo only','Key signature and accidentals','Dynamic marking'],'♯ ♭','Pitch spelling still applies.'),q('orn-6','The structural note being decorated is the…','Principal note',['Passing note','Principal note','Pedal note'],'●','The ornament resolves around it.'),q('orn-7','Which ornament usually has the symbol tr?','Trill',['Turn','Trill','Mordent'],'tr','Standard abbreviation.'),q('orn-8','Which grace note usually has a slash?','Acciaccatura',['Acciaccatura','Appoggiatura','Trill'],'♪̸','The slash indicates crushed delivery.'),q('orn-9','Ornaments mainly add…','Decoration and expression',['A new key signature','Decoration and expression','A new time signature'],'✨','They elaborate existing notes.'),q('orn-10','Which ornament repeatedly alternates with the upper note?','Trill',['Trill','Mordent','Turn'],'tr','Rapid alternation.')];
+
+  const familyMatch=matching('vi-1','Match each performer to its family or range.',[{id:'violin',text:'Violin'},{id:'oboe',text:'Oboe'},{id:'trumpet',text:'Trumpet'},{id:'soprano',text:'Soprano'}],[{id:'strings',label:'Strings'},{id:'woodwind',label:'Woodwind'},{id:'brass',label:'Brass'},{id:'highest',label:'Highest choir voice'}],{strings:'violin',woodwind:'oboe',brass:'trumpet',highest:'soprano'});
+  const voices=[familyMatch,q('vi-2','Which is the lowest standard choir voice?','Bass',['Alto','Tenor','Bass'],'S A T B','High to low.'),q('vi-3','A saxophone belongs to which family?','Woodwind',['Woodwind','Brass','Percussion'],'Saxophone','It uses a reed.'),q('vi-4','A timpani belongs to which family?','Percussion',['Percussion','Brass','Strings'],'Timpani','Its membrane is struck.'),q('vi-5','Which instrument commonly reads alto clef?','Viola',['Violin','Viola','Flute'],'𝄡','Its register suits the clef.'),q('vi-6','Which instrument uses a double reed?','Oboe',['Clarinet','Oboe','Flute'],'Oboe','Two reeds vibrate together.'),q('vi-7','Which voice lies between soprano and tenor?','Alto',['Alto','Bass','Baritone'],'S A T B','Standard choral order.'),q('vi-8','Which family produces sound by buzzing lips?','Brass',['Brass','Woodwind','Percussion'],'Horn','Lips vibrate into a mouthpiece.'),q('vi-9','Which string instrument commonly reads bass clef?','Cello',['Violin','Cello','Flute'],'Cello','Its low register suits bass clef.'),q('vi-10','Which woodwind instrument has no reed?','Flute',['Oboe','Clarinet','Flute'],'Flute','Air splits across the embouchure hole.')];
+
+  const observationMatch=matching('mo-1','Match each musical pattern to the analytical term.',[{id:'motif',text:'Motif'},{id:'sequence',text:'Sequence'},{id:'pedal',text:'Pedal'},{id:'imitation',text:'Imitation'}],[{id:'short',label:'Short recurring idea'},{id:'new-pitch',label:'Pattern repeated at a new pitch'},{id:'held-bass',label:'Repeated bass under changing harmony'},{id:'passed',label:'Idea passed to another part'}],{short:'motif','new-pitch':'sequence','held-bass':'pedal',passed:'imitation'});
+  const observation=[observationMatch,q('mo-2','One melody with chordal support is…','Melody and accompaniment',['Monophony','Melody and accompaniment','Imitation'],'line + chords','One line remains primary.'),q('mo-3','Several independent melodic lines create…','Polyphonic texture',['Monophonic texture','Polyphonic texture','A key signature'],'lines ↕','Lines have separate identities.'),q('mo-4','A phrase ending V–I uses a…','Perfect cadence',['Perfect cadence','Imperfect cadence','Sequence'],'V → I','Dominant resolves to tonic.'),q('mo-5','Two performers moving in the same rhythm create…','Homorhythmic texture',['Imitation','Homorhythmic texture','Sequence'],'♩ ♩ / ♩ ♩','Rhythms align vertically.'),q('mo-6','Moving to a new key is called…','Modulation',['Transposition','Modulation','Inversion'],'Key A → Key B','The tonal centre changes.'),q('mo-7','The strongest evidence for analysis comes from…','Features visible in the score',['Personal preference','Features visible in the score','The page number'],'evidence','Name the exact musical feature.'),q('mo-8','One unaccompanied melodic line has which texture?','Monophonic',['Monophonic','Polyphonic','Homorhythmic'],'single line','Only one melodic line sounds.'),q('mo-9','A melody passed between parts is…','Imitation',['Imitation','Staccato','Modulation'],'a → part 2','Another part copies the idea.'),q('mo-10','A pattern repeated at a new pitch level is a…','Sequence',['Sequence','Tie','Pedal'],'a → a↑','Shape repeats after transposition.')];
+
+  window.ListeningDeskPractice=Object.freeze({...window.ListeningDeskPractice,
+    'rhythm-note-values':bank('Rhythm and note values','rhythm','Read, hear and calculate authentic notation.',rnv),
+    clefs:bank('Clefs and note reading','clef','Read pitches from real treble, bass, alto and tenor staves.',clefs),
+    'clef-transposition':bank('Clef and octave transposition','transposition','Write answers directly on the destination staff.',clefTransposition),
+    'transposing-instruments':bank('Transposing instruments','concert pitch','Convert written and sounding extracts, then check your notation.',transposingInstruments),
+    accidentals:bank('Accidentals and enharmonic equivalents','spelling','Read each accidental in real notation and compare its sound.',accidentals),
+    'musical-terms':bank('Musical terms and signs','term','Match and interpret performance directions.',musicalTerms),
+    ornaments:bank('Ornaments','ornament','Match ornament symbols and understand their performance.',ornaments),
+    'voices-instruments':bank('Voices and instruments','performer','Classify ranges, families, clefs and sound production.',voices),
+    'musical-observation':bank('General musical observation','observation','Match and identify structural musical evidence.',observation)
+  });
 })();
