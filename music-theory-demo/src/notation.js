@@ -79,7 +79,7 @@
 
   function renderRhythm(element, specification, options = {}) {
     const width = responsiveWidth(element, options.width || 760);
-    const meter = `${specification.meter[0]}/${specification.meter[1]}`;
+    const meter = specification.showTimeSignature === false ? null : `${specification.meter[0]}/${specification.meter[1]}`;
     const { context, stave } = prepare(element, width, 190, null, meter);
     function addDotToAll(note, count) {
       for (let index = 0; index < (count || 0); index += 1) note.addModifier(new VF.Dot(), 0);

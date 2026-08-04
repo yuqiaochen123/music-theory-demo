@@ -116,6 +116,12 @@ describe("new topic notation renderers",()=>{
     assert.doesNotMatch(rhythmSource,/voice\.draw[\s\S]*VF\.Beam\.generateBeams/);
   });
 
+  it("can hide the printed metre in an assessment without changing lesson defaults",()=>{
+    const rhythmSource=source.slice(source.indexOf("function renderRhythm"),source.indexOf("function renderScale"));
+    assert.match(rhythmSource,/specification\.showTimeSignature === false \? null/);
+    assert.match(rhythmSource,/prepare\(element, width, 190, null, meter\)/);
+  });
+
   it("engraves accent articulations on marked rhythm events",()=>{
     const rhythmSource=source.slice(source.indexOf("function renderRhythm"),source.indexOf("function renderScale"));
     assert.match(rhythmSource,/new VF\.Articulation\("a>"\)/);
