@@ -219,6 +219,22 @@
 .notation-note-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .notation-note-list button { border: 1px solid #d8bac5; border-radius: 999px; background: #fff; padding: 7px 10px; }
 .notation-note-list button[aria-pressed="true"] { background: #f1dce4; border-color: var(--brand-primary, #9a2f5a); }
+.matching-practice { display: grid; gap: 18px; width: 100%; }
+.matching-instruction { margin: 0; color: #6d5c63; }
+.matching-labels { display: flex; flex-wrap: wrap; gap: 8px; }
+.matching-labels button { border: 1px solid var(--brand-primary, #9a2f5a); border-radius: 999px; background: #fff; color: var(--brand-deep, #631838); padding: 10px 15px; font: inherit; font-weight: 800; cursor: grab; }
+.matching-labels button[aria-pressed="true"] { background: var(--brand-primary, #9a2f5a); color: #fff; }
+.matching-labels button[data-assigned="true"] { box-shadow: inset 0 0 0 2px #efd2dd; }
+.matching-targets { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.matching-targets > button { display: grid; gap: 10px; min-height: 130px; border: 2px dashed #d8bac5; border-radius: 10px; background: #fff; padding: 16px; color: var(--brand-ink, #2a0b1c); font: inherit; text-align: left; cursor: pointer; }
+.matching-targets > button[data-filled="true"] { border-style: solid; border-color: var(--brand-primary, #9a2f5a); background: #fbf1f5; }
+.matching-clue { font-size: 24px; font-weight: 850; }
+.matching-targets [data-assignment] { color: var(--brand-primary, #9a2f5a); font-weight: 850; }
+.matching-notation { overflow: hidden; }
+.matching-check { justify-self: start; border: 0; border-radius: 8px; background: var(--brand-primary, #9a2f5a); color: #fff; padding: 12px 18px; font: inherit; font-weight: 850; }
+.matching-status { margin: 0; min-height: 24px; font-weight: 750; }
+.matching-status[data-result="correct"] { color: #1d7146; }
+.matching-status[data-result="incorrect"], .matching-status[data-result="incomplete"] { color: #9a2f5a; }
 
 @media (max-width: 620px) {
   .practice-body main.practice-wrap {
