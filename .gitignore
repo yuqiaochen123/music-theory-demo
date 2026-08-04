@@ -6,7 +6,6 @@ snapshots/
 work/
 
 music-theory-demo/.npmrc
-music-theory-demo/.openai/
 music-theory-demo/.superpowers/
 music-theory-demo/dist/
 music-theory-demo/node_modules/

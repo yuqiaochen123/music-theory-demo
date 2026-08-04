@@ -456,10 +456,6 @@ main.practice-wrap { padding-top: 0 !important; }
   font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Arial, sans-serif;
 }
 body, button, input, select { font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Arial, sans-serif; }
-body { opacity: 0; transform: translateY(8px); }
-body.is-ready { opacity: 1; transform: none; transition: opacity 320ms ease, transform 360ms cubic-bezier(.22, 1, .36, 1); }
-body.is-exiting main { opacity: 0; transform: translateX(-14px) scale(.992); }
-main { transition: opacity 180ms ease, transform 190ms cubic-bezier(.4, 0, 1, 1); }
 a, button { -webkit-tap-highlight-color: transparent; }
 button, a.grade, a.topic-card, a.practice, a.auth-primary, a.auth-secondary {
   transition: transform 130ms cubic-bezier(.2, .8, .2, 1), filter 130ms ease, background-color 180ms ease, border-color 180ms ease, opacity 180ms ease !important;
@@ -532,5 +528,4 @@ main.grade-five-page { background: var(--red); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
-  body { opacity: 1; transform: none; }
 }

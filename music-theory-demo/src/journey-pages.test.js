@@ -34,9 +34,10 @@ describe("learning journey pages", () => {
       assert.match(page(file), /src\/motion\.js\?v=20260802-motion1/);
     }
     const motion = page("src/motion.js");
-    assert.match(motion, /NAVIGATION_DELAY = 190/);
-    assert.match(motion, /classList\.add\('is-exiting'\)/);
-    assert.match(motion, /location\.assign/);
+    assert.match(motion, /document\.addEventListener\('click'/);
+    assert.match(motion, /link\.classList\.add\('is-pressed'\)/);
+    assert.doesNotMatch(motion, /NAVIGATION_DELAY|preventDefault|location\.assign|is-exiting/);
+    assert.doesNotMatch(page("src/redesign.css"), /body\s*\{\s*opacity:\s*0|body\.is-exiting|translateX\(-14px\)/);
   });
 
   it("uses one site-wide plum palette with the middle tone as the primary color", () => {
@@ -56,7 +57,7 @@ describe("learning journey pages", () => {
     const styles = page("src/redesign.css");
     assert.match(styles, /\.grade-five-page\s*\{[^}]*background:\s*var\(--red\)/);
     assert.match(styles, /\.grade-five-page \.topic-card:active\s*\{[^}]*transform:\s*scale\(\.985\)/);
-    assert.match(styles, /body\.is-exiting main\s*\{[^}]*opacity:\s*0/);
+    assert.doesNotMatch(styles, /body\.is-exiting main/);
     assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   });
 
