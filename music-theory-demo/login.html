@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Listening Desk · Account</title><link rel="stylesheet" href="src/journey.css?v=20260801-auth9"><link rel="stylesheet" href="src/redesign.css?v=20260802-red4"><link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
+</head>
+<body>
+  <header><a class="brand" href="index.html">Listening Desk <span>♪</span></a><nav><a href="index.html">Grades</a><a class="active" href="login.html">Account</a></nav></header>
+  <main class="auth-main">
+    <section class="auth-shell" aria-labelledby="auth-heading">
+      <div class="auth-identity">
+        <div class="auth-copy">
+          <p class="eyebrow">Your private learning record</p><h1 id="auth-heading">Save your<br><em>progress.</em></h1>
+          <p class="lead">Sign in on any device to continue with your own lessons, scores and exercise history.</p>
+        </div>
+        <div class="staff-art" aria-hidden="true">
+          <div class="staff-lines"></div>
+          <span class="staff-clef">𝄞</span>
+          <i class="staff-note note-one"></i><i class="staff-note note-two"></i><i class="staff-note note-three"></i><i class="staff-note note-four"></i>
+        </div>
+      </div>
+      <div class="auth-card">
+        <p id="auth-status" class="progress-sync" aria-live="polite"></p>
+        <form id="auth-form" class="auth-form" method="post" onsubmit="return false">
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password" minlength="8" required></label>
+          <button class="auth-primary" id="auth-submit" type="submit" data-auth-action="signin">Sign in</button>
+          <button class="auth-secondary" id="signup-submit" type="submit" data-auth-action="signup">Create account</button>
+          <button class="auth-recovery-link" id="forgot-password" type="button">Forgot password?</button>
+        </form>
+        <form id="password-reset-form" class="auth-form" method="post" onsubmit="return false" hidden>
+          <h2>Choose a new password</h2>
+          <p>Use at least 8 characters. Your learning progress will stay with this account.</p>
+          <label>New password<input name="newPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+          <label>Confirm new password<input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+          <button class="auth-primary" id="password-reset-submit" type="submit">Save new password</button>
+        </form>
+        <div id="account-panel" hidden><p>Signed in as <strong id="account-email"></strong></p><a class="auth-primary" href="index.html">Continue learning</a><button id="sign-out" type="button">Sign out</button></div>
+      </div>
+    </section>
+  </main>
+  <script src="vendor/supabase-2.111.0.js"></script><script type="module" src="src/login.js?v=20260801-auth9"></script><script src="src/motion.js?v=20260802-motion1"></script>
+</body></html>

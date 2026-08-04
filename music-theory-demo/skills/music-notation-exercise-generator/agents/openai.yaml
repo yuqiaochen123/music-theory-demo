@@ -1,0 +1,4 @@
+interface:
+  display_name: "Music Notation Exercise Generator"
+  short_description: "Create accurate staff-notation listening exercises."
+  default_prompt: "Use $music-notation-exercise-generator to create accurate major and minor third listening exercises."

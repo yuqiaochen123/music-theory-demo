@@ -22,6 +22,7 @@ function displaySync(element, message, isError = false) {
   if (!element) return;
   element.textContent = message;
   element.dataset.error = String(isError);
+  element.hidden = !isError;
 }
 
 export async function startCurrentLesson({ grade = 5, topicId, lessonId = null, statusElement, syncElement } = {}) {
@@ -48,7 +49,7 @@ export async function startCurrentLesson({ grade = 5, topicId, lessonId = null, 
     return refreshed;
   } catch (error) {
     displayStatus(statusElement, 'not_started');
-    displaySync(syncElement, 'Progress is temporarily unavailable. Learning still works.', true);
+    displaySync(syncElement, error?.code === 'AUTH_REQUIRED' ? 'Sign in to save this lesson.' : 'Progress is temporarily unavailable. Learning still works.', true);
     console.error(error);
     return null;
   }
@@ -90,7 +91,7 @@ export async function recordAnswer({
     displaySync(syncElement, 'Answer and progress saved');
     return refreshed;
   } catch (error) {
-    displaySync(syncElement, 'This answer could not be saved. You can continue practising.', true);
+    displaySync(syncElement, error?.code === 'AUTH_REQUIRED' ? 'Sign in to save answers and progress.' : 'This answer could not be saved. You can continue practising.', true);
     console.error(error);
     return null;
   }

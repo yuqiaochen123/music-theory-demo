@@ -1,19 +1,32 @@
 const SUPABASE_URL = 'https://pwofphatgbkhhmjaaxgl.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_np6qR5e7sn_vIifUj1c7pA_HtpOjpD4';
 
-// TODO（上线前）：加入正式账号绑定、匿名注册防滥用措施，并持续审查所有 RLS 策略。
 function buildClient(createClient) {
   return createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: true,
   },
   });
 }
 
 const browserClientFactory = globalThis.supabase?.createClient;
 const defaultClient = browserClientFactory ? buildClient(browserClientFactory) : null;
+
+export async function getSupabaseClient() {
+  if (defaultClient) return defaultClient;
+  const { createClient } = await import('@supabase/supabase-js');
+  return buildClient(createClient);
+}
+
+export class AuthenticationRequiredError extends Error {
+  constructor() {
+    super('Sign in to save and view your progress.');
+    this.name = 'AuthenticationRequiredError';
+    this.code = 'AUTH_REQUIRED';
+  }
+}
 
 function throwIfError(error, context) {
   if (error) throw new Error(`${context}: ${error.message ?? error}`);
@@ -59,28 +72,22 @@ export function createProgressStore({ client = defaultClient } = {}) {
 
   async function getClient() {
     if (activeClient) return activeClient;
-    const { createClient } = await import('@supabase/supabase-js');
-    activeClient = buildClient(createClient);
+    activeClient = await getSupabaseClient();
     return activeClient;
   }
 
   async function initializeStudent() {
     if (cachedStudentId) return cachedStudentId;
     const db = await getClient();
-    // 从数据库读：读取浏览器中已保存的 Supabase 匿名会话。
+    // Only permanent accounts may own learning data.
     const { data: sessionData, error: sessionError } = await db.auth.getSession();
     throwIfError(sessionError, 'Unable to read the student session');
-    if (sessionData.session?.user?.id) {
+    if (sessionData.session?.user?.id && !sessionData.session.user.is_anonymous) {
       cachedStudentId = sessionData.session.user.id;
       return cachedStudentId;
     }
 
-    // 往数据库写：创建无需登录界面的 Supabase 匿名学生账号。
-    const { data: anonymousData, error: anonymousError } = await db.auth.signInAnonymously();
-    throwIfError(anonymousError, 'Unable to create an anonymous student');
-    cachedStudentId = anonymousData.user?.id ?? anonymousData.session?.user?.id;
-    if (!cachedStudentId) throw new Error('Supabase did not return an anonymous student ID');
-    return cachedStudentId;
+    throw new AuthenticationRequiredError();
   }
 
   async function loadStudentData(studentId) {

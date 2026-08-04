@@ -1,0 +1,80 @@
+/* Listening Desk palette system
+   Dominance: primary plum > wine > gold > ink/cream accents. */
+:root {
+  --palette-900: #2A0B1C;
+  --palette-700: #631838;
+  --palette-500: #9A2F5A;
+  --palette-300: #D2A36B;
+  --palette-100: #F6F1E9;
+
+  --brand-ink: var(--palette-900);
+  --brand-deep: var(--palette-700);
+  --brand-primary: var(--palette-500);
+  --brand-accent: var(--palette-300);
+  --brand-paper: var(--palette-100);
+
+  /* Compatibility aliases used by the existing components. */
+  --red: var(--brand-primary);
+  --red-dark: var(--brand-deep);
+  --red-soft: #ead4dd;
+  --blue: var(--brand-primary);
+  --ink: var(--brand-ink);
+  --line: #dfd0d5;
+  --muted: #74666b;
+}
+
+body { color: var(--brand-ink); }
+header .brand,
+header nav a.active,
+.eyebrow { color: var(--brand-primary); }
+header nav a.active { border-color: var(--brand-primary); }
+
+.lesson-body,
+.grade-five-body { background: var(--brand-primary) !important; }
+.lesson-topbar,
+.grade-five-topbar,
+.lesson-body > .lesson-page,
+.grade-five-body > .grade-five-page { background: var(--brand-primary) !important; }
+
+.grade-five-page .curriculum-tabs button[aria-selected="true"] {
+  color: var(--brand-primary) !important;
+}
+.grade-five-page .topic-card:hover { background: rgba(99, 24, 56, .42) !important; }
+
+.auth-identity { background: var(--brand-deep); }
+.auth-card,
+.practice-concept,
+.concept-display,
+.clef-editor-head { background: var(--brand-paper); }
+
+.auth-primary,
+.next,
+.practice,
+.editor-toolbar .editor-play,
+.grouping-option[aria-pressed="true"] {
+  background: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+}
+.auth-primary:hover,
+.next:hover,
+.practice:hover { background: var(--brand-deep) !important; }
+
+.compare-btn,
+.listen,
+body[data-topic="key-signatures"] .key-compare {
+  background: var(--brand-accent) !important;
+  border-color: var(--brand-accent) !important;
+}
+
+.lesson-dots button[aria-current="page"] {
+  background: var(--brand-accent) !important;
+}
+
+:where(a, button, input, select):focus-visible {
+  outline-color: var(--brand-accent) !important;
+}
+
+::selection {
+  background: var(--brand-accent);
+  color: var(--brand-ink);
+}

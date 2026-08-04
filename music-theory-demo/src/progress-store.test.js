@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createProgressStore, summarizeGrades } from './progress-store.js';
 
-function createMemoryClient({ sessionUserId = null } = {}) {
+function createMemoryClient({ sessionUserId = null, isAnonymous = false } = {}) {
   const tables = { student_progress: [], exercise_attempts: [] };
   let userId = sessionUserId;
   let id = 0;
@@ -51,18 +51,16 @@ function createMemoryClient({ sessionUserId = null } = {}) {
   return {
     tables,
     auth: {
-      async getSession() { return { data: { session: userId ? { user: { id: userId } } : null }, error: null }; },
-      async signInAnonymously() { userId = 'anonymous-student'; return { data: { user: { id: userId }, session: { user: { id: userId } } }, error: null }; },
+      async getSession() { return { data: { session: userId ? { user: { id: userId, is_anonymous: isAnonymous } } : null }, error: null }; },
     },
     from(table) { return new Query(table); },
   };
 }
 
-test('initializes an anonymous student once and reuses the session identity', async () => {
-  const client = createMemoryClient();
+test('requires a permanent account before reading or saving progress', async () => {
+  const client = createMemoryClient({ sessionUserId: 'anonymous-student', isAnonymous: true });
   const store = createProgressStore({ client });
-  assert.equal(await store.initializeStudent(), 'anonymous-student');
-  assert.equal(await store.initializeStudent(), 'anonymous-student');
+  await assert.rejects(store.initializeStudent(), error => error.code === 'AUTH_REQUIRED');
 });
 
 test('saving progress rereads and returns the latest database state', async () => {

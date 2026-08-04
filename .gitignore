@@ -1,0 +1,18 @@
+.DS_Store
+**/.DS_Store
+.pnpm-store/
+snapshots/
+work/
+
+music-theory-demo/.npmrc
+music-theory-demo/.openai/
+music-theory-demo/.superpowers/
+music-theory-demo/dist/
+music-theory-demo/node_modules/
+music-theory-demo/vendor/vexflow-package/
+
+# Local duplicate/backup copies created with a " 2" suffix.
+music-theory-demo/* 2.*
+music-theory-demo/src/* 2.*
+music-theory-demo/vendor/* 2.*
+music-theory-demo/docs/**/* 2.md

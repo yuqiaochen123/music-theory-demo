@@ -10,6 +10,32 @@ export function gradeSummaryText(summary) {
   return `${summary.progressPercent}% · ${summary.completedLessons} completed · ${summary.inProgressLessons} in progress`;
 }
 
+export function categoryProgress(progressRecords = [], topicIds = []) {
+  if (!topicIds.length) return 0;
+  const values = topicIds.map(topicId => progressRecords
+    .filter(record => Number(record.grade) === 5 && record.topic_id === topicId)
+    .reduce((highest, record) => Math.max(
+      highest,
+      record.status === 'completed' ? 100 : Number(record.progress_percent ?? 0),
+    ), 0));
+  return Math.round(values.reduce((total, value) => total + value, 0) / topicIds.length);
+}
+
+export function renderCategoryProgress(progressRecords = [], root = document) {
+  root.querySelectorAll('.curriculum-section').forEach(section => {
+    const indicator = section.querySelector('[data-category-progress]');
+    if (!indicator) return;
+    const topicIds = [...section.querySelectorAll('.topic-card[href]')]
+      .map(link => new URL(link.href, globalThis.location?.href ?? 'http://localhost/').searchParams.get('topic'))
+      .filter(Boolean);
+    const percentage = categoryProgress(progressRecords, topicIds);
+    const category = section.querySelector('.section-head h2')?.textContent?.trim() || 'Category';
+    indicator.style.setProperty('--category-progress', `${percentage * 3.6}deg`);
+    indicator.querySelector('strong').textContent = `${percentage}%`;
+    indicator.setAttribute('aria-label', `${category} progress: ${percentage}%`);
+  });
+}
+
 export function renderGradeDashboard(summary) {
   const recent = summary.recentAttempts.length
     ? `<ul class="recent-attempts">${summary.recentAttempts.map(attempt => `<li><span><b>${titleCase(attempt.topic_id)}</b><small>${attempt.answer_given}</small></span><strong class="${attempt.is_correct ? 'correct' : 'incorrect'}">${attempt.is_correct ? 'Correct' : 'Review'}</strong></li>`).join('')}</ul>`
@@ -31,6 +57,12 @@ function showSyncMessage(message, isError = false) {
   target.dataset.error = String(isError);
 }
 
+function authMessage(error) {
+  return error?.code === 'AUTH_REQUIRED'
+    ? 'Sign in to save and view your progress.'
+    : 'Progress is temporarily unavailable. Learning still works.';
+}
+
 export async function loadGradeOverview() {
   try {
     showSyncMessage('Loading saved progress…');
@@ -44,7 +76,7 @@ export async function loadGradeOverview() {
     showSyncMessage('Progress saved securely');
     return summaries;
   } catch (error) {
-    showSyncMessage('Progress is temporarily unavailable. Learning still works.', true);
+    showSyncMessage(authMessage(error), true);
     console.error(error);
     return [];
   }
@@ -57,12 +89,16 @@ export async function loadGradeDashboard(grade = 5) {
     showSyncMessage('Loading saved progress…');
     const state = await progressStore.loadStudentData();
     const summary = summarizeGrades(state).find(item => item.grade === Number(grade));
+    renderCategoryProgress(state.progress);
     target.innerHTML = renderGradeDashboard(summary);
     showSyncMessage('Progress saved securely');
     return summary;
   } catch (error) {
-    target.innerHTML = '<p class="empty-activity">Saved progress is temporarily unavailable. You can continue learning.</p>';
-    showSyncMessage('Progress is temporarily unavailable. Learning still works.', true);
+    renderCategoryProgress([]);
+    target.innerHTML = error?.code === 'AUTH_REQUIRED'
+      ? '<p class="empty-activity">Sign in to see your private learning history. <a href="login.html">Sign in or create an account</a>.</p>'
+      : '<p class="empty-activity">Saved progress is temporarily unavailable. You can continue learning.</p>';
+    showSyncMessage(authMessage(error), true);
     console.error(error);
     return null;
   }

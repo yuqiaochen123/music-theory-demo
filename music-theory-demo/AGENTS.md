@@ -17,9 +17,16 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 - Rhythm notation must engrave the exact pitches used by playback. Create VexFlow beams before drawing the voice so grouped quavers use standard beams without leftover individual flags.
 - Apply VexFlow's optimal stem direction before creating rhythm beams: notes on or above the treble-clef middle B line stem down, while notes below it stem up.
 - For dense notation, calculate a minimum engraving width from its notes and modifiers. Use the full safe container width, then scale a wider virtual SVG inside that container rather than allowing noteheads, accidentals, or staves to overlap or overflow.
+- For labelled notation, never compress technical-name words until they overlap. Keep labels in a dedicated legend with one grid cell per note, and use a small number of full-width horizontal examples when the labels need more room.
 - Scales must engrave and sound both ascending and descending paths. Melodic minor descends as natural minor; chromatic descent uses conventional flat spellings.
 - Keep irregular-metre alternatives inside one lesson card and hide their grouping choices until the learner requests them. Notation, explanation, one-bar playback, and continuous playback must all resolve from the same selected grouping variant.
 - In every side-by-side card layout, matching content and action rows must remain horizontally aligned even when labels wrap or optional controls open. Optional menus must not shift only one card's downstream content.
+- On desktop, make paired lesson cards flex columns, let their bodies fill remaining height, and pin action rows with `margin-top: auto` so both top and bottom pairs retain a shared control baseline.
+- Teach every simple interval within an octave through its own URL and retain the original two-card interval listening format: two correctly spelled examples, lower/upper/together controls, and matching notation/MIDI data.
+- Persist learning history through `src/progress-store.js` using the pinned official Supabase client and invisible Anonymous Auth; never expose a service-role key in browser code.
+- Keep RLS enabled on every browser-accessible progress table and restrict rows with `auth.uid() = student_id`.
+- Add an adjacent Chinese comment beginning `// 从数据库读：` or `// 往数据库写：` beside every Supabase action.
+- After every progress or attempt mutation, reread the latest database records and use that fresh read—not mutation return data—as the UI source of truth.
 
 When implementing from a selected generated mock, treat that image as the source of truth for layout, component anatomy, density, spacing, color, typography, visible content, and hierarchy.
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { gradeSummaryText, renderGradeDashboard } from './progress-ui.js';
+import { categoryProgress, gradeSummaryText, renderGradeDashboard } from './progress-ui.js';
 
 test('formats a separate progress summary for any grade', () => {
   assert.equal(gradeSummaryText({ progressPercent: 0, completedLessons: 0, inProgressLessons: 0 }), 'No learning activity yet');
@@ -21,4 +21,16 @@ test('renders grade metrics and recent exercise results', () => {
   assert.match(html, /2<\/strong><span>Completed/);
   assert.match(html, /Intervals/);
   assert.match(html, /Correct/);
+});
+
+test('averages saved progress across every topic in a category', () => {
+  const records = [
+    { grade: 5, topic_id: 'rhythm-note-values', status: 'completed', progress_percent: 25 },
+    { grade: 5, topic_id: 'time-signatures', status: 'in_progress', progress_percent: 50 },
+    { grade: 5, topic_id: 'time-signatures', status: 'in_progress', progress_percent: 35 },
+    { grade: 4, topic_id: 'clefs', status: 'completed', progress_percent: 100 },
+  ];
+
+  assert.equal(categoryProgress(records, ['rhythm-note-values', 'time-signatures', 'clefs']), 50);
+  assert.equal(categoryProgress([], ['rhythm-note-values']), 0);
 });

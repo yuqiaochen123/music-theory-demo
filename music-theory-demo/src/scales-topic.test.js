@@ -25,4 +25,23 @@ describe("Major and minor scales MVP",()=>{
     assert.equal(data.scales.exercises.length,10);
     for(const exercise of data.scales.exercises)assert.equal(validateScale(exercise),true);
   });
+  it("labels ascending and descending degrees across three contrasting examples",()=>{
+    const {data}=load("./topic-data.js","ListeningDeskTopics");
+    const examples=data["scale-degrees"].examples;
+    assert.equal(examples.length,3);
+    for(const example of examples){
+      assert.equal(example.notation.ascendingDegreeLabels.length,8);
+      assert.equal(example.notation.descendingDegreeLabels.length,8);
+      assert.equal(example.parts[0][1].length,8);
+      assert.equal(example.parts[1][1].length,8);
+    }
+    assert.deepEqual(Array.from(examples[0].notation.descendingDegreeLabels),['Tonic','Leading note','Submediant','Dominant','Subdominant','Mediant','Supertonic','Tonic']);
+    assert.deepEqual(Array.from(examples[1].notation.descendingDegreeLabels),['Tonic','Subtonic','Submediant','Dominant','Subdominant','Mediant','Supertonic','Tonic']);
+    const melodic=examples[2];
+    assert.equal(melodic.label,'A melodic minor · changing degree 7');
+    assert.deepEqual(Array.from(melodic.notation.notes),['a/3','b/3','c/4','d/4','e/4','f#/4','g#/4','a/4']);
+    assert.deepEqual(Array.from(melodic.notation.descendingNotes),['a/4','g/4','f/4','e/4','d/4','c/4','b/3','a/3']);
+    assert.equal(melodic.notation.ascendingDegreeLabels[6],'Leading note');
+    assert.equal(melodic.notation.descendingDegreeLabels[1],'Subtonic');
+  });
 });
