@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { createNotationPracticeState, checkNotationPractice } from "./notation-practice.js";
+import { createNotationPracticeState, checkNotationPractice, displayPitch } from "./notation-practice.js";
 
 const exercise = {
   interaction: "notation-entry",
@@ -21,6 +21,11 @@ describe("writable staff practice", () => {
     const state = createNotationPracticeState(exercise);
     assert.equal(checkNotationPractice(state, exercise).code, "incomplete");
     assert.deepEqual(state.editor.notes, []);
+  });
+
+  it("does not mistake the note B for a flat accidental", () => {
+    assert.equal(displayPitch("b/4"), "B4");
+    assert.equal(displayPitch("bb/4"), "B♭4");
   });
 
   it("is integrated as a dedicated practice interaction with labelled controls", () => {

@@ -1,6 +1,6 @@
 import {
   NATURAL_PITCHES, addNote, applyAccidental, clearPhrase, createEditorState,
-  deleteSelected, noteMidi, placeAtCursor, rhythmicRests, selectNote, undo,
+  deleteSelected, noteMidi, pitchLabel, placeAtCursor, rhythmicRests, selectNote, undo,
 } from "./clef-transposition-editor.js";
 import { pitchFromStaffPoint } from "./clef-transposition-editor-ui.js";
 import { validateNotationAnswer } from "./notation-answer.js";
@@ -19,8 +19,8 @@ export function checkNotationPractice(state, exercise) {
   return validateNotationAnswer(state.editor, exercise.expected || exercise.answer);
 }
 
-function pitchLabel(pitch) {
-  return pitch.replace("/", "").replace("bb", "♭♭").replace("##", "♯♯").replace("b", "♭").replace("#", "♯").toUpperCase();
+export function displayPitch(pitch) {
+  return pitchLabel(pitch);
 }
 
 export function mountNotationPractice({ container, exercise, notation, play, onResult }) {
@@ -33,10 +33,10 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
         <div class="notation-tool-group" aria-label="Note value">
           <button type="button" data-duration="q" aria-label="Crotchet">♩</button><button type="button" data-duration="8" aria-label="Quaver">♪</button><button type="button" data-duration="16" aria-label="Semiquaver">♬</button>
         </div>
-        <div class="notation-tool-group" aria-label="Accidental">
+      <div class="notation-tool-group" aria-label="Accidental">
           <button type="button" data-accidental="" aria-label="Natural">♮</button><button type="button" data-accidental="#" aria-label="Sharp">♯</button><button type="button" data-accidental="b" aria-label="Flat">♭</button>
         </div>
-        <label class="notation-pitch-fallback">Pitch <select data-pitch>${NATURAL_PITCHES.map(pitch => `<option value="${pitch}">${pitchLabel(pitch)}</option>`).join("")}</select></label>
+        <label class="notation-pitch-fallback">Pitch <select data-pitch>${NATURAL_PITCHES.map(pitch => `<option value="${pitch}">${displayPitch(pitch)}</option>`).join("")}</select></label>
         <button type="button" data-add-note>Add note</button>
         <button type="button" data-delete-note>Delete note</button><button type="button" data-undo>Undo</button><button type="button" data-clear>Clear</button>
       </div>
@@ -66,7 +66,7 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
     find("[data-delete-note]").disabled = state.editor.selectedIndex === null;
     find("[data-undo]").disabled = state.editor.history.length === 0;
     find("[data-clear]").disabled = state.editor.notes.length === 0;
-    noteList.innerHTML = state.editor.notes.map((pitch, index) => `<button type="button" data-note-index="${index}" aria-pressed="${index === state.editor.selectedIndex}">${pitchLabel(pitch)}</button>`).join("");
+    noteList.innerHTML = state.editor.notes.map((pitch, index) => `<button type="button" data-note-index="${index}" aria-pressed="${index === state.editor.selectedIndex}">${displayPitch(pitch)}</button>`).join("");
   }
 
   function update(editor, message = editor.message) {
