@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Listening Desk · Choose your grade</title>
   <style>html{background:#f3efec}</style>
+  <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
   <link rel="stylesheet" href="src/page-transitions.css?v=20260805-transition1">
   <link rel="stylesheet" href="src/journey.css">
   <link rel="stylesheet" href="src/redesign.css?v=20260802-red4">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
 </head>
 <body>
+  <div class="page-transition-curtain" aria-hidden="true"></div>
   <header><a class="brand" href="index.html">Listening Desk <span>♪</span></a><nav><a class="active" href="index.html">Grades</a><a href="grade-5.html">Grade 5</a><a href="login.html?v=20260731-auth6" data-account-link>Sign in</a></nav></header>
   <main class="home grade-picker-page">
     <p class="eyebrow">Music theory that you can hear</p>
@@ -37,6 +39,6 @@
     import { loadGradeOverview } from './src/progress-ui.js';
     loadGradeOverview();
   </script>
-  <script src="src/motion.js?v=20260802-motion1"></script>
+  <script type="module" src="src/motion.js?v=20260806-curtain1"></script>
 </body>
 </html>

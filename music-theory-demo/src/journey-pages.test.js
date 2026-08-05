@@ -30,13 +30,25 @@ describe("learning journey pages", () => {
   });
 
   it("uses one restrained motion system across every app page", () => {
-    for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html"]) {
-      assert.match(page(file), /src\/motion\.js\?v=20260802-motion1/);
+    for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html", "vexflow-cadence-proof.html"]) {
+      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260806-curtain1"/);
     }
     const motion = page("src/motion.js");
+    assert.match(motion, /from '.\/page-navigation\.js'/);
     assert.match(motion, /document\.addEventListener\('click'/);
     assert.match(motion, /link\.classList\.add\('is-pressed'\)/);
-    assert.doesNotMatch(motion, /NAVIGATION_DELAY|preventDefault|location\.assign|is-exiting/);
+    assert.match(motion, /'pointerenter'/);
+    assert.match(motion, /'focusin'/);
+    assert.match(motion, /'touchstart'/);
+    assert.match(motion, /fetch\(destination\.href/);
+    assert.match(motion, /consumeArrivalMarker/);
+    assert.match(motion, /classList\.remove\('is-transition-arriving'\)/);
+    assert.match(motion, /'transitionend'/);
+    assert.match(motion, /NAVIGATION_FALLBACK_MS = 180/);
+    assert.match(motion, /window\.location\.assign/);
+    assert.match(motion, /'startViewTransition' in document/);
+    assert.match(motion, /pageshow/);
+    assert.doesNotMatch(motion, /NAVIGATION_DELAY|is-exiting/);
     assert.doesNotMatch(page("src/redesign.css"), /body\s*\{\s*opacity:\s*0|body\.is-exiting|translateX\(-14px\)/);
   });
 

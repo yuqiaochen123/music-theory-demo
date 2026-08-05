@@ -36,4 +36,28 @@ describe("seamless cross-page navigation", () => {
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
     assert.match(styles, /animation-duration:\s*0\.01ms\s*!important/);
   });
+
+  it("provides the same inert transition curtain on every entry page", () => {
+    const curtain = '<div class="page-transition-curtain" aria-hidden="true"></div>';
+    const arrivalBootstrap = /sessionStorage\.getItem\('listening-desk:page-transition'\)[\s\S]*is-transition-arriving/;
+
+    for (const filename of entryPages) {
+      const html = page(filename);
+      assert.equal((html.match(/class="page-transition-curtain"/g) || []).length, 1, `${filename} needs one curtain`);
+      assert.match(html, arrivalBootstrap, `${filename} needs the early arrival bootstrap`);
+      assert.ok(html.indexOf(curtain) > html.indexOf("<body"), `${filename} curtain must be inside the body`);
+    }
+  });
+
+  it("covers hard navigations with bounded opacity-only motion", () => {
+    const styles = page("src/page-transitions.css");
+
+    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*position:\s*fixed[^}]*inset:\s*0[^}]*z-index:\s*2147483647/);
+    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*background:\s*var\(--brand-primary,\s*#9a2f5a\)/i);
+    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*pointer-events:\s*none[^}]*opacity:\s*0[^}]*140ms/);
+    assert.match(styles, /html\.is-transitioning \.page-transition-curtain\s*\{[^}]*pointer-events:\s*auto[^}]*opacity:\s*1[^}]*110ms/);
+    assert.match(styles, /html\.is-transition-arriving \.page-transition-curtain\s*\{[^}]*opacity:\s*1/);
+    assert.doesNotMatch(styles, /\.page-transition-curtain\s*\{[^}]*translate|\.page-transition-curtain\s*\{[^}]*scale/);
+    assert.match(styles, /prefers-reduced-motion:\s*reduce[\s\S]*\.page-transition-curtain\s*\{[^}]*transition-duration:\s*0\.01ms\s*!important/);
+  });
 });

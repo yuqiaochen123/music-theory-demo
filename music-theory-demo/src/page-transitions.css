@@ -6,6 +6,26 @@
   background: #f3efec;
 }
 
+.page-transition-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: var(--brand-primary, #9a2f5a);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+html.is-transitioning .page-transition-curtain {
+  pointer-events: auto;
+  opacity: 1;
+  transition-duration: 110ms;
+}
+
+html.is-transition-arriving .page-transition-curtain {
+  opacity: 1;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 150ms;
@@ -13,6 +33,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .page-transition-curtain {
+    transition-duration: 0.01ms !important;
+  }
+
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation-duration: 0.01ms !important;

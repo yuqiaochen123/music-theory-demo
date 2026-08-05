@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Listening Desk · Lesson</title>
   <style>html{background:#f3efec}</style>
+  <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
   <link rel="stylesheet" href="src/page-transitions.css?v=20260805-transition1">
   <link rel="stylesheet" href="src/journey.css">
   <style>
@@ -33,6 +34,7 @@
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
 </head>
 <body class="lesson-body">
+  <div class="page-transition-curtain" aria-hidden="true"></div>
   <div class="lesson-topbar"><strong id="lesson-topbar-title">Lesson</strong><a class="lesson-close" href="grade-5.html" aria-label="Close lesson">×</a></div>
   <main class="lesson-page">
     <div class="lesson-carousel" aria-label="Lesson pages">
@@ -148,6 +150,6 @@
     startCurrentLesson({grade:5,topicId:topic,lessonId:lessonId||null,statusElement:null,syncElement:document.querySelector('[data-progress-sync]')});
   </script>
   <script src="src/topic-file-runtime.bundle.js?v=20260803-file12"></script>
-  <script src="src/motion.js?v=20260802-motion1"></script>
+  <script type="module" src="src/motion.js?v=20260806-curtain1"></script>
 </body>
 </html>

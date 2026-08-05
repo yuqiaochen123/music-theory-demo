@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VexFlow Cadence Proof</title>
     <style>html{background:#f3efec}</style>
+    <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
     <link rel="stylesheet" href="src/page-transitions.css?v=20260805-transition1">
     <style>
       * { box-sizing: border-box; }
@@ -29,6 +30,7 @@
     </style>
   </head>
   <body>
+    <div class="page-transition-curtain" aria-hidden="true"></div>
     <main>
       <p class="eyebrow">Isolated engraving proof — existing pages unchanged</p>
       <h1>A-major perfect cadence</h1>
@@ -46,6 +48,7 @@
     </main>
 
     <script src="vendor/vexflow-5.0.0.js"></script>
+    <script type="module" src="src/motion.js?v=20260806-curtain1"></script>
     <script>
       (() => {
         const result = document.getElementById("result");
