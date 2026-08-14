@@ -39,3 +39,16 @@ test("declares the production build and publish directory for Netlify", async ()
   assert.match(config, /command\s*=\s*"npm run build"/);
   assert.match(config, /publish\s*=\s*"dist\/client"/);
 });
+
+test("keeps Grade 5 carousel geometry stable when production CSS chunks reorder", async () => {
+  const styles = await readFile(
+    new URL("../src/horizontal-flow.css", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(styles, /\.grade-five-page \.curriculum\{[^}]*overflow:hidden!important/);
+  assert.match(styles, /\.grade-five-page \.curriculum\{[^}]*gap:0!important/);
+  assert.match(styles, /\.grade-five-page \.curriculum-section\{[^}]*flex:0 0 100%!important/);
+  assert.match(styles, /\.grade-five-page \.curriculum-section\{[^}]*max-width:none!important/);
+  assert.match(styles, /\.grade-five-page \.curriculum-section\{[^}]*margin:0!important/);
+});

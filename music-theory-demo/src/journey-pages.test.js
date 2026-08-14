@@ -135,7 +135,7 @@ describe("learning journey pages", () => {
     const styles = page("src/horizontal-flow.css");
     assert.equal((gradeFive.match(/data-category-progress/g) || []).length, 5);
     assert.match(gradeFive, /\.\/src\/progress-ui\.js\?v=20260806-progress-animation2/);
-    assert.match(gradeFive, /src\/horizontal-flow\.css\?v=20260806-flow6/);
+    assert.match(gradeFive, /src\/horizontal-flow\.css\?v=20260814-flow7/);
     assert.match(progress, /export function categoryProgress\(/);
     assert.match(progress, /renderCategoryProgress\(state\.progress\)/);
     assert.match(styles, /\.grade-five-page \.category-progress\{[^}]*conic-gradient\([^}]*--category-progress/);

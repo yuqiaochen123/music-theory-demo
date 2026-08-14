@@ -5,7 +5,7 @@
 @media(max-width:720px){.lesson-topbar,.grade-five-topbar{height:64px}.lesson-close,.grade-five-close{right:8px;top:5px}.lesson-body>.lesson-page,.grade-five-body>.grade-five-page{height:calc(100vh - 64px)}.lesson-carousel,.grade-five-page .curriculum{gap:20px;padding-inline:16px;scroll-padding-inline:16px}.lesson-slide,.grade-five-page .curriculum-section{flex-basis:calc(100vw - 32px)}.lesson-body .hero{padding:32px 24px!important}.lesson-body .lesson-reference{padding:24px 16px}.grade-five-page .topic-grid{grid-template-columns:1fr}.grade-five-page .curriculum-tabs{justify-content:flex-start;max-width:calc(100vw - 32px)}}
 
 /* Button-controlled curriculum pages and compact lesson canvas. */
-.grade-five-page .curriculum{height:calc(100% - 92px);overflow:hidden;scroll-behavior:smooth;pointer-events:none}
+.grade-five-page .curriculum{height:calc(100% - 92px);overflow:hidden!important;scroll-behavior:smooth;pointer-events:none}
 .grade-five-page .curriculum .topic-card{pointer-events:auto}
 .grade-five-page .curriculum-section{pointer-events:auto;overscroll-behavior-y:contain}
 .grade-five-page .curriculum-tabs{overflow:hidden}
@@ -17,8 +17,8 @@
 .lesson-dots{gap:11px}
 .lesson-dots button{width:12px;height:12px}
 
-.grade-five-page .curriculum{gap:0;padding-inline:0;scroll-padding-inline:0}
-.grade-five-page .curriculum-section{flex:0 0 100%;max-width:none;padding-inline:7vw;box-sizing:border-box}
+.grade-five-page .curriculum{gap:0!important;padding-inline:0!important;scroll-padding-inline:0!important}
+.grade-five-page .curriculum-section{flex:0 0 100%!important;max-width:none!important;margin:0!important;padding-inline:7vw!important;box-sizing:border-box}
 .curriculum-dots{display:none}
 .lesson-slide{padding-bottom:68px!important}
 .lesson-dots button{background:var(--brand-paper,#F6F1E9);opacity:calc(.46 + var(--dot-wave,0) * .48);transform:translateY(calc(-1 * var(--dot-lift,0px))) scale(calc(.94 + var(--dot-wave,0) * .34));transition:background-color 260ms cubic-bezier(.22,.61,.36,1),opacity 180ms ease-out,transform 220ms cubic-bezier(.22,.61,.36,1)}
