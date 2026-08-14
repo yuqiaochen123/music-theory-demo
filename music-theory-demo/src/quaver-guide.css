@@ -15,6 +15,7 @@
   padding: 0;
   border: 0;
   background: transparent;
+  mix-blend-mode: multiply;
   pointer-events: none;
   transition: bottom 180ms ease;
 }
@@ -37,6 +38,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  mix-blend-mode: multiply;
   pointer-events: auto;
   animation: quaver-idle 3.6s ease-in-out infinite;
 }
@@ -51,7 +53,9 @@
 }
 
 .quaver-guide[data-quaver-mode="rive"] .quaver-guide__stage canvas {
-  transform: scale(1.12);
+  background: transparent;
+  mix-blend-mode: multiply;
+  transform: scale(2.2);
   transform-origin: center;
 }
 
@@ -104,8 +108,20 @@
 }
 
 .quaver-guide__controls button:hover { border-color: #9a2f5a; background: #f8edf1; }
-.quaver-guide__credit { margin: 0; color: #786a70; font-size: 10px; line-height: 1.3; }
-.quaver-guide__credit a { color: inherit; }
+.quaver-guide__controls button:focus-visible {
+  outline: 3px solid #f0b84c;
+  outline-offset: 2px;
+}
+
+.quaver-credit {
+  display: block;
+  margin-top: 8px;
+  color: #786a70;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.quaver-credit a { color: inherit; }
 .quaver-guide[data-mood="celebrate"] .quaver-guide__stage { animation: quaver-celebrate 520ms cubic-bezier(.2,.9,.25,1); }
 .quaver-guide[data-mood="think"] .quaver-guide__stage { animation: quaver-think 520ms ease; }
 
@@ -127,7 +143,7 @@
   .quaver-guide__stage,
   .quaver-guide__stage canvas,
   .quaver-guide__fallback { width: 76px; height: 76px; }
-  .quaver-guide[data-quaver-mode="rive"] .quaver-guide__stage canvas { transform: scale(1.08); }
+  .quaver-guide[data-quaver-mode="rive"] .quaver-guide__stage canvas { transform: scale(2.2); }
   .quaver-guide__bubble { max-width: min(220px, calc(100vw - 112px)); font-size: 13px; }
 }
 

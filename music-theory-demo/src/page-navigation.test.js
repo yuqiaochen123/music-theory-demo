@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   consumeArrivalMarker,
   eligibleNavigation,
+  interactiveClickTarget,
   transitionKey,
   writeArrivalMarker,
 } from "./page-navigation.js";
@@ -20,6 +21,37 @@ const click = overrides => ({
 const anchor = (href, overrides = {}) => ({ href, target: "", download: "", ...overrides });
 
 describe("curtain navigation helpers", () => {
+  it("recognizes enabled interactive click targets and ignores blank or disabled clicks", () => {
+    const enabledButton = { matches: () => false };
+    const disabledButton = { matches: selector => selector.includes(":disabled") };
+    const from = control => ({ closest: () => control });
+
+    assert.equal(interactiveClickTarget(from(enabledButton)), enabledButton);
+    assert.equal(interactiveClickTarget(from(disabledButton)), null);
+    assert.equal(interactiveClickTarget({ closest: () => null }), null);
+    assert.equal(interactiveClickTarget(null), null);
+  });
+
+  it("keeps the Prism click silent on musical playback controls", () => {
+    const fromPlaybackControl = selector => ({
+      closest: () => ({ matches: candidate => candidate.includes(selector) }),
+    });
+
+    for (const selector of [".listen", ".play-row button", "[data-play-source]", "[data-play-answer]", "[data-play-phrase]", "[data-key-compare]"]) {
+      assert.equal(interactiveClickTarget(fromPlaybackControl(selector)), null, selector);
+    }
+  });
+
+  it("keeps the Prism click silent when an answer is submitted for feedback", () => {
+    const fromAnswerControl = selector => ({
+      closest: () => ({ matches: candidate => candidate.includes(selector) }),
+    });
+
+    for (const selector of ["[data-answer]", "[data-check-answer]", "[data-check-matches]"]) {
+      assert.equal(interactiveClickTarget(fromAnswerControl(selector)), null, selector);
+    }
+  });
+
   it("accepts only an unmodified same-origin HTTP page navigation", () => {
     const current = "http://localhost:3000/grade-5.html";
     assert.equal(eligibleNavigation(anchor("topic.html?topic=rhythm-note-values"), click(), current)?.href,

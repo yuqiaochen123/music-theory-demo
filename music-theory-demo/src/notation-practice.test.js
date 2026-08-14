@@ -31,11 +31,27 @@ describe("writable staff practice", () => {
   it("is integrated as a dedicated practice interaction with labelled controls", () => {
     const page = readFileSync(new URL("../practice.html", import.meta.url), "utf8");
     const source = readFileSync(new URL("./notation-practice.js", import.meta.url), "utf8");
+    assert.match(page, /notation-practice\.js\?v=20260806-hover1/);
     assert.match(page, /mountNotationPractice/);
     assert.match(page, /question\.interaction==='notation-entry'/);
     assert.match(source, /Play source/);
     assert.match(source, /Play your answer/);
     assert.match(source, /Check answer/);
     assert.match(source, /data-answer-staff/);
+  });
+
+  it("lets the interactive notation editor expand in normal page flow", () => {
+    const styles = readFileSync(new URL("./practice.css", import.meta.url), "utf8");
+    assert.match(
+      styles,
+      /\.practice-body \.notation\.notation--entry\s*\{[^}]*height:\s*auto\s*!important;[^}]*overflow:\s*visible;/s,
+    );
+  });
+
+  it("previews the next note while the learner hovers over the answer staff", () => {
+    const source = readFileSync(new URL("./notation-practice.js", import.meta.url), "utf8");
+    assert.match(source, /answerStaff\.addEventListener\("pointermove", updatePointerPreview\)/);
+    assert.match(source, /data-notation-pointer-preview/);
+    assert.match(source, /answerStaff\.addEventListener\("pointerleave"/);
   });
 });

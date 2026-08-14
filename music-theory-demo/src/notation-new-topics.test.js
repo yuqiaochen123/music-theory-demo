@@ -33,7 +33,7 @@ describe("new topic notation renderers",()=>{
     const melodySource=source.slice(source.indexOf("function renderMelody"),source.indexOf("function render(element"));
     assert.match(melodySource,/addClef\(specification\.clef\)/);
     assert.match(melodySource,/addKeySignature\(specification\.key\)/);
-    assert.match(melodySource,/staveNote\(\[placement\.pitch\], true, placement\.duration\)/);
+    assert.match(melodySource,/staveNote\(\[placement\.pitch\], true, placement\.duration, specification\.clef\)/);
     assert.match(source,/specification\.type === "melody"/);
   });
 

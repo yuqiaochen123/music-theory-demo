@@ -7,6 +7,7 @@
 /* Button-controlled curriculum pages and compact lesson canvas. */
 .grade-five-page .curriculum{height:calc(100% - 92px);overflow:hidden;scroll-behavior:smooth;pointer-events:none}
 .grade-five-page .curriculum .topic-card{pointer-events:auto}
+.grade-five-page .curriculum-section{pointer-events:auto;overscroll-behavior-y:contain}
 .grade-five-page .curriculum-tabs{overflow:hidden}
 .curriculum-dots{height:28px;display:flex;align-items:center;justify-content:center;gap:11px}
 .curriculum-dots span{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.38);transition:background .18s ease,transform .18s ease}
@@ -31,10 +32,11 @@
 
 /* Saved progress sits between each subject heading and its topic choices. */
 .grade-five-page .section-head{margin-bottom:12px}
-.grade-five-page .category-progress{--category-progress:0deg;width:clamp(72px,7vw,92px);aspect-ratio:1;margin:0 auto 24px;display:grid;place-items:center;border-radius:50%;background:conic-gradient(var(--brand-accent,#D2A36B) var(--category-progress),rgba(246,241,233,.28) 0);transition:background 320ms cubic-bezier(.22,.61,.36,1)}
-.grade-five-page .category-progress strong{width:54%;aspect-ratio:1;display:grid;place-items:center;border-radius:50%;background:var(--brand-paper,#F6F1E9);color:var(--brand-deep,#631838);font-size:clamp(12px,1.3vw,16px);font-weight:700;font-variant-numeric:tabular-nums}
+.grade-five-page .category-progress{--category-progress:0deg;width:clamp(72px,7vw,92px);aspect-ratio:1;margin:0 auto 24px;display:grid;place-items:center;container-type:inline-size;border-radius:50%;background:conic-gradient(var(--brand-accent,#D2A36B) var(--category-progress),rgba(246,241,233,.28) 0)}
+.grade-five-page .category-progress strong{width:54%;aspect-ratio:1;display:grid;place-items:center;border-radius:50%;background:var(--brand-paper,#F6F1E9);color:var(--brand-deep,#631838);font-size:12px;font-size:clamp(11px,16cqi,15px);font-weight:700;line-height:1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
 @media(max-height:760px){.grade-five-page .category-progress{width:64px;margin-bottom:16px}.grade-five-page .section-head{margin-bottom:8px}}
 @media(max-width:720px){.grade-five-page .category-progress{width:62px;margin-bottom:16px}}
+@media(max-width:720px){.grade-five-page .curriculum-tabs{overflow-x:auto;overscroll-behavior-inline:contain}.grade-five-page .curriculum-section{padding-bottom:24px}}
 @media(prefers-reduced-motion:reduce){.grade-five-page .category-progress{transition:none}}
 
 /* Rhythm values use one focused, notation-led card per horizontal lesson page. */

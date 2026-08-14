@@ -1,8 +1,8 @@
 import {
-  NATURAL_PITCHES, addNote, applyAccidental, clearPhrase, createEditorState,
+  NATURAL_PITCHES, addNote, applyAccidental, canPlaceNote, clearPhrase, createEditorState,
   deleteSelected, noteMidi, pitchLabel, placeAtCursor, rhythmicRests, selectNote, undo,
 } from "./clef-transposition-editor.js";
-import { pitchFromStaffPoint } from "./clef-transposition-editor-ui.js";
+import { pitchFromStaffPoint, yForPitch } from "./clef-transposition-editor-ui.js";
 import { validateNotationAnswer } from "./notation-answer.js";
 
 export function createNotationPracticeState(exercise) {
@@ -93,6 +93,51 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
     const button = event.target.closest("[data-note-index]");
     if (button) update(selectNote(state.editor, Number(button.dataset.noteIndex)));
   });
+  function updatePointerPreview(event) {
+    const svg = answerStaff.querySelector("svg");
+    if (!svg) return;
+    const existing = svg.querySelector("[data-notation-pointer-preview]");
+    const rect = svg.getBoundingClientRect();
+    let pitchYs = null;
+    try { pitchYs = JSON.parse(svg.dataset.pitchYs || "null"); } catch {}
+    const pitch = pitchFromStaffPoint(event.clientY, rect, pitchYs);
+    const x = Number(svg.dataset.cursorX);
+    if (!pitch || !Number.isFinite(x) || !canPlaceNote(state.editor, state.editor.cursorSlot, state.duration)) {
+      existing?.remove();
+      return;
+    }
+    const y = yForPitch(pitch, pitchYs);
+    const namespace = "http://www.w3.org/2000/svg";
+    const preview = existing || document.createElementNS(namespace, "g");
+    preview.setAttribute("data-notation-pointer-preview", "");
+    preview.setAttribute("pointer-events", "none");
+    preview.replaceChildren();
+    const head = document.createElementNS(namespace, "ellipse");
+    head.setAttribute("cx", String(x));
+    head.setAttribute("cy", String(y));
+    head.setAttribute("rx", "7.5");
+    head.setAttribute("ry", "5");
+    head.setAttribute("transform", `rotate(-12 ${x} ${y})`);
+    head.setAttribute("fill", "#1687d9");
+    preview.append(head);
+    const stem = document.createElementNS(namespace, "path");
+    stem.setAttribute("d", `M ${x + 6.5} ${y} V ${y - 34}`);
+    stem.setAttribute("fill", "none");
+    stem.setAttribute("stroke", "#1687d9");
+    stem.setAttribute("stroke-width", "2");
+    preview.append(stem);
+    const flagCount = state.duration === "16" ? 2 : state.duration === "8" ? 1 : 0;
+    for (let flag = 0; flag < flagCount; flag += 1) {
+      const flagPath = document.createElementNS(namespace, "path");
+      const flagY = y - 34 + flag * 9;
+      flagPath.setAttribute("d", `M ${x + 6.5} ${flagY} C ${x + 18} ${flagY + 5}, ${x + 18} ${flagY + 16}, ${x + 8} ${flagY + 23}`);
+      flagPath.setAttribute("fill", "none");
+      flagPath.setAttribute("stroke", "#1687d9");
+      flagPath.setAttribute("stroke-width", "3");
+      preview.append(flagPath);
+    }
+    if (!existing) svg.append(preview);
+  }
   answerStaff.addEventListener("pointerdown", event => {
     const svg = answerStaff.querySelector("svg");
     const rect = svg?.getBoundingClientRect() || answerStaff.getBoundingClientRect();
@@ -101,6 +146,8 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
     const pitch = pitchFromStaffPoint(event.clientY, rect, pitchYs);
     if (pitch) update(placeAtCursor(state.editor, applyAccidental(pitch, state.accidental), state.duration));
   });
+  answerStaff.addEventListener("pointermove", updatePointerPreview);
+  answerStaff.addEventListener("pointerleave", () => answerStaff.querySelector("[data-notation-pointer-preview]")?.remove());
   draw();
   return { getState: () => state, destroy: () => container.replaceChildren() };
 }

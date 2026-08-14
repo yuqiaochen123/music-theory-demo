@@ -1,6 +1,24 @@
 export const transitionKey = "listening-desk:page-transition";
 
 const ARRIVAL_MAX_AGE_MS = 5_000;
+const INTERACTIVE_CLICK_SELECTOR = [
+  "a[href]", "button", "input", "select", "textarea", "summary",
+  '[role="button"]', '[role="link"]', '[role="option"]', '[role="checkbox"]',
+  '[role="radio"]', '[role="switch"]', '[role="tab"]', '[role="menuitem"]',
+  "[data-answer-staff]", "[data-editor-source]",
+].join(",");
+const PRISM_SILENT_SELECTOR = [
+  ".listen", ".play-row button", ".editor-play", "[data-play]", "[data-play-source]",
+  "[data-play-answer]", "[data-play-phrase]", "[data-play-transposed]",
+  "[data-key-side]", "[data-key-compare]", "[data-answer]", "[data-check-answer]",
+  "[data-check-matches]",
+].join(",");
+
+export function interactiveClickTarget(target) {
+  const control = target?.closest?.(INTERACTIVE_CLICK_SELECTOR) ?? null;
+  if (!control || control.matches?.(`:disabled,[aria-disabled="true"],${PRISM_SILENT_SELECTOR}`)) return null;
+  return control;
+}
 
 export function eligibleNavigation(anchor, event, currentUrl) {
   if (!anchor || !event || event.defaultPrevented || event.button !== 0) return null;

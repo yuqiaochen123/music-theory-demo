@@ -6,9 +6,11 @@ Make each Grade 5 category progress ring reveal its saved percentage gradually i
 
 ## Behaviour
 
-- When saved category progress is rendered, begin the visible ring at 0% and animate it to the calculated percentage over 2 seconds.
+- When saved category progress is rendered, begin the visible ring at 0% and animate it to the calculated percentage over 1.8 seconds.
 - Animate the conic-gradient angle and the visible percentage number together so they remain synchronized throughout the reveal.
-- Use an ease-out curve: the animation should begin promptly, then slow gently as it reaches the target.
+- Use a smoothstep curve so the circumference begins gently, remains visibly in motion, and settles gently at the target.
+- Cache the progress already loaded by the grade picker for the current tab so the animation begins immediately after navigation instead of waiting for another database read.
+- Refresh saved progress in the background without restarting an animation whose target has not changed.
 - Continue to expose the final category name and percentage immediately through the ring's accessible label.
 - If the visitor prefers reduced motion, skip the animation and render the final angle and number immediately.
 - If a category's target is 0%, render 0% without running a needless animation.

@@ -7,6 +7,17 @@ const topic = page("topic.html");
 const styles = page("src/horizontal-flow.css");
 
 describe("learning journey pages", () => {
+  it("uses one grade-context navigation label instead of separate Grades and Grade 5 links", () => {
+    const chooser = page("index.html");
+    const gradeFive = page("grade-5.html");
+    const practice = page("practice.html");
+
+    assert.match(chooser, /<nav><a class="active" href="index\.html">Grades<\/a><a href="login\.html/);
+    assert.doesNotMatch(chooser, /<nav>[\s\S]*href="grade-5\.html">Grade 5<\/a>/);
+    assert.match(gradeFive, /<strong>Grade: 5 · Choose a topic<\/strong>/);
+    assert.match(practice, /<nav><a href="grade-5\.html">Grade: 5<\/a>/);
+  });
+
   it("expands the rhythm quick guide into five notation-backed lesson cards",()=>{
     assert.match(topic,/function renderRhythmGuide\(items\)/);
     assert.match(topic,/rhythm-guide-slide/);
@@ -31,10 +42,12 @@ describe("learning journey pages", () => {
 
   it("uses one restrained motion system across every app page", () => {
     for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html", "vexflow-cadence-proof.html"]) {
-      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260806-curtain1"/);
+      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260806-prism5"/);
     }
     const motion = page("src/motion.js");
-    assert.match(motion, /from '.\/page-navigation\.js'/);
+    assert.match(motion, /from '.\/page-navigation\.js\?v=20260806-prism3'/);
+    assert.match(motion, /document\.addEventListener\('pointerdown',[\s\S]*playPrismClick\(\)/);
+    assert.match(motion, /clickAudioContext\.state !== 'running'[\s\S]*void clickAudioContext\.resume\(\)/);
     assert.match(motion, /document\.addEventListener\('click'/);
     assert.match(motion, /link\.classList\.add\('is-pressed'\)/);
     assert.match(motion, /'pointerenter'/);
@@ -106,15 +119,29 @@ describe("learning journey pages", () => {
     assert.match(controls, /scrollIntoView\(\{ behavior: 'smooth'/);
   });
 
+  it("keeps every Grade 5 subject and topic reachable on narrow screens", () => {
+    const styles = page("src/horizontal-flow.css");
+    const controls = page("src/interface.js");
+    assert.match(styles, /@media\(max-width:720px\)\{[^}]*\.grade-five-page \.curriculum-tabs\{[^}]*overflow-x:auto/);
+    assert.match(styles, /\.grade-five-page \.curriculum-section\{[^}]*pointer-events:auto/);
+    assert.match(controls, /navigation\.children\[index\]\?\.scrollIntoView\(\{ behavior: 'smooth'/);
+    assert.match(controls, /\['ArrowLeft', 'ArrowRight', 'Home', 'End'\]/);
+    assert.match(controls, /setAttribute\('role', 'tabpanel'\)/);
+  });
+
   it("shows a saved-progress pie above every Grade 5 topic grid", () => {
     const gradeFive = page("grade-5.html");
     const progress = page("src/progress-ui.js");
     const styles = page("src/horizontal-flow.css");
     assert.equal((gradeFive.match(/data-category-progress/g) || []).length, 5);
+    assert.match(gradeFive, /\.\/src\/progress-ui\.js\?v=20260806-progress-animation2/);
+    assert.match(gradeFive, /src\/horizontal-flow\.css\?v=20260806-flow6/);
     assert.match(progress, /export function categoryProgress\(/);
     assert.match(progress, /renderCategoryProgress\(state\.progress\)/);
     assert.match(styles, /\.grade-five-page \.category-progress\{[^}]*conic-gradient\([^}]*--category-progress/);
     assert.match(styles, /\.grade-five-page \.category-progress\{[^}]*width:clamp\(/);
+    assert.match(styles, /\.grade-five-page \.category-progress\{[^}]*container-type:inline-size/);
+    assert.match(styles, /\.grade-five-page \.category-progress strong\{[^}]*font-size:clamp\(11px,16cqi,15px\)[^}]*line-height:1/);
   });
 
   it("fully masks adjacent curriculum pages and gives lesson dots their own bottom layout row", () => {
@@ -167,7 +194,7 @@ describe("learning journey pages", () => {
     const practiceStyles = page("src/practice.css");
     assert.doesNotMatch(practice, />Listening practice</i);
     assert.match(practice, /class="practice-body"/);
-    assert.match(practice, /src\/practice\.css\?v=20260804-practice1/);
+    assert.match(practice, /src\/practice\.css\?v=20260806-sparkle1/);
     assert.match(practiceStyles, /\.practice-body\s*\{[^}]*background:\s*#eee8e5/);
     assert.match(practiceStyles, /\.practice-body \.exercise\s*\{[^}]*background:\s*#fff\s*!important/);
     assert.match(practiceStyles, /\.practice-body \.notation\s*\{[^}]*background:\s*#fbf8f3/);

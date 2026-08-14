@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" role="img" aria-labelledby="title">
+  <title id="title">Interactive learning guide</title>
+  <g fill="none" stroke="#2a0b1c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#2a0b1c" d="M40 39c0-25 21-34 37-25 14-17 38-3 36 15 18 2 24 23 10 35H39c-12-8-11-21 1-25Z"/>
+    <path fill="#f6f1e9" d="M43 55c0 41 14 65 39 65 23 0 39-22 39-63-12 9-25 5-33-2-13 11-30 10-45 0Z"/>
+    <circle cx="62" cy="72" r="19" fill="#fff"/>
+    <circle cx="101" cy="70" r="21" fill="#fff"/>
+    <path d="M80 70c3-4 7-5 10-1"/>
+    <circle cx="66" cy="74" r="3" fill="#2a0b1c" stroke="none"/>
+    <circle cx="96" cy="72" r="3" fill="#2a0b1c" stroke="none"/>
+    <path d="M73 97c9 6 18 5 26-2"/>
+    <path d="M49 119 45 136M111 117l7 18"/>
+  </g>
+  <circle cx="52" cy="92" r="5" fill="#d2a36b" opacity=".75"/>
+  <circle cx="108" cy="90" r="5" fill="#d2a36b" opacity=".75"/>
+</svg>

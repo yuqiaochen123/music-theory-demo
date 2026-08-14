@@ -51,6 +51,11 @@ test('generic grade page loads a separate dashboard for Grades 1 to 4', () => {
   assert.match(gradePage, /data-grade-dashboard/);
 });
 
+test('Grade 5 starts cached category progress before refreshing the dashboard', () => {
+  assert.match(gradeFivePage, /renderCachedCategoryProgress\(\)/);
+  assert.ok(gradeFivePage.indexOf('renderCachedCategoryProgress()') < gradeFivePage.indexOf('loadGradeDashboard(5)'));
+});
+
 test('every progress-enabled page loads the pinned local Supabase browser client', () => {
   for (const page of [indexPage, gradePage, gradeFivePage, topicPage, practicePage]) {
     assert.match(page, /vendor\/supabase-2\.111\.0\.js/);

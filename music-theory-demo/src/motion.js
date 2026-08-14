@@ -1,8 +1,9 @@
 import {
   consumeArrivalMarker,
   eligibleNavigation,
+  interactiveClickTarget,
   writeArrivalMarker,
-} from './page-navigation.js';
+} from './page-navigation.js?v=20260806-prism3';
 
 const NAVIGATION_FALLBACK_MS = 180;
 const root = document.documentElement;
@@ -18,6 +19,43 @@ const previewEvent = {
   shiftKey: false,
   altKey: false,
 };
+
+let clickAudioContext = null;
+
+function prismTone(audio, frequency, start, duration, volume, endFrequency) {
+  const oscillator = audio.createOscillator();
+  const gain = audio.createGain();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency, start);
+  oscillator.frequency.exponentialRampToValueAtTime(endFrequency, start + duration);
+  oscillator.connect(gain).connect(audio.destination);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.003);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  oscillator.start(start);
+  oscillator.stop(start + duration + 0.01);
+}
+
+function playPrismClick() {
+  const Audio = window.AudioContext || window.webkitAudioContext;
+  if (!Audio) return;
+  clickAudioContext ||= new Audio();
+  if (clickAudioContext.state !== 'running') void clickAudioContext.resume();
+  const now = clickAudioContext.currentTime + 0.012;
+  prismTone(clickAudioContext, 1760, now, 0.05, 0.12, 1480);
+  prismTone(clickAudioContext, 2637, now + 0.018, 0.065, 0.09, 2217);
+}
+
+document.addEventListener('pointerdown', event => {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  if (!interactiveClickTarget(event.target)) return;
+  playPrismClick();
+}, true);
+
+document.addEventListener('keydown', event => {
+  if (event.repeat || !['Enter', ' '].includes(event.key) || !interactiveClickTarget(event.target)) return;
+  playPrismClick();
+}, true);
 
 const arrivedThroughCurtain = consumeArrivalMarker(window.sessionStorage);
 if (supportsNativeTransitions || !arrivedThroughCurtain) {

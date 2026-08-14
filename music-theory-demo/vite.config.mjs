@@ -1,9 +1,24 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   build: {
     outDir: "dist/client",
+    rollupOptions: {
+      input: {
+        index: path.resolve(root, "index.html"),
+        grade: path.resolve(root, "grade.html"),
+        "grade-5": path.resolve(root, "grade-5.html"),
+        login: path.resolve(root, "login.html"),
+        topic: path.resolve(root, "topic.html"),
+        practice: path.resolve(root, "practice.html"),
+        "vexflow-cadence-proof": path.resolve(root, "vexflow-cadence-proof.html"),
+      },
+    },
   },
   optimizeDeps: {
     include: ["react", "react-dom/client"],

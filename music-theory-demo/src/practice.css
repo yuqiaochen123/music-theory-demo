@@ -190,6 +190,7 @@
 
 .practice-body .notation.notation--entry {
   display: block;
+  height: auto !important;
   min-height: 0;
   overflow: visible;
   border: 0 !important;
@@ -235,6 +236,40 @@
 .matching-status { margin: 0; min-height: 24px; font-weight: 750; }
 .matching-status[data-result="correct"] { color: #1d7146; }
 .matching-status[data-result="incorrect"], .matching-status[data-result="incomplete"] { color: #9a2f5a; }
+
+.answer-feedback--correct { position: relative; overflow: visible; animation: answer-haptic-success 520ms cubic-bezier(.2, .9, .25, 1); }
+.answer-feedback--incorrect { animation: answer-haptic-error 300ms cubic-bezier(.36, .07, .19, .97); }
+.answer-sparkle-burst { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.answer-sparkle-burst i { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; background: #e5a94f; clip-path: polygon(50% 0, 61% 38%, 100% 50%, 61% 62%, 50% 100%, 39% 62%, 0 50%, 39% 38%); opacity: 0; animation: answer-sparkle-pop 560ms cubic-bezier(.16,.84,.35,1) forwards; }
+.answer-sparkle-burst i:nth-child(even) { width: 6px; height: 6px; background: #c84f80; animation-delay: 35ms; }
+
+@keyframes answer-haptic-success {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(29, 113, 70, 0); }
+  18% { transform: scale(.955); }
+  45% { transform: scale(1.035); box-shadow: 0 0 0 7px rgba(29, 113, 70, .12); }
+  72% { transform: scale(.992); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(29, 113, 70, 0); }
+}
+
+@keyframes answer-haptic-error {
+  0%, 100% { transform: translateX(0); }
+  28% { transform: translateX(-4px); }
+  56% { transform: translateX(3px); }
+  78% { transform: translateX(-1px); }
+}
+
+@keyframes answer-sparkle-pop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.25) rotate(0deg); }
+  22% { opacity: 1; }
+  72% { opacity: .9; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--sparkle-x)), calc(-50% + var(--sparkle-y))) scale(1.05) rotate(80deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer-feedback--correct,
+  .answer-feedback--incorrect { animation: none; }
+  .answer-sparkle-burst { display: none; }
+}
 
 @media (max-width: 620px) {
   .practice-body main.practice-wrap {

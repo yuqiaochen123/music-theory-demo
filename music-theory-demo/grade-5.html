@@ -33,12 +33,12 @@
     @media(max-width:560px){.topic-grid{grid-template-columns:1fr}.topic-card{min-height:178px}.section-head{align-items:flex-start;flex-direction:column;gap:6px}.curriculum{gap:36px}.curriculum-intro{margin-bottom:40px}}
   </style>
   <link rel="stylesheet" href="src/redesign.css?v=20260802-red5">
-  <link rel="stylesheet" href="src/horizontal-flow.css?v=20260803-flow3">
+  <link rel="stylesheet" href="src/horizontal-flow.css?v=20260806-flow6">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
 </head>
 <body class="grade-five-body">
   <div class="page-transition-curtain" aria-hidden="true"></div>
-  <div class="grade-five-topbar"><strong>Grade 5 · Choose a topic</strong><a class="grade-five-close" href="index.html" aria-label="Close Grade 5 contents">×</a></div>
+  <div class="grade-five-topbar"><strong>Grade: 5 · Choose a topic</strong><a class="grade-five-close" href="index.html" aria-label="Close Grade 5 contents">×</a></div>
   <main class="grade-five-page">
     <p class="eyebrow">ABRSM Music Theory</p>
     <h1>Grade 5 <em>contents.</em></h1>
@@ -109,10 +109,11 @@
   <script src="vendor/supabase-2.111.0.js"></script>
   <script type="module" src="src/auth-nav.js"></script>
   <script type="module">
-    import { loadGradeDashboard } from './src/progress-ui.js';
+    import { loadGradeDashboard, renderCachedCategoryProgress } from './src/progress-ui.js?v=20260806-progress-animation2';
+    renderCachedCategoryProgress();
     loadGradeDashboard(5);
   </script>
-  <script src="src/interface.js?v=20260803-ui4"></script>
-  <script type="module" src="src/motion.js?v=20260806-curtain1"></script>
+  <script src="src/interface.js?v=20260806-ui5"></script>
+  <script type="module" src="src/motion.js?v=20260806-prism5"></script>
 </body>
 </html>

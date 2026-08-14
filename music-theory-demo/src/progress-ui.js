@@ -1,5 +1,15 @@
 import { progressStore, summarizeGrades } from './progress-store.js';
 
+const gradeProgressCacheKey = 'listening-desk:grade-5-progress';
+
+const sessionProgressStorage = () => {
+  try {
+    return globalThis.sessionStorage ?? null;
+  } catch {
+    return null;
+  }
+};
+
 const titleCase = value => String(value ?? '')
   .split('-')
   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -21,7 +31,56 @@ export function categoryProgress(progressRecords = [], topicIds = []) {
   return Math.round(values.reduce((total, value) => total + value, 0) / topicIds.length);
 }
 
+export function cacheGradeProgress(progressRecords = [], storage = sessionProgressStorage()) {
+  try {
+    storage?.setItem(gradeProgressCacheKey, JSON.stringify(progressRecords));
+  } catch {
+    // Progress still loads from the database when tab storage is unavailable.
+  }
+}
+
+export function readCachedGradeProgress(storage = sessionProgressStorage()) {
+  try {
+    const cached = storage?.getItem(gradeProgressCacheKey);
+    if (cached === null || cached === undefined) return null;
+    const records = JSON.parse(cached);
+    return Array.isArray(records) ? records : null;
+  } catch {
+    return null;
+  }
+}
+
+export function animateCategoryProgress(indicator, targetPercentage, options = {}) {
+  const target = Math.max(0, Math.min(100, Number(targetPercentage) || 0));
+  const duration = options.duration ?? 1800;
+  const reducedMotion = options.reducedMotion ?? false;
+  const requestFrame = options.requestFrame ?? globalThis.requestAnimationFrame.bind(globalThis);
+  const now = options.now ?? (() => performance.now());
+  const label = indicator.querySelector('strong');
+  const render = percentage => {
+    indicator.style.setProperty('--category-progress', `${percentage * 3.6}deg`);
+    if (label) label.textContent = `${Math.round(percentage)}%`;
+  };
+
+  if (reducedMotion || target === 0 || duration <= 0) {
+    render(target);
+    return;
+  }
+
+  const startedAt = now();
+  render(0);
+  const step = timestamp => {
+    const elapsed = Math.max(0, timestamp - startedAt);
+    const linearProgress = Math.min(1, elapsed / duration);
+    const smoothProgress = linearProgress * linearProgress * (3 - (2 * linearProgress));
+    render(linearProgress === 1 ? target : target * smoothProgress);
+    if (linearProgress < 1) requestFrame(step);
+  };
+  requestFrame(step);
+}
+
 export function renderCategoryProgress(progressRecords = [], root = document) {
+  const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
   root.querySelectorAll('.curriculum-section').forEach(section => {
     const indicator = section.querySelector('[data-category-progress]');
     if (!indicator) return;
@@ -30,10 +89,18 @@ export function renderCategoryProgress(progressRecords = [], root = document) {
       .filter(Boolean);
     const percentage = categoryProgress(progressRecords, topicIds);
     const category = section.querySelector('.section-head h2')?.textContent?.trim() || 'Category';
-    indicator.style.setProperty('--category-progress', `${percentage * 3.6}deg`);
-    indicator.querySelector('strong').textContent = `${percentage}%`;
     indicator.setAttribute('aria-label', `${category} progress: ${percentage}%`);
+    if (indicator.dataset.categoryProgressTarget === String(percentage)) return;
+    indicator.dataset.categoryProgressTarget = String(percentage);
+    animateCategoryProgress(indicator, percentage, { duration: 1800, reducedMotion });
   });
+}
+
+export function renderCachedCategoryProgress(root = document, storage = sessionProgressStorage()) {
+  const progressRecords = readCachedGradeProgress(storage);
+  if (!progressRecords) return false;
+  renderCategoryProgress(progressRecords, root);
+  return true;
 }
 
 export function renderGradeDashboard(summary) {
@@ -67,6 +134,7 @@ export async function loadGradeOverview() {
   try {
     showSyncMessage('Loading saved progress…');
     const state = await progressStore.loadStudentData();
+    cacheGradeProgress(state.progress);
     const summaries = summarizeGrades(state);
     document.querySelectorAll('[data-grade]').forEach(card => {
       const summary = summaries.find(item => item.grade === Number(card.dataset.grade));
@@ -76,6 +144,7 @@ export async function loadGradeOverview() {
     showSyncMessage('Progress saved securely');
     return summaries;
   } catch (error) {
+    cacheGradeProgress([]);
     showSyncMessage(authMessage(error), true);
     console.error(error);
     return [];
@@ -88,6 +157,7 @@ export async function loadGradeDashboard(grade = 5) {
   try {
     showSyncMessage('Loading saved progress…');
     const state = await progressStore.loadStudentData();
+    cacheGradeProgress(state.progress);
     const summary = summarizeGrades(state).find(item => item.grade === Number(grade));
     renderCategoryProgress(state.progress);
     target.innerHTML = renderGradeDashboard(summary);

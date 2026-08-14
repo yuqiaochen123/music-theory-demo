@@ -11,8 +11,8 @@
     return match?.[1] || null;
   }
 
-  function staveNote(keys, showAccidentals, duration = "q") {
-    const note = new VF.StaveNote({ keys, duration });
+  function staveNote(keys, showAccidentals, duration = "q", clef = "treble") {
+    const note = new VF.StaveNote({ clef, keys, duration });
     if (showAccidentals) {
       keys.forEach((key, index) => {
         const accidental = accidentalFor(key);
@@ -302,7 +302,7 @@
     for (let slot = 0; slot < totalSlots;) {
       const placement = pitchBySlot.get(slot);
       if (placement) {
-        const note = staveNote([placement.pitch], true, placement.duration);
+        const note = staveNote([placement.pitch], true, placement.duration, specification.clef);
         if (placement.index === specification.selectedIndex) note.setKeyStyle(0, { fillStyle: "#1687d9", strokeStyle: "#1687d9" });
         tickables.push(note);
         if (["8", "16"].includes(placement.duration)) {
