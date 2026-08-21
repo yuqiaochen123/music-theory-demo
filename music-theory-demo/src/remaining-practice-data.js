@@ -29,10 +29,10 @@
     score('clef-4','Name the note on the fourth line of tenor clef.','C4',['A3','C4','E4'],melody(['c/4'],'tenor'),[60]),
     q('clef-5','Which clef is commonly used by viola?','Alto clef',['Alto clef','Bass clef','Treble clef'],'Viola','Its central register fits alto clef.'),
     q('clef-6','Which clef is commonly used for cello low notes?','Bass clef',['Bass clef','Alto clef','Treble clef'],'Cello','Low register uses bass clef.'),
-    score('clef-7','Name this treble-clef note.','G4',['F4','G4','A4'],melody(['g/4']),[67]),
-    score('clef-8','Name this bass-clef note.','F3',['E3','F3','G3'],melody(['f/3'],'bass'),[53]),
-    score('clef-9','These two staves show the same sounding pitch. What is it?','C4',['B3','C4','D4'],melody(['c/4'],'alto'),[60]),
-    score('clef-10','Changing only the clef should preserve what?','Sounding pitch',['Staff line','Sounding pitch','Clef symbol'],melody(['c/4'],'tenor'),[60])
+    score('clef-7','A melody rises to this treble-clef note. Name it.','D5',['B4','D5','F5'],melody(['b/4','d/5']),[71,74]),
+    score('clef-8','Which pitch is written below the bass stave?','A2',['F2','A2','C3'],melody(['a/2'],'bass'),[45]),
+    score('clef-9','Read the upper note of this alto-clef third.','E4',['C4','D4','E4'],melody(['c/4','e/4'],'alto'),[60,64]),
+    score('clef-10','Read the lower note of this tenor-clef fourth.','G3',['G3','C4','D4'],melody(['g/3','c/4'],'tenor'),[55,60])
   ];
 
   const clefTransposition=[
@@ -64,14 +64,14 @@
   const accidentals=[
     score('acc-1','What does the accidental do to this written note?','Raises it one semitone',['Raises it one semitone','Raises it two semitones','Lowers it one semitone'],melody(['f#/4']),[66]),
     score('acc-2','How far does this double flat lower the note?','Two semitones',['One semitone','Two semitones','Three semitones'],melody(['gbb/4']),[65]),
-    score('acc-3','Which spelling is enharmonic with the shown F-sharp?','G-flat',['E-sharp','G-flat','A-flat'],melody(['f#/4']),[66]),
+    score('acc-3','Which spelling is enharmonic with the shown C-sharp?','D-flat',['B-sharp','D-flat','D-sharp'],melody(['c#/4']),[61]),
     score('acc-4','Which natural pitch sounds the same as the shown B-sharp?','C',['B-flat','C','C-sharp'],melody(['b#/4']),[72]),
     score('acc-5','What does the natural sign do here?','Cancels the sharp',['Raises a semitone','Cancels the sharp','Lowers two semitones'],melody(['f#/4','f/4']),[66,65]),
     score('acc-6','How long does the first accidental normally remain in force?','To the end of the bar',['For one note only','To the end of the bar','To the end of the piece'],melody(['f#/4','f#/4']),[66,66]),
     score('acc-7','Which natural pitch is enharmonic with C-flat?','B',['B','B-flat','C'],melody(['cb/4']),[59]),
     score('acc-8','How far does the double sharp raise this note?','Two semitones',['One semitone','Two semitones','One octave'],melody(['f##/4']),[67]),
     score('acc-9','Why is E-sharp the correct leading note in F-sharp major?','It preserves scale letter order',['It sounds higher than F','It preserves scale letter order','It shortens the note'],melody(['e#/5','f#/5'], 'treble','F#'),[77,78]),
-    score('acc-10','Which natural pitch sounds like G double flat?','F',['F','F-sharp','G-flat'],melody(['gbb/4']),[65])
+    score('acc-10','Which natural pitch sounds like A double flat?','G',['F-sharp','G','A-flat'],melody(['abb/4']),[67])
   ];
 
   const termsMatch=matching('term-1','Match each direction to its performance meaning.',[{id:'allegro',text:'Allegro'},{id:'dim',text:'Diminuendo'},{id:'ff',text:'Fortissimo'},{id:'rit',text:'Ritardando'}],[{id:'fast',label:'Fast and lively'},{id:'softer',label:'Gradually softer'},{id:'loud',label:'Very loud'},{id:'slower',label:'Gradually slower'}],{fast:'allegro',softer:'dim',loud:'ff',slower:'rit'});

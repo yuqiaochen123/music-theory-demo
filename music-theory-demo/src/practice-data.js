@@ -11,6 +11,8 @@
     {answer:'major',notes:['f/4','a/4'],midis:[65,69]},
     {answer:'minor',notes:['f/4','ab/4'],midis:[65,68]}
   ];
+  const intervalPrompts=['Classify the written third.','Listen and identify the quality of this third.','Which quality matches both the spelling and sound?'];
+  intervals.forEach((exercise,index)=>exercise.prompt=intervalPrompts[index%intervalPrompts.length]);
   const cadences=[
     {answer:'perfect',key:'F',chords:[['e/4','g/4','c/5'],['f/4','a/4','c/5']],audio:[[64,67,72],[65,69,72]]},
     {answer:'imperfect',key:'F',chords:[['f/4','a/4','c/5'],['e/4','g/4','c/5']],audio:[[65,69,72],[64,67,72]]},
@@ -23,6 +25,8 @@
     {answer:'perfect',key:'Bb',chords:[['a/4','c/5','f/5'],['bb/4','d/5','f/5']],audio:[[69,72,77],[70,74,77]]},
     {answer:'imperfect',key:'Bb',chords:[['bb/4','d/5','f/5'],['a/4','c/5','f/5']],audio:[[70,74,77],[69,72,77]]}
   ];
+  const cadencePrompts=['Does the harmony resolve to the tonic or finish on the dominant?','Identify the cadence from the final two chords.','Which cadence matches this harmonic direction?'];
+  cadences.forEach((exercise,index)=>exercise.prompt=cadencePrompts[index%cadencePrompts.length]);
   const triads=[
     {answer:'Major triad',prompt:'What chord quality is shown?',choices:['Major triad','Minor triad'],quality:'major',inversion:0,root:'c',notes:['c/4','e/4','g/4'],midis:[60,64,67]},
     {answer:'Minor triad',prompt:'What chord quality is shown?',choices:['Major triad','Minor triad'],quality:'minor',inversion:0,root:'c',notes:['c/4','eb/4','g/4'],midis:[60,63,67]},
@@ -35,19 +39,20 @@
     {answer:'IV',prompt:'Which chord is this in G major?',choices:['I','ii','IV','V'],key:'G',roman:'IV',quality:'major',inversion:1,root:'c',notes:['e/4','g/4','c/5'],midis:[64,67,72]},
     {answer:'V',prompt:'Which chord is this in D major?',choices:['I','ii','IV','V'],key:'D',roman:'V',quality:'major',inversion:2,root:'a',notes:['e/4','a/4','c#/5'],midis:[64,69,73]}
   ];
-  const makeEvents=(count,duration,groups)=>{let group=1,used=0,limit=groups[0];return Array.from({length:count},()=>{const downbeat=used===0;const event={keys:[downbeat?'e/5':'c/5'],duration,group,accent:downbeat};used++;if(used===limit){group++;used=0;limit=groups[group-1]||Infinity}return event})};
-  const rhythm=(answer,meter,groups,duration,choices)=>{const events=makeEvents(meter[0],duration,groups);return {answer,prompt:'Which time signature matches this bar?',choices,meter,groups,durations:Array(meter[0]).fill(1),unit:meter[1],events,midis:events.map(event=>event.keys[0]==='e/5'?76:72),showTimeSignature:false}};
+  const rhythm=(answer,prompt,choices,meter,groups,specs)=>{let position=0,groupIndex=0,nextBoundary=groups[0];const events=specs.map((spec,index)=>{while(position>=nextBoundary&&groupIndex<groups.length-1){groupIndex++;nextBoundary+=groups[groupIndex]}const accent=position===0||position===nextBoundary-groups[groupIndex];const event={keys:[accent?'e/5':index%2?'d/5':'c/5'],duration:spec.duration,group:groupIndex+1,accent};if(spec.rest)event.rest=true;if(spec.dots)event.dots=spec.dots;position+=spec.units;return event});return {answer,prompt,choices,meter,groups,durations:specs.map(spec=>spec.units),unit:meter[1],events,midis:events.map(event=>event.keys[0]==='e/5'?76:event.keys[0]==='d/5'?74:72),showTimeSignature:false}};
+  const note=(duration,units,dots=0)=>({duration,units,dots});
+  const rest=(duration,units,dots=0)=>({duration,units,dots,rest:true});
   const timeSignatures=[
-    rhythm('2/4',[2,4],[1,1],'q',['2/4','3/4','4/4']),
-    rhythm('3/4',[3,4],[1,1,1],'q',['2/4','3/4','4/4']),
-    rhythm('4/4',[4,4],[1,1,1,1],'q',['2/4','3/4','4/4']),
-    rhythm('6/8',[6,8],[3,3],'8',['6/8','9/8','12/8']),
-    rhythm('9/8',[9,8],[3,3,3],'8',['6/8','9/8','12/8']),
-    rhythm('12/8',[12,8],[3,3,3,3],'8',['6/8','9/8','12/8']),
-    rhythm('5/4',[5,4],[2,3],'q',['5/4','7/4','5/8']),
-    rhythm('7/4',[7,4],[4,3],'q',['5/4','7/4','7/8']),
-    rhythm('5/8',[5,8],[2,3],'8',['5/4','5/8','7/8']),
-    rhythm('7/8',[7,8],[2,2,3],'8',['7/4','5/8','7/8'])
+    rhythm('2/4','Which time signature fits this complete bar?',['2/4','3/4','4/4'],[2,4],[1,1],[note('8',.5),note('8',.5),note('q',1)]),
+    rhythm('3/4','Count the crotchet beats: which metre is present?',['2/4','3/4','4/4'],[3,4],[1,1,1],[note('q',1),rest('q',1),note('8',.5),note('8',.5)]),
+    rhythm('4/4','Which simple metre accommodates this mixture of values?',['2/4','3/4','4/4'],[4,4],[1,1,1,1],[note('h',2),note('q',1),rest('q',1)]),
+    rhythm('Two: 6/8','How many compound beats are grouped in this bar?',['Two: 6/8','Three: 9/8','Four: 12/8'],[6,8],[3,3],[note('q',2),note('8',1),rest('8',1),note('q',2)]),
+    rhythm('9/8','Which metre matches these three compound-beat groups?',['6/8','9/8','12/8'],[9,8],[3,3,3],[note('q',2),note('8',1),note('q',2),rest('8',1),note('q',2),note('8',1)]),
+    rhythm('12/8','Which compound metre contains four dotted-crotchet beats?',['6/8','9/8','12/8'],[12,8],[3,3,3,3],[note('q',2),note('8',1),rest('q',2),note('8',1),note('q',2),note('8',1),note('q',2),note('8',1)]),
+    rhythm('5/4','Which irregular metre matches the 2+3 crotchet grouping?',['5/4','7/4','5/8'],[5,4],[2,3],[note('h',2),note('q',1),note('h',2)]),
+    rhythm('7/4','Which bar has the displayed 4+3 crotchet grouping?',['5/4','7/4','7/8'],[7,4],[4,3],[note('h',2),note('h',2),rest('q',1),note('h',2)]),
+    rhythm('5/8','The beam accents reveal 2+3 quavers. Which metre is it?',['5/4','5/8','7/8'],[5,8],[2,3],[note('8',1),note('8',1),note('q',2),note('8',1)]),
+    rhythm('7/8','Which metre fits the 2+2+3 quaver grouping?',['7/4','5/8','7/8'],[7,8],[2,2,3],[note('q',2),rest('8',1),note('8',1),note('q',2),note('8',1)])
   ];
   const scales=[
     {answer:'C major',prompt:'Which scale is shown?',choices:['C major','G major','F major'],type:'major',notes:['c/4','d/4','e/4','f/4','g/4','a/4','b/4','c/5'],midis:[60,62,64,65,67,69,71,72],descendingType:'major-descending',descendingNotes:['c/5','b/4','a/4','g/4','f/4','e/4','d/4','c/4'],descendingMidis:[72,71,69,67,65,64,62,60]},
@@ -61,6 +66,8 @@
     {answer:'A melodic minor',prompt:'Which minor scale is shown?',choices:['A natural minor','A harmonic minor','A melodic minor'],type:'melodic-minor-ascending',notes:['a/3','b/3','c/4','d/4','e/4','f#/4','g#/4','a/4'],midis:[57,59,60,62,64,66,68,69],descendingType:'natural-minor-descending',descendingNotes:['a/4','g/4','f/4','e/4','d/4','c/4','b/3','a/3'],descendingMidis:[69,67,65,64,62,60,59,57]},
     {answer:'C chromatic',prompt:'Which scale is shown?',choices:['C major','C chromatic','A harmonic minor'],type:'chromatic',notes:['c/4','c#/4','d/4','d#/4','e/4','f/4','f#/4','g/4','g#/4','a/4','bb/4','b/4','c/5'],midis:[60,61,62,63,64,65,66,67,68,69,70,71,72],descendingType:'chromatic',descendingNotes:['c/5','b/4','bb/4','a/4','ab/4','g/4','gb/4','f/4','e/4','eb/4','d/4','db/4','c/4'],descendingMidis:[72,71,70,69,68,67,66,65,64,63,62,61,60]}
   ];
+  const scalePrompts=['Identify the scale from its tonic and pitch pattern.','Compare the ascent and descent: which scale form is written?','Which named scale matches every accidental shown?'];
+  scales.forEach((exercise,index)=>exercise.prompt=scalePrompts[index%scalePrompts.length]);
   const scaleDegrees=[
     {answer:'Tonic',prompt:'In C major, what is degree 1 called?',choices:['Tonic','Dominant','Mediant'],notes:['c/4','d/4','e/4','f/4','g/4','a/4','b/4','c/5'],descendingNotes:['c/5','b/4','a/4','g/4','f/4','e/4','d/4','c/4'],midis:[60,62,64,65,67,69,71,72]},
     {answer:'Supertonic',prompt:'In C major, what is degree 2 called?',choices:['Supertonic','Subdominant','Submediant'],notes:['c/4','d/4','e/4','f/4','g/4','a/4','b/4','c/5'],descendingNotes:['c/5','b/4','a/4','g/4','f/4','e/4','d/4','c/4'],midis:[60,62,64,65,67,69,71,72]},
@@ -85,6 +92,8 @@
     {id:'ks-9',answer:'D-flat major / B-flat minor',prompt:'Which relative keys share this signature?',choices:['A-flat major / F minor','D-flat major / B-flat minor','G-flat major / E-flat minor'],notation:{type:'key-signature',key:'Db'},midis:[61,63,65,66,68,70,72,73]},
     {id:'ks-10',answer:'G-flat major / E-flat minor',prompt:'Which relative keys share this signature?',choices:['D-flat major / B-flat minor','G-flat major / E-flat minor','F-sharp major / D-sharp minor'],notation:{type:'key-signature',key:'Gb'},midis:[66,68,70,71,73,75,77,78]}
   ];
+  const signaturePrompts=['Identify the relative major and minor pair.','Which pair uses exactly this key signature?','Read the accidentals, then choose both possible tonal centres.'];
+  keySignatures.forEach((exercise,index)=>exercise.prompt=signaturePrompts[index%signaturePrompts.length]);
   window.ListeningDeskPractice = Object.freeze({
     "intervals": {name:'Intervals',title:'Identify the<br><em>interval.</em>',lead:'Use the staff notation and sound. Every written third appears once.',question:'What interval is this?',playLabel:'▶ Play interval',answers:[['major','Major third'],['minor','Minor third']],exercises:intervals},
     "cadences": {name:'Cadences',title:'Identify the<br><em>cadence.</em>',lead:'Read the key signature, then use the notation and sound to decide where the phrase leads.',question:'What cadence is this?',playLabel:'▶ Play cadence',answers:[['perfect','Perfect cadence'],['imperfect','Imperfect cadence']],exercises:cadences},
