@@ -6,7 +6,7 @@
   z-index: 40;
   display: grid;
   grid-template-columns: minmax(150px, 250px) 112px;
-  grid-template-areas: "bubble stage" "controls controls";
+  grid-template-areas: "bubble bubble" ". stage" "controls controls";
   align-items: end;
   gap: 8px;
   width: max-content;
@@ -15,21 +15,44 @@
   padding: 0;
   border: 0;
   background: transparent;
-  mix-blend-mode: multiply;
   pointer-events: none;
   transition: bottom 180ms ease;
 }
 
-.quaver-guide[hidden],
-.quaver-guide[data-minimized="true"] .quaver-guide__stage,
-.quaver-guide[data-minimized="true"] .quaver-guide__bubble,
-.quaver-guide[data-muted="true"] .quaver-guide__bubble { display: none; }
-
-.quaver-guide[data-minimized="true"] {
-  grid-template-columns: auto;
-  grid-template-areas: "controls";
-  min-height: 0;
+.quaver-guide::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  z-index: -1;
+  background: rgba(42, 11, 28, 0);
+  border-radius: 24px;
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, backdrop-filter 180ms ease, background 180ms ease;
 }
+
+.quaver-guide[data-chat-open="true"] {
+  width: min(360px, calc(100vw - 32px));
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "chat" "input" "stage" "send" "controls";
+  align-items: stretch;
+  gap: 10px;
+}
+
+.quaver-guide[data-chat-open="true"]::before {
+  background: rgba(255, 250, 252, .38);
+  border-radius: 24px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 14px 38px rgba(42, 11, 28, .08);
+  opacity: 1;
+}
+
+.quaver-guide[hidden],
+.quaver-guide[data-minimized="true"] [data-quaver-chat-toggle],
+.quaver-guide[data-minimized="true"] [data-quaver-chat] { display: none; }
 
 .quaver-guide__stage {
   grid-area: stage;
@@ -38,7 +61,10 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  mix-blend-mode: multiply;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  mix-blend-mode: normal;
   pointer-events: auto;
   animation: quaver-idle 3.6s ease-in-out infinite;
 }
@@ -54,7 +80,7 @@
 
 .quaver-guide[data-quaver-mode="rive"] .quaver-guide__stage canvas {
   background: transparent;
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
   transform: scale(2.2);
   transform-origin: center;
 }
@@ -62,15 +88,23 @@
 .quaver-guide__stage canvas[hidden],
 .quaver-guide__fallback[hidden] { display: none; }
 
+.quaver-guide__stage canvas[data-quaver-source] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .quaver-guide__bubble {
   grid-area: bubble;
   align-self: center;
+  justify-self: end;
   max-width: 250px;
   padding: 11px 14px;
   border-radius: 12px 12px 3px 12px;
   background: #f1dce4;
   box-shadow: 0 8px 24px rgba(42, 11, 28, .12);
   color: #2a0b1c;
+  mix-blend-mode: normal;
   font-size: 14px;
   font-weight: 750;
   line-height: 1.4;
@@ -79,6 +113,7 @@
 .quaver-guide__controls {
   grid-area: controls;
   display: flex;
+  flex-wrap: wrap;
   gap: 7px;
   justify-self: end;
   opacity: 0;
@@ -89,6 +124,7 @@
 
 .quaver-guide:hover .quaver-guide__controls,
 .quaver-guide:focus-within .quaver-guide__controls,
+.quaver-guide[data-chat-ready="true"] .quaver-guide__controls,
 .quaver-guide[data-minimized="true"] .quaver-guide__controls {
   opacity: 1;
   transform: translateY(0);
@@ -108,9 +144,104 @@
 }
 
 .quaver-guide__controls button:hover { border-color: #9a2f5a; background: #f8edf1; }
+.quaver-guide__controls [data-quaver-chat-toggle]:not([hidden]) {
+  border-color: #9a2f5a;
+  background: #9a2f5a;
+  color: #fff;
+  box-shadow: 0 7px 20px rgba(99, 24, 56, .24);
+}
+.quaver-guide__controls [data-quaver-chat-toggle]:not([hidden]):hover { background: #76163d; }
 .quaver-guide__controls button:focus-visible {
   outline: 3px solid #f0b84c;
   outline-offset: 2px;
+}
+
+[data-quaver-chat] {
+  grid-area: chat;
+  display: contents;
+  flex-basis: 100%;
+  order: 10;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: auto;
+}
+
+[data-quaver-chat][hidden] { display: none; }
+
+.quaver-chat__messages {
+  grid-area: chat;
+  display: grid;
+  gap: 7px;
+  max-height: min(48vh, 360px);
+  overflow-y: auto;
+}
+
+.quaver-chat__message {
+  max-width: 86%;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 11px;
+  box-shadow: 0 8px 24px rgba(42, 11, 28, .12);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.quaver-chat__message--user {
+  justify-self: start;
+  border: 1px solid #d8bac5;
+  border-bottom-left-radius: 3px;
+  background: #fff;
+  color: #2a0b1c;
+}
+
+.quaver-chat__message--assistant {
+  justify-self: end;
+  border-bottom-right-radius: 3px;
+  background: #9a2f5a;
+  color: #fff;
+}
+
+.quaver-chat__composer { display: contents; }
+
+.quaver-chat__composer button {
+  grid-area: send;
+  width: 100%;
+  border: 1px solid #9a2f5a;
+  border-radius: 999px;
+  background: #9a2f5a;
+  color: #fff;
+  padding: 8px 16px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+[data-quaver-chat] input {
+  grid-area: input;
+  width: 100%;
+  border: 1px solid #d8bac5;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .96);
+  color: #2a0b1c;
+  padding: 8px 11px;
+  font: inherit;
+  font-size: 12px;
+}
+
+[data-quaver-chat] input:focus { outline: 3px solid #f0b84c; outline-offset: 2px; }
+
+.quaver-guide[data-chat-open="true"] .quaver-guide__stage {
+  justify-self: center;
+}
+
+.quaver-guide[data-chat-open="true"] .quaver-guide__controls {
+  justify-self: center;
 }
 
 .quaver-credit {
@@ -125,6 +256,14 @@
 .quaver-guide[data-mood="celebrate"] .quaver-guide__stage { animation: quaver-celebrate 520ms cubic-bezier(.2,.9,.25,1); }
 .quaver-guide[data-mood="think"] .quaver-guide__stage { animation: quaver-think 520ms ease; }
 
+[data-quaver-thinking-dots] { display: inline-flex; min-width: 1.15em; }
+[data-quaver-thinking-dots] span {
+  display: inline-block;
+  animation: quaver-thinking-dot 1.05s ease-in-out infinite;
+}
+[data-quaver-thinking-dots] span:nth-child(2) { animation-delay: 140ms; }
+[data-quaver-thinking-dots] span:nth-child(3) { animation-delay: 280ms; }
+
 @keyframes quaver-idle {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
@@ -132,6 +271,10 @@
 
 @keyframes quaver-celebrate { 50% { transform: translateY(-12px) scale(1.06); } }
 @keyframes quaver-think { 35% { transform: rotate(-4deg); } 70% { transform: rotate(3deg); } }
+@keyframes quaver-thinking-dot {
+  0%, 60%, 100% { opacity: .3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-2px); }
+}
 
 @media (max-width: 600px) {
   .quaver-guide {
@@ -145,9 +288,14 @@
   .quaver-guide__fallback { width: 76px; height: 76px; }
   .quaver-guide[data-quaver-mode="rive"] .quaver-guide__stage canvas { transform: scale(2.2); }
   .quaver-guide__bubble { max-width: min(220px, calc(100vw - 112px)); font-size: 13px; }
+  .quaver-guide[data-chat-open="true"] {
+    width: min(330px, calc(100vw - 20px));
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .quaver-guide,
-  .quaver-guide__stage { animation: none !important; transition: none !important; }
+  .quaver-guide__stage,
+  [data-quaver-thinking-dots] span { animation: none !important; transition: none !important; }
 }

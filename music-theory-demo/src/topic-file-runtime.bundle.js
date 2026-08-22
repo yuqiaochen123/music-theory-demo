@@ -20738,7 +20738,7 @@ ${suffix}`;
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: false
+        detectSessionInUrl: true
       }
     });
   }
@@ -20983,7 +20983,7 @@ ${suffix}`;
     return INTERVAL_LESSONS.find((lesson) => lesson.id === id);
   }
 
-  // src/clef-transposition-editor.js
+  // src/clef-transposition-editor.js?v=20260822-g4abrsm1
   var NATURAL_PITCHES = Object.freeze([
     "c/4",
     "d/4",
@@ -21037,6 +21037,28 @@ ${suffix}`;
   function noteMidi(pitch) {
     const { letter, accidental, octave } = pitchParts(pitch);
     return 12 * (octave + 1) + LETTER_SEMITONES[letter] + ACCIDENTAL_OFFSETS[accidental];
+  }
+  var GRADE4_CLEFS = Object.freeze(["treble", "alto", "bass"]);
+  function octaveDirectionForClefs(sourceClef, targetClef) {
+    if (!GRADE4_CLEFS.includes(sourceClef) || !GRADE4_CLEFS.includes(targetClef)) throw new RangeError("Only treble, alto, and bass clefs belong to this Grade 4 tool.");
+    if (sourceClef !== "alto" && targetClef !== "alto") throw new RangeError("Grade 4 octave transposition must involve alto clef.");
+    if (sourceClef === targetClef) throw new RangeError("Choose a different destination clef.");
+    return sourceClef === "treble" || targetClef === "bass" ? -1 : 1;
+  }
+  function transposeOctavePitch(pitch, direction) {
+    if (![1, -1].includes(direction)) throw new RangeError("Octave direction must be 1 or -1.");
+    const { letter, accidental, octave } = pitchParts(pitch);
+    return `${letter}${accidental}/${octave + direction}`;
+  }
+  function transposePhraseAtOctave(state, sourceClef, targetClef) {
+    const direction = octaveDirectionForClefs(sourceClef, targetClef);
+    return {
+      ...state,
+      sourceClef,
+      targetClef,
+      transposedNotes: state.notes.map((pitch) => transposeOctavePitch(pitch, direction)),
+      message: `Moved every note ${direction > 0 ? "up" : "down"} one octave from ${sourceClef} to ${targetClef} clef.`
+    };
   }
   function createEditorState(initialNotes = ["c/4", "e/4", "g/4", "c/5"]) {
     initialNotes.forEach(requirePitch);
@@ -21201,9 +21223,22 @@ ${suffix}`;
     return `${letter.toUpperCase()}${accidental.replace("bb", "\u266D\u266D").replace("##", "\u266F\u266F").replace("b", "\u266D").replace("#", "\u266F")}${octave}`;
   }
 
-  // src/clef-transposition-editor-ui.js
-  function pitchFromStaffPoint(clientY, rect) {
+  // src/clef-transposition-editor-ui.js?v=20260822-g4abrsm2
+  function yForPitch(pitch, pitchYs = null) {
+    if (pitchYs && Number.isFinite(Number(pitchYs[pitch]))) return Number(pitchYs[pitch]);
+    const pitchIndex = NATURAL_PITCHES.indexOf(pitch);
+    return pitchIndex < 0 ? null : 122 - pitchIndex * 60 / 11;
+  }
+  function pitchFromStaffPoint(clientY, rect, pitchYs = null) {
     const engravingY = (clientY - rect.top) / rect.height * 190;
+    if (pitchYs) {
+      const candidates = NATURAL_PITCHES.map((pitch) => ({ pitch, y: Number(pitchYs[pitch]) })).filter(({ y }) => Number.isFinite(y));
+      if (candidates.length) {
+        const nearest = candidates.reduce((best, candidate) => Math.abs(candidate.y - engravingY) < Math.abs(best.y - engravingY) ? candidate : best);
+        const step = candidates.length > 1 ? Math.abs(candidates[1].y - candidates[0].y) : 5;
+        return Math.abs(nearest.y - engravingY) <= step * 0.75 ? nearest.pitch : null;
+      }
+    }
     if (engravingY < 57 || engravingY > 127) return null;
     return NATURAL_PITCHES[Math.round((122 - engravingY) * 11 / 60)] || null;
   }
@@ -21212,14 +21247,24 @@ ${suffix}`;
     const scale = viewportWidth / engravingWidth;
     return slotCenters.map((center) => center * scale);
   }
-  function mountClefTranspositionEditor({ container, notation, play }) {
+  function mountClefTranspositionEditor({ container, notation, play, mode = "key" }) {
     let state = createEditorState([]);
+    const grade4Mode = mode === "grade4-clef";
+    let sourceClef = "treble";
+    let targetClef = "alto";
     let selectedDuration = "q";
     let selectedAccidental = "";
     const find = (selector) => container.querySelector(selector);
     const source = find("[data-editor-source]");
     const destination = find("[data-editor-destination]");
     const keySelect = find("[data-target-key]");
+    let sourceClefSelect = null;
+    if (grade4Mode) {
+      const targetField = keySelect.closest(".editor-field");
+      targetField.querySelector("label").textContent = "Target clef";
+      targetField.insertAdjacentHTML("beforebegin", '<div class="editor-field"><label>Source clef</label><select data-source-clef><option value="treble">Treble</option><option value="alto">Alto</option><option value="bass">Bass</option></select></div>');
+      sourceClefSelect = find("[data-source-clef]");
+    }
     const transposeButton = find("[data-transpose]");
     const status = find("[data-editor-status]");
     const count = find("[data-note-count]");
@@ -21231,26 +21276,32 @@ ${suffix}`;
     const playTransposedButton = find("[data-play-transposed]");
     const addBarButton = find("[data-add-bar]");
     const addBarsButton = find("[data-add-bars]");
-    function drawStaff(target, notes, slots, durations, key = null, selectedIndex = null, cursorSlot = null, rests = []) {
+    function drawStaff(target, notes, slots, durations, key = null, selectedIndex = null, cursorSlot = null, rests = [], clef = "treble") {
       try {
-        notation.renderMelody(target, { notes, slots, durations, clef: "treble", key, selectedIndex, cursorSlot, rests, barCount: state.barCount }, { width: 820 });
+        notation.renderMelody(target, { notes, slots, durations, clef, key, selectedIndex, cursorSlot, rests, barCount: state.barCount }, { width: 820 });
       } catch (error) {
         target.textContent = "Notation is unavailable in this browser.";
       }
     }
     function render() {
-      drawStaff(source, state.notes, state.slots, state.durations, "C", state.selectedIndex, state.cursorSlot, rhythmicRests(state));
+      if (grade4Mode) {
+        source.closest(".editor-staff").querySelector("h3").textContent = `Source \xB7 ${sourceClef[0].toUpperCase() + sourceClef.slice(1)} clef`;
+        destination.closest(".editor-staff").querySelector("h3").textContent = `Target \xB7 ${targetClef[0].toUpperCase() + targetClef.slice(1)} clef`;
+      }
+      drawStaff(source, state.notes, state.slots, state.durations, grade4Mode ? null : "C", state.selectedIndex, state.cursorSlot, rhythmicRests(state), grade4Mode ? sourceClef : "treble");
       drawStaff(
         destination,
         state.transposedNotes,
         state.transposedNotes.length ? state.slots : [],
         state.durations,
-        state.targetKey,
+        grade4Mode ? null : state.targetKey,
         null,
         null,
-        state.transposedNotes.length ? rhythmicRests(state) : []
+        state.transposedNotes.length ? rhythmicRests(state) : [],
+        grade4Mode ? targetClef : "treble"
       );
-      keySelect.value = state.targetKey;
+      keySelect.value = grade4Mode ? targetClef : state.targetKey;
+      if (sourceClefSelect) sourceClefSelect.value = sourceClef;
       status.textContent = state.message;
       count.textContent = `${state.notes.length} notes \xB7 ${state.barCount} bars`;
       deleteButton.disabled = state.selectedIndex === null;
@@ -21277,14 +21328,24 @@ ${suffix}`;
         slotCenters = scaleSlotCenters(slotCenters, engravingWidth, rect.width);
       } catch {
       }
-      return { rect, slotCenters };
+      let pitchYs = null;
+      try {
+        pitchYs = JSON.parse(svg?.dataset.pitchYs || "null");
+      } catch {
+      }
+      return { rect, slotCenters, pitchYs };
     };
     function updatePointerPreview(event) {
       const svg = source.querySelector("svg");
       if (!svg) return;
       const existing = svg.querySelector("[data-editor-pointer-preview]");
       const rect = svg.getBoundingClientRect();
-      const pitch = pitchFromStaffPoint(event.clientY, rect);
+      let pitchYs = null;
+      try {
+        pitchYs = JSON.parse(svg.dataset.pitchYs || "null");
+      } catch {
+      }
+      const pitch = pitchFromStaffPoint(event.clientY, rect, pitchYs);
       if (!pitch || !canPlaceNote(state, state.cursorSlot, selectedDuration)) {
         existing?.remove();
         return;
@@ -21294,8 +21355,7 @@ ${suffix}`;
         existing?.remove();
         return;
       }
-      const pitchIndex = NATURAL_PITCHES.indexOf(pitch);
-      const y = 122 - pitchIndex * 60 / 11;
+      const y = yForPitch(pitch, pitchYs);
       const namespace = "http://www.w3.org/2000/svg";
       const preview = existing || document.createElementNS(namespace, "g");
       preview.setAttribute("data-editor-pointer-preview", "");
@@ -21342,10 +21402,28 @@ ${suffix}`;
     deleteButton.addEventListener("click", () => update(deleteSelected(state)));
     undoButton.addEventListener("click", () => update(undo(state)));
     clearButton.addEventListener("click", () => update(clearPhrase(state)));
-    keySelect.addEventListener("change", () => update(setTargetKey(state, keySelect.value)));
-    transposeButton.addEventListener("click", () => update(transposePhrase(state)));
-    playButton.addEventListener("click", () => play(state.notes.map(noteMidi), 0, 0.28));
-    playTransposedButton.addEventListener("click", () => play(state.transposedNotes.map(noteMidi), 0, 0.28));
+    function syncGrade4Targets() {
+      if (!grade4Mode) return;
+      const targets = sourceClef === "alto" ? ["treble", "bass"] : ["alto"];
+      keySelect.innerHTML = targets.map((clef) => `<option value="${clef}">${clef[0].toUpperCase() + clef.slice(1)}</option>`).join("");
+      if (!targets.includes(targetClef)) targetClef = targets[0];
+    }
+    sourceClefSelect?.addEventListener("change", () => {
+      sourceClef = sourceClefSelect.value;
+      syncGrade4Targets();
+      state = { ...state, transposedNotes: [], message: `Enter a phrase in ${sourceClef} clef, then transpose it at the octave.` };
+      render();
+    });
+    keySelect.addEventListener("change", () => {
+      if (grade4Mode) {
+        targetClef = keySelect.value;
+        state = { ...state, transposedNotes: [], message: `Ready to move the phrase from ${sourceClef} to ${targetClef} clef.` };
+        render();
+      } else update(setTargetKey(state, keySelect.value));
+    });
+    transposeButton.addEventListener("click", () => update(grade4Mode ? transposePhraseAtOctave(state, sourceClef, targetClef) : transposePhrase(state)));
+    playButton.addEventListener("click", () => play(state.notes.map(noteMidi), 0, 0.28, 0.22));
+    playTransposedButton.addEventListener("click", () => play(state.transposedNotes.map(noteMidi), 0, 0.28, 0.22));
     addBarButton.addEventListener("click", () => update(addBars(state, 1)));
     addBarsButton.addEventListener("click", () => {
       const requested = window.prompt("How many more bars would you like to add?", "2");
@@ -21359,8 +21437,8 @@ ${suffix}`;
       if (button) update(selectNote(state, Number(button.dataset.selectNote)));
     });
     source.addEventListener("pointerdown", (event) => {
-      const { rect } = staffHitData();
-      const pitch = pitchFromStaffPoint(event.clientY, rect);
+      const { rect, pitchYs } = staffHitData();
+      const pitch = pitchFromStaffPoint(event.clientY, rect, pitchYs);
       if (pitch && canPlaceNote(state, state.cursorSlot, selectedDuration)) update(placeAtCursor(state, applyAccidental(pitch, selectedAccidental), selectedDuration));
     });
     source.addEventListener("pointermove", updatePointerPreview);
@@ -21375,6 +21453,14 @@ ${suffix}`;
     });
     window.addEventListener("resize", render);
     container.hidden = false;
+    if (grade4Mode) {
+      syncGrade4Targets();
+      container.dataset.editorMode = "grade4-clef";
+      find("[data-play-transposed]").textContent = "\u25B6 Play target";
+      find("[data-transpose]").textContent = "Transpose one octave";
+      source.closest(".editor-staff").querySelector("h3").textContent = "Source \xB7 Treble clef";
+      destination.closest(".editor-staff").querySelector("h3").textContent = "Target \xB7 Alto clef";
+    }
     render();
     return { getState: () => state };
   }
@@ -21386,7 +21472,7 @@ ${suffix}`;
       if (!base.variants) return base;
       const id = selectedVariants[index] || base.variants[0].id;
       return { ...base, ...base.variants.find((variant) => variant.id === id) };
-    }, sound = function(midis, delay = 0, spread = 0) {
+    }, sound = function(midis, delay = 0, spread = 0, duration = 0.55) {
       const Audio = window.AudioContext || window.webkitAudioContext;
       if (!Audio) {
         showAudioFallback();
@@ -21400,9 +21486,9 @@ ${suffix}`;
         oscillator.connect(gain).connect(audio.destination);
         gain.gain.setValueAtTime(1e-3, start);
         gain.gain.exponentialRampToValueAtTime(0.16, start + 0.03);
-        gain.gain.exponentialRampToValueAtTime(1e-3, start + 0.55);
+        gain.gain.exponentialRampToValueAtTime(1e-3, start + duration);
         oscillator.start(start);
-        oscillator.stop(start + 0.57);
+        oscillator.stop(start + duration + 0.02);
       });
     }, showAudioFallback = function() {
       document.querySelectorAll(".play-row").forEach((row) => {
@@ -21541,6 +21627,12 @@ ${suffix}`;
       const reference = $(".lesson-reference"), practice = $(".continue");
       document.querySelectorAll(".lesson-guide-slide").forEach((slide) => slide.remove());
       reference.hidden = true;
+      if (grade === 4 && current().comparison) {
+        const slide = document.createElement("section");
+        slide.className = "lesson-slide lesson-guide-slide grade4-comparison-slide";
+        slide.innerHTML = `<article class="lesson-guide-card"><header><p class="eyebrow">Pitch comparison</p><h2>${current().comparison.title}</h2><p class="lesson-guide-rule">Hover, focus, or tap each note. All three are the same sounding pitch.</p></header><div data-grade4-clef-comparison></div></article>`;
+        practice.before(slide);
+      }
       items.forEach((item, index) => {
         const slide = document.createElement("section");
         slide.className = "lesson-slide lesson-guide-slide";
@@ -21576,16 +21668,16 @@ ${suffix}`;
       $("#subtitle").textContent = data.subtitle;
       $("#intro").textContent = data.intro;
       $("#footer").textContent = data.name;
-      if (topic === "key-signatures") {
+      $("#practice").href = `practice.html?${gradeQuery}topic=${topic}`;
+      if (grade === 5 && topic === "key-signatures") {
         renderKeySignatureLesson(data);
         return;
       }
-      $("#practice").href = "practice.html?topic=" + topic;
       if (topic === "rhythm-note-values") {
         renderRhythmGuide(items);
         return;
       }
-      if ((/* @__PURE__ */ new Set(["clefs", "transposing-instruments", "accidentals", "musical-terms", "ornaments", "voices-instruments", "musical-observation"])).has(topic)) {
+      if (grade === 4 || (/* @__PURE__ */ new Set(["clefs", "transposing-instruments", "accidentals", "musical-terms", "ornaments", "voices-instruments", "musical-observation"])).has(topic)) {
         renderLessonGuide(items);
         return;
       }
@@ -21672,17 +21764,21 @@ ${suffix}`;
         update();
       });
     };
-    const DATA = window.ListeningDeskTopics;
     const query = new URLSearchParams(location.search);
+    const grade = query.get("grade") === "4" ? 4 : 5;
+    const DATA = grade === 4 ? window.ListeningDeskGrade4Topics : window.ListeningDeskTopics;
     let topic = query.get("topic");
-    if (!DATA[topic]) topic = "intervals";
+    if (!DATA[topic]) topic = grade === 4 ? "rhythm-note-values" : "intervals";
+    const gradeQuery = grade === 4 ? "grade=4&" : "";
     const lessonId = query.get("lesson");
-    const intervalLesson2 = topic === "intervals" && lessonId ? getIntervalLesson(lessonId) : void 0;
+    const intervalLesson2 = grade === 5 && topic === "intervals" && lessonId ? getIntervalLesson(lessonId) : void 0;
     const $ = (selector) => document.querySelector(selector);
     const current = () => DATA[topic];
-    const isIntervalOverview = topic === "intervals" && !intervalLesson2;
+    const isIntervalOverview = grade === 5 && topic === "intervals" && !intervalLesson2;
     const displayedData = () => intervalLesson2 ? { name: "Intervals", title: intervalLesson2.label, subtitle: "See two correct spellings, hear each note, then hear the interval together.", intro: intervalLesson2.intro, examples: intervalLesson2.examples } : current();
     document.body.dataset.topic = topic;
+    document.body.dataset.grade = String(grade);
+    $(".lesson-close").href = grade === 4 ? "grade-4.html" : "grade-5.html";
     const selectedVariants = {};
     const revealedGroupingSelectors = /* @__PURE__ */ new Set();
     const audioUnavailable = "Audio playback is unavailable; you can continue with notation.";
@@ -21694,9 +21790,10 @@ ${suffix}`;
     };
     window.addEventListener("pageshow", resetScaleDegreeScroll);
     window.addEventListener("load", resetScaleDegreeScroll);
+    window.ListeningDeskPlayMidis = sound;
     render();
-    if (topic === "clef-transposition") mountClefTranspositionEditor({ container: $("#clef-editor"), notation: window.ListeningDeskNotation, play: sound });
+    if (topic === "clef-transposition") mountClefTranspositionEditor({ container: $("#clef-editor"), notation: window.ListeningDeskNotation, play: sound, mode: grade === 4 ? "grade4-clef" : void 0 });
     setupLessonCarousel();
-    startCurrentLesson({ grade: 5, topicId: topic, lessonId: lessonId || null, statusElement: null, syncElement: document.querySelector("[data-progress-sync]") });
+    startCurrentLesson({ grade, topicId: topic, lessonId: lessonId || null, statusElement: null, syncElement: document.querySelector("[data-progress-sync]") });
   }
 })();

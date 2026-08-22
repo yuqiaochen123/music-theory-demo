@@ -33,14 +33,14 @@
     return Math.max(availableWidth, minimumWidth);
   }
 
-  function prepare(element, width, height, key, timeSignature) {
+  function prepare(element, width, height, key, timeSignature, clef = "treble") {
     requireVexFlow();
     element.replaceChildren();
     const renderer = new VF.Renderer(element, VF.Renderer.Backends.SVG);
     renderer.resize(width, height);
     const context = renderer.getContext();
     const stave = new VF.Stave(18, 42, width - 58);
-    stave.addClef("treble");
+    stave.addClef(clef);
     if (key && key !== "C") stave.addKeySignature(key);
     if (timeSignature) stave.addTimeSignature(timeSignature);
     stave.setContext(context).draw();
@@ -49,10 +49,11 @@
 
   function renderInterval(element, notes, options = {}) {
     const width = responsiveWidth(element, options.width || 620);
-    const { context, stave } = prepare(element, width, 190, null);
+    const clef = options.clef || "treble";
+    const { context, stave } = prepare(element, width, 190, null, null, clef);
     stave.setNoteStartX(width * 0.47);
     const voice = new VF.Voice({ numBeats: 1, beatValue: 4 });
-    voice.addTickable(staveNote(notes, true));
+    voice.addTickable(staveNote(notes, true, "q", clef));
     new VF.Formatter().joinVoices([voice]).format([voice], 80);
     voice.draw(context, stave);
   }
@@ -96,8 +97,13 @@
       return note;
     });
     const tupletEvents = specification.events.map((event, index) => ({ event, note: notes[index] })).filter(({ event }) => event.tuplet);
-    const tuplets = tupletEvents.length > 1 ? [new VF.Tuplet(tupletEvents.map(({ note }) => note), { num_notes: 3, notes_occupied: 2 })] : [];
+    const tupletKind = tupletEvents[0]?.event.tuplet;
+    const tuplets = tupletEvents.length > 1 ? [new VF.Tuplet(tupletEvents.map(({ note }) => note), {
+      num_notes: tupletKind === 2 ? 2 : 3,
+      notes_occupied: tupletKind === 2 ? 3 : 2,
+    })] : [];
     const voice = new VF.Voice({ numBeats: specification.meter[0], beatValue: specification.meter[1] });
+    if (tupletEvents.length) voice.setMode(VF.Voice.Mode.SOFT);
     voice.addTickables(notes);
     const grouped = new Map();
     specification.events.forEach((event, index) => {
@@ -380,7 +386,7 @@
     } else if (specification.type === "melody") {
       renderMelody(element, specification, options);
     } else {
-      renderInterval(element, specification.notes, options);
+      renderInterval(element, specification.notes, { ...options, clef: specification.clef || options.clef });
     }
   }
 

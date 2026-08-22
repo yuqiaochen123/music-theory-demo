@@ -34,3 +34,5 @@ Execute implementation plans inline in the current task unless the user explicit
 When the user has approved a scoped design, carry it through implementation, verification, and local merge without repeated approval prompts unless a real blocker or material scope decision arises.
 
 Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`, and `tests/sites-worker.test.mjs` intact so the same local prototype can be handed to Sites. Before a Sites handoff, run `npm run build` and `npm run test:sites`; the build must leave `dist/client/index.html`, `dist/server/index.js`, and `dist/.openai/hosting.json`.
+- Preserve Quaver's original animated Rive face, but keep its white artboard visually transparent against the page.
+- After an incorrect answer, expand Quaver immediately for the tutor response and keep the follow-up chat action visible without hover.

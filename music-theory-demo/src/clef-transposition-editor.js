@@ -44,6 +44,30 @@ export function noteMidi(pitch) {
   return 12 * (octave + 1) + LETTER_SEMITONES[letter] + ACCIDENTAL_OFFSETS[accidental];
 }
 
+const GRADE4_CLEFS = Object.freeze(["treble", "alto", "bass"]);
+
+export function octaveDirectionForClefs(sourceClef, targetClef) {
+  if (!GRADE4_CLEFS.includes(sourceClef) || !GRADE4_CLEFS.includes(targetClef)) throw new RangeError("Only treble, alto, and bass clefs belong to this Grade 4 tool.");
+  if (sourceClef !== "alto" && targetClef !== "alto") throw new RangeError("Grade 4 octave transposition must involve alto clef.");
+  if (sourceClef === targetClef) throw new RangeError("Choose a different destination clef.");
+  return sourceClef === "treble" || targetClef === "bass" ? -1 : 1;
+}
+
+export function transposeOctavePitch(pitch, direction) {
+  if (![1, -1].includes(direction)) throw new RangeError("Octave direction must be 1 or -1.");
+  const { letter, accidental, octave } = pitchParts(pitch);
+  return `${letter}${accidental}/${octave + direction}`;
+}
+
+export function transposePhraseAtOctave(state, sourceClef, targetClef) {
+  const direction = octaveDirectionForClefs(sourceClef, targetClef);
+  return {
+    ...state, sourceClef, targetClef,
+    transposedNotes: state.notes.map(pitch => transposeOctavePitch(pitch, direction)),
+    message: `Moved every note ${direction > 0 ? "up" : "down"} one octave from ${sourceClef} to ${targetClef} clef.`,
+  };
+}
+
 export function createEditorState(initialNotes = ["c/4", "e/4", "g/4", "c/5"]) {
   initialNotes.forEach(requirePitch);
   if (initialNotes.length > 8) throw new RangeError("The starting phrase has an eight-note limit.");

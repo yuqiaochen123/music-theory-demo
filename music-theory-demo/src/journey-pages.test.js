@@ -42,7 +42,7 @@ describe("learning journey pages", () => {
 
   it("uses one restrained motion system across every app page", () => {
     for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html", "vexflow-cadence-proof.html"]) {
-      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260806-prism5"/);
+      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260819-visible1"/);
     }
     const motion = page("src/motion.js");
     assert.match(motion, /from '.\/page-navigation\.js\?v=20260806-prism3'/);
@@ -55,6 +55,7 @@ describe("learning journey pages", () => {
     assert.match(motion, /'touchstart'/);
     assert.match(motion, /fetch\(destination\.href/);
     assert.match(motion, /consumeArrivalMarker/);
+    assert.match(motion, /document\.body\.classList\.add\('is-ready'\)/);
     assert.match(motion, /classList\.remove\('is-transition-arriving'\)/);
     assert.match(motion, /'transitionend'/);
     assert.match(motion, /NAVIGATION_FALLBACK_MS = 180/);
@@ -102,7 +103,7 @@ describe("learning journey pages", () => {
 
   it("provides a classic-script lesson fallback when opened directly from disk", () => {
     const topic = page("topic.html");
-    assert.match(topic, /src="src\/topic-file-runtime\.bundle\.js\?v=20260803-file12"/);
+    assert.match(topic, /src="src\/topic-file-runtime\.bundle\.js\?v=20260822-g4abrsm1"/);
     assert.match(page("src/topic-file-runtime.bundle.js"), /file:/);
   });
 
@@ -194,7 +195,7 @@ describe("learning journey pages", () => {
     const practiceStyles = page("src/practice.css");
     assert.doesNotMatch(practice, />Listening practice</i);
     assert.match(practice, /class="practice-body"/);
-    assert.match(practice, /src\/practice\.css\?v=20260806-sparkle1/);
+    assert.match(practice, /src\/practice\.css\?v=20260823-mastery1/);
     assert.match(practiceStyles, /\.practice-body\s*\{[^}]*background:\s*#eee8e5/);
     assert.match(practiceStyles, /\.practice-body \.exercise\s*\{[^}]*background:\s*#fff\s*!important/);
     assert.match(practiceStyles, /\.practice-body \.notation\s*\{[^}]*background:\s*#fbf8f3/);

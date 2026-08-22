@@ -1,7 +1,3 @@
-@view-transition {
-  navigation: auto;
-}
-
 :root {
   background: #f3efec;
 }
@@ -26,19 +22,8 @@ html.is-transition-arriving .page-transition-curtain {
   opacity: 1;
 }
 
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 150ms;
-  animation-timing-function: ease-in-out;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .page-transition-curtain {
     transition-duration: 0.01ms !important;
-  }
-
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 0.01ms !important;
   }
 }

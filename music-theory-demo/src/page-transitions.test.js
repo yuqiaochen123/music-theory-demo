@@ -26,26 +26,21 @@ describe("seamless cross-page navigation", () => {
     }
   });
 
-  it("uses a short opacity-only crossfade with a reduced-motion fallback", () => {
+  it("does not enable browser-native view transitions that can cover Codex pages", () => {
     const styles = page("src/page-transitions.css");
 
-    assert.match(styles, /@view-transition\s*\{\s*navigation:\s*auto/);
-    assert.match(styles, /::view-transition-old\(root\)[\s\S]*::view-transition-new\(root\)/);
-    assert.match(styles, /animation-duration:\s*150ms/);
-    assert.doesNotMatch(styles, /translate|scale/);
-    assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
-    assert.match(styles, /animation-duration:\s*0\.01ms\s*!important/);
+    assert.doesNotMatch(styles, /@view-transition|::view-transition/);
   });
 
-  it("provides the same inert transition curtain on every entry page", () => {
-    const curtain = '<div class="page-transition-curtain" aria-hidden="true"></div>';
+  it("keeps the transition curtain hidden so it can never block the interface", () => {
+    const curtain = '<div class="page-transition-curtain" aria-hidden="true" hidden></div>';
     const arrivalBootstrap = /sessionStorage\.getItem\('listening-desk:page-transition'\)[\s\S]*is-transition-arriving/;
 
     for (const filename of entryPages) {
       const html = page(filename);
       assert.equal((html.match(/class="page-transition-curtain"/g) || []).length, 1, `${filename} needs one curtain`);
       assert.match(html, arrivalBootstrap, `${filename} needs the early arrival bootstrap`);
-      assert.ok(html.indexOf(curtain) > html.indexOf("<body"), `${filename} curtain must be inside the body`);
+      assert.ok(html.indexOf(curtain) > html.indexOf("<body"), `${filename} hidden curtain must be inside the body`);
     }
   });
 

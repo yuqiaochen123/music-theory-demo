@@ -12,6 +12,7 @@ export default defineConfig({
       input: {
         index: path.resolve(root, "index.html"),
         grade: path.resolve(root, "grade.html"),
+        "grade-4": path.resolve(root, "grade-4.html"),
         "grade-5": path.resolve(root, "grade-5.html"),
         login: path.resolve(root, "login.html"),
         topic: path.resolve(root, "topic.html"),

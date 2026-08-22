@@ -237,6 +237,64 @@
 .matching-status[data-result="correct"] { color: #1d7146; }
 .matching-status[data-result="incorrect"], .matching-status[data-result="incomplete"] { color: #9a2f5a; }
 
+body[data-mode="mastery"] .session {
+  gap: 12px;
+  border-color: rgba(154, 47, 90, .24) !important;
+  background: linear-gradient(100deg, #fbf3f6, #f8f4f2);
+}
+
+body[data-mode="mastery"] #score { display: none; }
+
+.mastery-results {
+  display: grid;
+  gap: 24px;
+}
+
+.mastery-results h2 { margin: 0; font-size: clamp(30px, 5vw, 46px); }
+.mastery-results__summary { margin: -12px 0 0; color: #665a5e; font-size: 18px; }
+.mastery-results ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+
+.mastery-topic-result {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 18px;
+  padding: 16px 18px;
+  border: 1px solid #dfd3d1;
+  border-radius: 12px;
+  background: #fcfaf9;
+}
+
+.mastery-topic-result > div:first-child { display: grid; gap: 3px; }
+.mastery-topic-result span { color: #76686d; font-size: 14px; }
+.mastery-topic-result > b { border-radius: 999px; padding: 7px 11px; background: #ead4dd; color: #631838; font-size: 13px; }
+.mastery-topic-result[data-status="secure"] > b { background: #dcecdf; color: #1d633e; }
+.mastery-topic-result[data-status="developing"] > b { background: #f7e7c9; color: #704812; }
+
+.mastery-topic-result__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 5px;
+}
+
+.mastery-topic-result__actions a,
+.mastery-results__return {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border-radius: 999px;
+  padding: 0 16px;
+  color: #831f4b;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.mastery-topic-result__actions a { border: 1px solid #d5a7bb; background: #fff; }
+.mastery-results__return { justify-self: start; background: #9a2f5a; color: #fff; }
+
 .answer-feedback--correct { position: relative; overflow: visible; animation: answer-haptic-success 520ms cubic-bezier(.2, .9, .25, 1); }
 .answer-feedback--incorrect { animation: answer-haptic-error 300ms cubic-bezier(.36, .07, .19, .97); }
 .answer-sparkle-burst { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
@@ -309,4 +367,11 @@
   .notation-score__heading { align-items: flex-start; flex-direction: column; }
   .notation-score__heading button,
   .notation-practice__actions button { width: 100%; }
+
+  body[data-mode="mastery"] .session { align-items: flex-start; flex-direction: column; }
+  .mastery-topic-result { grid-template-columns: 1fr; align-items: start; }
+  .mastery-topic-result > b { justify-self: start; }
+  .mastery-topic-result__actions { grid-column: 1; display: grid; }
+  .mastery-topic-result__actions a,
+  .mastery-results__return { width: 100%; box-sizing: border-box; }
 }

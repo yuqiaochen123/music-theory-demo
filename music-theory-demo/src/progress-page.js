@@ -67,14 +67,17 @@ export async function recordAnswer({
   exerciseNumber,
   totalExercises,
   syncElement,
+  sourceTopicId,
+  attemptNumber,
+  isFirstAttempt,
 }) {
   try {
     displaySync(syncElement, 'Saving answer…');
     await progressStore.recordExerciseAttempt({
       grade,
-      topicId,
+      topicId: sourceTopicId ?? topicId,
       lessonId,
-      exerciseId,
+      exerciseId: masteryExerciseAttemptId(exerciseId, attemptNumber, isFirstAttempt),
       answerGiven,
       correctAnswer,
       isCorrect,
@@ -97,6 +100,36 @@ export async function recordAnswer({
   }
 }
 
+export function masteryExerciseAttemptId(exerciseId, attemptNumber, isFirstAttempt) {
+  if (attemptNumber == null) return String(exerciseId);
+  return `${exerciseId}:attempt:${Number(attemptNumber)}:first:${isFirstAttempt ? 1 : 0}`;
+}
+
+export async function recordMasterySummary({
+  grade = 4,
+  firstTryCorrect,
+  total,
+  syncElement,
+  store = progressStore,
+} = {}) {
+  try {
+    displaySync(syncElement, 'Saving mastery result…');
+    const refreshed = await store.saveProgress({
+      grade,
+      topicId: 'mastery-check',
+      lessonId: null,
+      status: 'completed',
+      progressPercent: Math.round((Number(firstTryCorrect) / Number(total)) * 100),
+    });
+    displaySync(syncElement, 'Mastery result saved');
+    return refreshed;
+  } catch (error) {
+    displaySync(syncElement, error?.code === 'AUTH_REQUIRED' ? 'Sign in to save this mastery result.' : 'This mastery result could not be saved. Your results remain visible.', true);
+    console.error(error);
+    return null;
+  }
+}
+
 export function installPracticeProgress() {
-  window.ListeningDeskProgress = { recordAnswer };
+  window.ListeningDeskProgress = { recordAnswer, recordMasterySummary };
 }

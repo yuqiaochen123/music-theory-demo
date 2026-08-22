@@ -21,6 +21,15 @@ test('practice page records every answer before refreshing progress', () => {
   assert.match(practicePage, /progress-page\.js/);
 });
 
+test('Grade 4 mastery saves source attempts and a freshly read summary',()=>{
+  assert.match(practicePage,/sourceTopicId:question\.sourceTopicId/);
+  assert.match(practicePage,/attemptNumber:masteryMode\?masteryState\.attempts\[exerciseId\]:undefined/);
+  assert.match(practicePage,/recordMasterySummary/);
+  const progressPage=readFileSync(new URL('./progress-page.js',import.meta.url),'utf8');
+  assert.match(progressPage,/topicId:\s*'mastery-check'/);
+  assert.match(progressPage,/return refreshed/);
+});
+
 test('practice page requests AI help only as a non-blocking incorrect-answer enhancement', () => {
   assert.match(practicePage, /ai-tutor-page\.js/);
   assert.match(practicePage, /window\.ListeningDeskTutor\?\.explain\(tutorInput\)/);
@@ -39,7 +48,7 @@ test('practice page tells signed-out learners how to enable the AI tutor', () =>
 
 test('practice page includes a collapsed, styled follow-up chat enhancement', () => {
   const tutorUi = readFileSync(new URL('./ai-tutor-ui.js', import.meta.url), 'utf8');
-  assert.match(tutorUi, /Ask a follow-up/);
+  assert.match(tutorUi, /Ask Quaver a follow-up/);
   assert.match(tutorUi, /tutor-chat__message--\$\{role\}/);
   assert.match(practicePage, /\.tutor-chat__toggle/);
   assert.match(practicePage, /\.tutor-chat__message--assistant/);
@@ -56,9 +65,13 @@ test('Grade 5 starts cached category progress before refreshing the dashboard', 
   assert.ok(gradeFivePage.indexOf('renderCachedCategoryProgress()') < gradeFivePage.indexOf('loadGradeDashboard(5)'));
 });
 
-test('every progress-enabled page loads the pinned local Supabase browser client', () => {
-  for (const page of [indexPage, gradePage, gradeFivePage, topicPage, practicePage]) {
-    assert.match(page, /vendor\/supabase-2\.111\.0\.js/);
+test('progress-enabled pages bootstrap the pinned Supabase client before modules when opened directly from disk', () => {
+  const loginPage = readFileSync(new URL('../login.html', import.meta.url), 'utf8');
+  for (const page of [indexPage, gradePage, gradeFivePage, topicPage, practicePage, loginPage]) {
+    const clientIndex = page.indexOf('vendor/supabase-2.111.0.js');
+    const firstModuleIndex = page.indexOf('type="module"');
+    assert.ok(clientIndex >= 0, 'missing pinned Supabase browser client');
+    assert.ok(clientIndex < firstModuleIndex, 'Supabase browser client must load before auth/progress modules');
   }
 });
 

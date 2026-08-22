@@ -1,8 +1,8 @@
 import {
   NATURAL_PITCHES, NOTE_DURATIONS, addBars, applyAccidental, canPlaceNote, clearPhrase,
   createEditorState, deleteSelected, durationLabel, noteMidi, pitchLabel, placeAtCursor, rhythmicRests,
-  selectNote, setTargetKey, transposePhrase, undo,
-} from "./clef-transposition-editor.js";
+  selectNote, setTargetKey, transposePhrase, transposePhraseAtOctave, undo,
+} from "./clef-transposition-editor.js?v=20260822-g4abrsm1";
 
 export function yForPitch(pitch, pitchYs = null) {
   if (pitchYs && Number.isFinite(Number(pitchYs[pitch]))) return Number(pitchYs[pitch]);
@@ -80,14 +80,24 @@ export function hoveredNoteIndexFromStaffPoint(clientX, clientY, rect, slotCente
   return index >= 0 && notes[index] ? index : null;
 }
 
-export function mountClefTranspositionEditor({ container, notation, play }) {
+export function mountClefTranspositionEditor({ container, notation, play, mode = "key" }) {
   let state = createEditorState([]);
+  const grade4Mode = mode === "grade4-clef";
+  let sourceClef = "treble";
+  let targetClef = "alto";
   let selectedDuration = "q";
   let selectedAccidental = "";
   const find = (selector) => container.querySelector(selector);
   const source = find("[data-editor-source]");
   const destination = find("[data-editor-destination]");
   const keySelect = find("[data-target-key]");
+  let sourceClefSelect = null;
+  if (grade4Mode) {
+    const targetField = keySelect.closest(".editor-field");
+    targetField.querySelector("label").textContent = "Target clef";
+    targetField.insertAdjacentHTML("beforebegin", '<div class="editor-field"><label>Source clef</label><select data-source-clef><option value="treble">Treble</option><option value="alto">Alto</option><option value="bass">Bass</option></select></div>');
+    sourceClefSelect = find("[data-source-clef]");
+  }
   const transposeButton = find("[data-transpose]");
   const status = find("[data-editor-status]");
   const count = find("[data-note-count]");
@@ -100,19 +110,21 @@ export function mountClefTranspositionEditor({ container, notation, play }) {
   const addBarButton = find("[data-add-bar]");
   const addBarsButton = find("[data-add-bars]");
 
-  function drawStaff(target, notes, slots, durations, key = null, selectedIndex = null, cursorSlot = null, rests = []) {
+  function drawStaff(target, notes, slots, durations, key = null, selectedIndex = null, cursorSlot = null, rests = [], clef = "treble") {
     try {
-      notation.renderMelody(target, { notes, slots, durations, clef: "treble", key, selectedIndex, cursorSlot, rests, barCount: state.barCount }, { width: 820 });
+      notation.renderMelody(target, { notes, slots, durations, clef, key, selectedIndex, cursorSlot, rests, barCount: state.barCount }, { width: 820 });
     } catch (error) {
       target.textContent = "Notation is unavailable in this browser.";
     }
   }
 
   function render() {
-    drawStaff(source, state.notes, state.slots, state.durations, "C", state.selectedIndex, state.cursorSlot, rhythmicRests(state));
-    drawStaff(destination, state.transposedNotes, state.transposedNotes.length ? state.slots : [], state.durations, state.targetKey, null, null,
-      state.transposedNotes.length ? rhythmicRests(state) : []);
-    keySelect.value = state.targetKey;
+    if(grade4Mode){source.closest(".editor-staff").querySelector("h3").textContent=`Source · ${sourceClef[0].toUpperCase()+sourceClef.slice(1)} clef`;destination.closest(".editor-staff").querySelector("h3").textContent=`Target · ${targetClef[0].toUpperCase()+targetClef.slice(1)} clef`}
+    drawStaff(source, state.notes, state.slots, state.durations, grade4Mode ? null : "C", state.selectedIndex, state.cursorSlot, rhythmicRests(state),grade4Mode?sourceClef:"treble");
+    drawStaff(destination, state.transposedNotes, state.transposedNotes.length ? state.slots : [], state.durations, grade4Mode?null:state.targetKey, null, null,
+      state.transposedNotes.length ? rhythmicRests(state) : [],grade4Mode?targetClef:"treble");
+    keySelect.value = grade4Mode ? targetClef : state.targetKey;
+    if(sourceClefSelect)sourceClefSelect.value=sourceClef;
     status.textContent = state.message;
     count.textContent = `${state.notes.length} notes · ${state.barCount} bars`;
     deleteButton.disabled = state.selectedIndex === null;
@@ -200,8 +212,15 @@ export function mountClefTranspositionEditor({ container, notation, play }) {
   deleteButton.addEventListener("click", () => update(deleteSelected(state)));
   undoButton.addEventListener("click", () => update(undo(state)));
   clearButton.addEventListener("click", () => update(clearPhrase(state)));
-  keySelect.addEventListener("change", () => update(setTargetKey(state, keySelect.value)));
-  transposeButton.addEventListener("click", () => update(transposePhrase(state)));
+  function syncGrade4Targets(){
+    if(!grade4Mode)return;
+    const targets=sourceClef==="alto"?["treble","bass"]:["alto"];
+    keySelect.innerHTML=targets.map(clef=>`<option value="${clef}">${clef[0].toUpperCase()+clef.slice(1)}</option>`).join("");
+    if(!targets.includes(targetClef))targetClef=targets[0];
+  }
+  sourceClefSelect?.addEventListener("change",()=>{sourceClef=sourceClefSelect.value;syncGrade4Targets();state={...state,transposedNotes:[],message:`Enter a phrase in ${sourceClef} clef, then transpose it at the octave.`};render()});
+  keySelect.addEventListener("change", () => {if(grade4Mode){targetClef=keySelect.value;state={...state,transposedNotes:[],message:`Ready to move the phrase from ${sourceClef} to ${targetClef} clef.`};render()}else update(setTargetKey(state,keySelect.value))});
+  transposeButton.addEventListener("click", () => update(grade4Mode?transposePhraseAtOctave(state,sourceClef,targetClef):transposePhrase(state)));
   playButton.addEventListener("click", () => play(state.notes.map(noteMidi), 0, 0.28, 0.22));
   playTransposedButton.addEventListener("click", () => play(state.transposedNotes.map(noteMidi), 0, 0.28, 0.22));
   addBarButton.addEventListener("click", () => update(addBars(state, 1)));
@@ -233,6 +252,7 @@ export function mountClefTranspositionEditor({ container, notation, play }) {
   });
   window.addEventListener("resize", render);
   container.hidden = false;
+  if(grade4Mode){syncGrade4Targets();container.dataset.editorMode="grade4-clef";find("[data-play-transposed]").textContent="▶ Play target";find("[data-transpose]").textContent="Transpose one octave";source.closest(".editor-staff").querySelector("h3").textContent="Source · Treble clef";destination.closest(".editor-staff").querySelector("h3").textContent="Target · Alto clef"}
   render();
   return { getState: () => state };
 }

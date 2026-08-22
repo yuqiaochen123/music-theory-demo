@@ -15,6 +15,9 @@ import {
   selectNote,
   setTargetKey,
   transposePhrase,
+  octaveDirectionForClefs,
+  transposePhraseAtOctave,
+  transposeOctavePitch,
   undo,
 } from "./clef-transposition-editor.js";
 
@@ -108,6 +111,27 @@ describe("clef transposition editor state", () => {
     assert.deepEqual(inBb.transposedNotes, ["bb/4", "d/5", "f/5", "bb/5"]);
     assert.equal(noteMidi("f#/4"), 66);
     assert.equal(noteMidi("bb/4"), 70);
+  });
+
+  it("supports only the ABRSM Grade 4 octave transfers involving alto clef", () => {
+    assert.equal(octaveDirectionForClefs("treble", "alto"), -1);
+    assert.equal(octaveDirectionForClefs("bass", "alto"), 1);
+    assert.equal(octaveDirectionForClefs("alto", "treble"), 1);
+    assert.equal(octaveDirectionForClefs("alto", "bass"), -1);
+    assert.throws(() => octaveDirectionForClefs("treble", "bass"), /alto clef/i);
+    assert.throws(() => octaveDirectionForClefs("alto", "tenor"), /Grade 4/i);
+  });
+
+  it("preserves spelling and rhythm when transposing at the octave", () => {
+    assert.equal(transposeOctavePitch("f##/4", 1), "f##/5");
+    let state = createEditorState([]);
+    state = placeNote(state, "c#/4", 0, "8");
+    state = placeNote(state, "eb/4", 2, "16");
+    const result = transposePhraseAtOctave(state, "alto", "treble");
+    assert.deepEqual(result.transposedNotes, ["c#/5", "eb/5"]);
+    assert.deepEqual(result.durations, ["8", "16"]);
+    assert.equal(result.sourceClef, "alto");
+    assert.equal(result.targetClef, "treble");
   });
 
   it("preserves note values and chromatic alterations through transposition", () => {

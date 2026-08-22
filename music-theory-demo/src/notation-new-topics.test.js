@@ -139,6 +139,11 @@ describe("new topic notation renderers",()=>{
     assert.match(rhythmSource,/event\.tuplet/);
   });
 
+  it("allows duplet voices whose displayed duration differs from raw note ticks",()=>{
+    const rhythmSource=source.slice(source.indexOf("function renderRhythm"),source.indexOf("function renderScale"));
+    assert.match(rhythmSource,/if \(tupletEvents\.length\) voice\.setMode\(VF\.Voice\.Mode\.SOFT\)/);
+  });
+
   it("turns labelled rhythm notes into hover and keyboard targets",()=>{
     assert.match(source,/attachRhythmHoverLabels\(element, notes, specification\.events\)/);
     assert.match(source,/event\.hoverLabel/);

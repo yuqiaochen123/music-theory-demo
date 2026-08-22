@@ -7,6 +7,7 @@
   <style>html{background:#f3efec}</style>
   <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
   <link rel="stylesheet" href="src/page-transitions.css?v=20260805-transition1">
+  <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css">
   <style>
     .curriculum-intro{display:grid;grid-template-columns:minmax(0,720px) auto;gap:28px;align-items:end;margin-bottom:52px}
@@ -32,12 +33,13 @@
     @media(max-width:940px){.topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.curriculum-intro{grid-template-columns:1fr;align-items:start}.availability{justify-self:start}}
     @media(max-width:560px){.topic-grid{grid-template-columns:1fr}.topic-card{min-height:178px}.section-head{align-items:flex-start;flex-direction:column;gap:6px}.curriculum{gap:36px}.curriculum-intro{margin-bottom:40px}}
   </style>
-  <link rel="stylesheet" href="src/redesign.css?v=20260802-red5">
+  <link rel="stylesheet" href="src/redesign.css?v=20260819-visible1">
   <link rel="stylesheet" href="src/horizontal-flow.css?v=20260814-flow7">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
+  <link rel="stylesheet" href="src/quaver-guide.css?v=20260822-tutor12">
 </head>
 <body class="grade-five-body">
-  <div class="page-transition-curtain" aria-hidden="true"></div>
+  <div class="page-transition-curtain" aria-hidden="true" hidden></div>
   <div class="grade-five-topbar"><strong>Grade: 5 · Choose a topic</strong><a class="grade-five-close" href="index.html" aria-label="Close Grade 5 contents">×</a></div>
   <main class="grade-five-page">
     <p class="eyebrow">ABRSM Music Theory</p>
@@ -106,7 +108,6 @@
     </div>
   </main>
   <footer hidden>Grade 5 · 16 of 16 topics available</footer>
-  <script src="vendor/supabase-2.111.0.js"></script>
   <script type="module" src="src/auth-nav.js"></script>
   <script type="module">
     import { loadGradeDashboard, renderCachedCategoryProgress } from './src/progress-ui.js?v=20260806-progress-animation2';
@@ -114,6 +115,7 @@
     loadGradeDashboard(5);
   </script>
   <script src="src/interface.js?v=20260806-ui5"></script>
-  <script type="module" src="src/motion.js?v=20260806-prism5"></script>
+  <script type="module" src="src/motion.js?v=20260819-visible1"></script>
+  <script type="module" src="src/quaver-guide.js?v=20260822-tutor12"></script>
 </body>
 </html>

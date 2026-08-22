@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createProgressStore, summarizeGrades } from './progress-store.js';
+import { masteryExerciseAttemptId, recordMasterySummary } from './progress-page.js';
 
 function createMemoryClient({ sessionUserId = null, isAnonymous = false } = {}) {
   const tables = { student_progress: [], exercise_attempts: [] };
@@ -117,4 +118,19 @@ test('summarizes progress independently for all five grades', () => {
   assert.equal(summaries[4].completedLessons, 1);
   assert.equal(summaries[4].inProgressLessons, 1);
   assert.equal(summaries[4].recentAttempts.length, 1);
+});
+
+test('encodes mastery retries without losing the source exercise identity',()=>{
+  assert.equal(masteryExerciseAttemptId('g4-clefs-identify-1',1,true),'g4-clefs-identify-1:attempt:1:first:1');
+  assert.equal(masteryExerciseAttemptId('g4-clefs-identify-1',2,false),'g4-clefs-identify-1:attempt:2:first:0');
+  assert.equal(masteryExerciseAttemptId('ordinary-id'), 'ordinary-id');
+});
+
+test('saves and returns a freshly reread Grade 4 mastery summary',async()=>{
+  let input;
+  const fresh={progress:[{grade:4,topic_id:'mastery-check',status:'completed',progress_percent:75}],attempts:[]};
+  const store={saveProgress:async value=>{input=value;return fresh}};
+  const result=await recordMasterySummary({grade:4,firstTryCorrect:21,total:28,store});
+  assert.deepEqual(input,{grade:4,topicId:'mastery-check',lessonId:null,status:'completed',progressPercent:75});
+  assert.equal(result,fresh);
 });

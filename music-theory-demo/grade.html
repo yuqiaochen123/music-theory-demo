@@ -7,12 +7,14 @@
   <style>html{background:#f3efec}</style>
   <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
   <link rel="stylesheet" href="src/page-transitions.css?v=20260805-transition1">
+  <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css">
   <link rel="stylesheet" href="src/redesign.css?v=20260802-red4">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
+  <link rel="stylesheet" href="src/quaver-guide.css?v=20260822-tutor12">
 </head>
 <body>
-  <div class="page-transition-curtain" aria-hidden="true"></div>
+  <div class="page-transition-curtain" aria-hidden="true" hidden></div>
   <header><a class="brand" href="index.html">Listening Desk <span>♪</span></a><nav><a href="index.html">Grades</a><a class="active" href="#" id="grade-nav">Grade</a><a href="login.html?v=20260731-auth6" data-account-link>Sign in</a></nav></header>
   <main class="grade-page">
     <p class="crumb"><a href="index.html">Grades</a> / <span id="grade-crumb">Grade</span></p>
@@ -26,7 +28,6 @@
     <section class="coming-soon-panel"><p class="eyebrow">Coming soon</p><h2>Lessons for this grade are being prepared.</h2><p>When lessons become available, their progress will appear in this same dashboard.</p></section>
   </main>
   <footer id="grade-footer">Listening Desk</footer>
-  <script src="vendor/supabase-2.111.0.js"></script>
   <script type="module" src="src/auth-nav.js"></script>
   <script type="module">
     import { loadGradeDashboard } from './src/progress-ui.js';
@@ -40,6 +41,7 @@
     document.querySelector('#grade-footer').textContent=`Grade ${grade} · Coming soon`;
     loadGradeDashboard(grade);
   </script>
-  <script type="module" src="src/motion.js?v=20260806-prism5"></script>
+  <script type="module" src="src/motion.js?v=20260819-visible1"></script>
+  <script type="module" src="src/quaver-guide.js?v=20260822-tutor12"></script>
 </body>
 </html>

@@ -52,7 +52,7 @@ export function buildTutorRequest({ topicId, exerciseId, question, selectedAnswe
   };
 }
 
-export function createTutorController({ requestExplanation, feedbackElement }) {
+export function createTutorController({ requestExplanation, feedbackElement, useFloatingGuide = false, onPending = null, onExplanation = null }) {
   let generation = 0;
   let currentRequest = null;
   let history = [];
@@ -88,7 +88,7 @@ export function createTutorController({ requestExplanation, feedbackElement }) {
 
   function installChat(region) {
     const document = feedbackElement.ownerDocument;
-    const toggle = createTextElement(document, 'button', 'tutor-chat__toggle', 'Ask a follow-up');
+    const toggle = createTextElement(document, 'button', 'tutor-chat__toggle', 'Ask Quaver a follow-up →');
     toggle.type = 'button';
     toggle.setAttribute?.('aria-expanded', 'false');
 
@@ -113,7 +113,7 @@ export function createTutorController({ requestExplanation, feedbackElement }) {
 
     toggle.onclick = () => {
       chat.hidden = !chat.hidden;
-      toggle.textContent = chat.hidden ? 'Ask a follow-up' : 'Close chat';
+      toggle.textContent = chat.hidden ? 'Ask Quaver a follow-up →' : 'Close chat';
       toggle.setAttribute?.('aria-expanded', String(!chat.hidden));
       if (!chat.hidden) input.focus?.();
     };
@@ -138,7 +138,7 @@ export function createTutorController({ requestExplanation, feedbackElement }) {
 
   async function ask(question) {
     const followUpQuestion = String(question ?? '').trim();
-    if (!currentRequest || !chatElements || pending || followUpCount >= 8 || !followUpQuestion || followUpQuestion.length > 500) {
+    if (!currentRequest || (!useFloatingGuide && !chatElements) || pending || followUpCount >= 8 || !followUpQuestion || followUpQuestion.length > 500) {
       return null;
     }
 
@@ -155,7 +155,9 @@ export function createTutorController({ requestExplanation, feedbackElement }) {
     if (generation !== requestGeneration) return null;
     setPending(false);
     if (!result) {
-      chatElements.status.textContent = 'The tutor could not reply. Your explanation above is still available.';
+      const failureMessage = 'Quaver could not reply just now. Your explanation above is still available.';
+      if (chatElements) chatElements.status.textContent = failureMessage;
+      if (useFloatingGuide) onExplanation?.(failureMessage);
       return null;
     }
 
@@ -164,7 +166,8 @@ export function createTutorController({ requestExplanation, feedbackElement }) {
       { role: 'user', content: followUpQuestion },
       { role: 'assistant', content: assistantReply },
     );
-    appendChatMessage('assistant', assistantReply);
+    if (useFloatingGuide) onExplanation?.(assistantReply);
+    else appendChatMessage('assistant', assistantReply);
     setPending(false);
     return result;
   }
@@ -173,6 +176,18 @@ export function createTutorController({ requestExplanation, feedbackElement }) {
     reset();
     const requestGeneration = generation;
     const document = feedbackElement.ownerDocument;
+    if (useFloatingGuide) {
+      onPending?.();
+      const result = await requestExplanation(input);
+      if (generation !== requestGeneration) return null;
+      const response = result
+        ? combinedReply(result)
+        : `${answerGuide(input).explanation} Try this: ${answerGuide(input).tip}`;
+      currentRequest = { ...input };
+      history = [{ role: 'assistant', content: response }];
+      onExplanation?.(response);
+      return result;
+    }
     const region = createTextElement(document, 'div', 'tutor-feedback', 'AI tutor is preparing a short explanation…');
     region.setAttribute?.('aria-live', 'polite');
     feedbackElement.append(region);

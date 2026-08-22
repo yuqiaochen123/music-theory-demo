@@ -180,13 +180,49 @@ test('keeps the complete explanation visible and chat collapsed until clicked', 
   const region = feedback.children[1];
   assert.equal(region.children[1].textContent, 'A tie combines the durations.');
   assert.equal(region.children[3].className, 'tutor-chat__toggle');
-  assert.equal(region.children[3].textContent, 'Ask a follow-up');
+  assert.equal(region.children[3].textContent, 'Ask Quaver a follow-up →');
   assert.equal(region.children[4].className, 'tutor-chat');
   assert.equal(region.children[4].hidden, true);
 
   region.children[3].onclick();
   assert.equal(region.children[4].hidden, false);
   assert.equal(region.children[3].textContent, 'Close chat');
+});
+
+test('signals Quaver immediately before waiting for a floating AI explanation', async () => {
+  const { feedback } = fixture();
+  const events = [];
+  let release;
+  const response = new Promise(resolve => { release = resolve; });
+  const controller = createTutorController({
+    feedbackElement: feedback,
+    useFloatingGuide: true,
+    onPending: () => events.push('pending'),
+    onExplanation: () => events.push('explanation'),
+    requestExplanation: () => response,
+  });
+
+  const request = controller.explain({ exerciseId: 'one', selectedAnswer: 'A', correctAnswer: 'B', facts: [] });
+  assert.deepEqual(events, ['pending']);
+  release({ explanation: 'Specific explanation.', tip: 'Specific tip.' });
+  await request;
+  assert.deepEqual(events, ['pending', 'explanation']);
+});
+
+test('keeps floating follow-up chat usable when the AI cannot reply', async () => {
+  const { feedback } = fixture();
+  const messages = [];
+  const responses = [{ explanation: 'Initial explanation.', tip: 'Initial tip.' }, null];
+  const controller = createTutorController({
+    feedbackElement: feedback,
+    useFloatingGuide: true,
+    onExplanation: message => messages.push(message),
+    requestExplanation: async () => responses.shift(),
+  });
+  await controller.explain({ exerciseId: 'one', selectedAnswer: 'A', correctAnswer: 'B', facts: [] });
+
+  assert.equal(await controller.ask('Why?'), null);
+  assert.match(messages.at(-1), /could not reply/i);
 });
 
 test('asks a grounded follow-up with the prior explanation and renders chat bubbles', async () => {

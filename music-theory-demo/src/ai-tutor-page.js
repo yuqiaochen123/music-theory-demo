@@ -7,6 +7,17 @@ if (feedbackElement) {
   const controller = createTutorController({
     feedbackElement,
     requestExplanation: requestTutorExplanation,
+    useFloatingGuide: true,
+    onPending() {
+      window.dispatchEvent(new CustomEvent('listening-desk:quaver', {
+        detail: { type: 'tutor:pending' },
+      }));
+    },
+    onExplanation(message) {
+      window.dispatchEvent(new CustomEvent('listening-desk:quaver', {
+        detail: { type: 'tutor:explanation', message },
+      }));
+    },
   });
 
   window.ListeningDeskTutor = {

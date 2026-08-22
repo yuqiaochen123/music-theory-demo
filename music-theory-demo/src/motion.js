@@ -20,6 +20,10 @@ const previewEvent = {
   altKey: false,
 };
 
+// Keep every page visible even when an earlier cached stylesheet still expects
+// the retired `is-ready` entry-state class.
+document.body.classList.add('is-ready');
+
 let clickAudioContext = null;
 
 function prismTone(audio, frequency, start, duration, volume, endFrequency) {
