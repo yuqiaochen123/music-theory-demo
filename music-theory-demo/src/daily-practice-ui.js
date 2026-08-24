@@ -4,6 +4,9 @@ import { mountDailyStreak } from "./daily-streak-rive.js";
 
 const roleLabels = { weak: "Weak topic", review: "Spaced review", wildcard: "Wildcard" };
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+const ACTIVE_STREAK_CONTROLLER = Symbol.for("listeningDesk.dailyPractice.activeStreakController");
+const SUMMARY_MOUNT_GENERATION = Symbol.for("listeningDesk.dailyPractice.summaryMountGeneration");
+const DAILY_PRACTICE_BOOTSTRAP = Symbol.for("listeningDesk.dailyPractice.bootstrapController");
 
 export function isNeutralBackdropPixel(red, green, blue) {
   const brightest = Math.max(red, green, blue);
@@ -51,8 +54,8 @@ export function notebookShortcutMarkup({ reviewCount } = {}) {
   return `<a class="notebook-shortcut" href="mistake-notebook.html" aria-label="Open Mistake Notebook, ${escapeHtml(reviewLabel)}" title="Notebook Loading Animation by samib · CC BY"><span class="notebook-shortcut__bubble" data-notebook-dialogue aria-live="polite">${escapeHtml(NOTEBOOK_DIALOGUES[0])}</span><span class="notebook-shortcut__art" aria-hidden="true"><canvas data-notebook-source width="300" height="300"></canvas><canvas data-notebook-animation width="300" height="300"></canvas></span></a>`;
 }
 
-function renderNotebookShortcut(reviewCount) {
-  const root = document.querySelector("[data-notebook-shortcut]");
+function renderNotebookShortcut(reviewCount, documentObject = globalThis.document) {
+  const root = documentObject?.querySelector("[data-notebook-shortcut]");
   if (root) root.innerHTML = notebookShortcutMarkup({ reviewCount });
 }
 
@@ -88,60 +91,117 @@ export async function loadSummaryData({ registry = globalThis.window?.ListeningD
   return { challenge, reviewCount: notebook.length, streak };
 }
 
-async function mountSummary(root) {
-  root.innerHTML = '<p class="daily-loading">Preparing today’s practice…</p>';
-  try {
-    const { challenge, reviewCount, streak } = await loadSummaryData({ registry: window.ListeningDeskPractice });
-    root.innerHTML = summaryMarkup({ challenge, reviewCount, streak });
-    await mountDailyStreak(root.querySelector("[data-daily-streak]"), streak);
-    renderNotebookShortcut(reviewCount);
-  } catch (error) {
-    const streak = 1;
-    root.innerHTML = summaryMarkup({ signedOut: true, streak });
-    await mountDailyStreak(root.querySelector("[data-daily-streak]"), streak);
-    renderNotebookShortcut();
-    if (error?.code !== "AUTH_REQUIRED") console.error(error);
-  }
+function cleanupSummaryStreak(root) {
+  if (!root) return;
+  root[SUMMARY_MOUNT_GENERATION] = (root[SUMMARY_MOUNT_GENERATION] ?? 0) + 1;
+  root[ACTIVE_STREAK_CONTROLLER]?.cleanup?.();
+  delete root[ACTIVE_STREAK_CONTROLLER];
 }
 
-async function mountChallenge(root) {
+export async function mountSummary(root, {
+  documentObject = globalThis.document,
+  registry = globalThis.window?.ListeningDeskPractice,
+  store = dailyPracticeStore,
+  mountStreak = mountDailyStreak,
+  logError = globalThis.console?.error,
+} = {}) {
+  const generation = (root[SUMMARY_MOUNT_GENERATION] ?? 0) + 1;
+  root[SUMMARY_MOUNT_GENERATION] = generation;
+  root[ACTIVE_STREAK_CONTROLLER]?.cleanup?.();
+  delete root[ACTIVE_STREAK_CONTROLLER];
+  root.innerHTML = '<p class="daily-loading">Preparing today’s practice…</p>';
+  let streak = 1;
+  try {
+    const summary = await loadSummaryData({ registry, store });
+    if (root[SUMMARY_MOUNT_GENERATION] !== generation) return;
+    streak = summary.streak;
+    const { challenge, reviewCount } = summary;
+    root.innerHTML = summaryMarkup({ challenge, reviewCount, streak });
+    renderNotebookShortcut(reviewCount, documentObject);
+  } catch (error) {
+    if (root[SUMMARY_MOUNT_GENERATION] !== generation) return;
+    root.innerHTML = summaryMarkup({ signedOut: true, streak });
+    renderNotebookShortcut(undefined, documentObject);
+    if (error?.code !== "AUTH_REQUIRED") logError?.(error);
+  }
+  const controller = await mountStreak(root.querySelector("[data-daily-streak]"), streak);
+  if (root[SUMMARY_MOUNT_GENERATION] !== generation) controller?.cleanup?.();
+  else root[ACTIVE_STREAK_CONTROLLER] = controller;
+}
+
+async function mountChallenge(root, {
+  registry = globalThis.window?.ListeningDeskPractice,
+  store = dailyPracticeStore,
+  logError = globalThis.console?.error,
+} = {}) {
   root.innerHTML = '<p class="daily-loading">Building today’s challenge…</p>';
   try {
-    const challenge = await dailyPracticeStore.getOrCreateChallenge({ grade: 5, registry: window.ListeningDeskPractice });
-    root.innerHTML = challengeMarkup({ challenge, registry: window.ListeningDeskPractice });
+    const challenge = await store.getOrCreateChallenge({ grade: 5, registry });
+    root.innerHTML = challengeMarkup({ challenge, registry });
   } catch (error) {
     const date = dailyDate();
-    const items = selectDailyChallenge({ exercises: flattenExerciseBank(window.ListeningDeskPractice), date, studentSeed: "guest" });
-    root.innerHTML = challengeMarkup({ challenge: { challenge_date: date, items, completed_exercise_ids: [], first_attempt_results: {} }, registry: window.ListeningDeskPractice, preview: true });
-    if (error?.code !== "AUTH_REQUIRED") console.error(error);
+    const items = selectDailyChallenge({ exercises: flattenExerciseBank(registry), date, studentSeed: "guest" });
+    root.innerHTML = challengeMarkup({ challenge: { challenge_date: date, items, completed_exercise_ids: [], first_attempt_results: {} }, registry, preview: true });
+    if (error?.code !== "AUTH_REQUIRED") logError?.(error);
   }
 }
 
-async function mountNotebook(root) {
-  const status = new URLSearchParams(location.search).get("status") === "resolved" ? "resolved" : "to_review";
+async function mountNotebook(root, {
+  locationObject = globalThis.location,
+  store = dailyPracticeStore,
+  logError = globalThis.console?.error,
+} = {}) {
+  const status = new URLSearchParams(locationObject?.search ?? "").get("status") === "resolved" ? "resolved" : "to_review";
   root.innerHTML = '<p class="daily-loading">Opening your notebook…</p>';
   try {
-    const items = await dailyPracticeStore.loadNotebook({ grade: 5, status });
+    const items = await store.loadNotebook({ grade: 5, status });
     root.innerHTML = notebookMarkup({ status, items });
     root.querySelectorAll("[data-hide-mistake]").forEach(button => button.addEventListener("click", async () => {
       button.disabled = true;
-      await dailyPracticeStore.hideNotebookItem({ grade: 5, topicId: button.dataset.topic, exerciseId: button.dataset.hideMistake });
+      await store.hideNotebookItem({ grade: 5, topicId: button.dataset.topic, exerciseId: button.dataset.hideMistake });
       button.closest(".notebook-card")?.remove();
       if (!root.querySelector(".notebook-card")) root.innerHTML = notebookMarkup({ status, items: [] });
     }));
   } catch (error) {
     root.innerHTML = '<div class="notebook-empty"><strong>Sign in to open your Mistake Notebook.</strong><p>Your mistakes are private and saved only to your permanent account.</p><a class="today-action" href="login.html">Sign in</a></div>';
-    if (error?.code !== "AUTH_REQUIRED") console.error(error);
+    if (error?.code !== "AUTH_REQUIRED") logError?.(error);
   }
 }
 
-if (typeof document !== "undefined") {
-  const summary = document.querySelector("[data-daily-practice-summary]");
-  const challenge = document.querySelector("[data-daily-challenge]");
-  const notebook = document.querySelector("[data-mistake-notebook]");
-  const notebookShortcut = document.querySelector("[data-notebook-shortcut]");
+export function bootstrapDailyPractice({
+  documentObject = globalThis.document,
+  windowObject = globalThis.window,
+  registry = windowObject?.ListeningDeskPractice,
+  store = dailyPracticeStore,
+  mountStreak = mountDailyStreak,
+  logError = globalThis.console?.error,
+} = {}) {
+  if (!documentObject) return null;
+  if (documentObject[DAILY_PRACTICE_BOOTSTRAP]) return documentObject[DAILY_PRACTICE_BOOTSTRAP];
+
+  const summary = documentObject.querySelector("[data-daily-practice-summary]");
+  const challenge = documentObject.querySelector("[data-daily-challenge]");
+  const notebook = documentObject.querySelector("[data-mistake-notebook]");
+  const notebookShortcut = documentObject.querySelector("[data-notebook-shortcut]");
+  let cleaned = false;
+  const onPageHide = () => controller.cleanup();
+  const controller = {
+    ready: Promise.resolve(),
+    cleanup() {
+      if (cleaned) return;
+      cleaned = true;
+      cleanupSummaryStreak(summary);
+      windowObject?.removeEventListener?.("pagehide", onPageHide);
+      if (documentObject[DAILY_PRACTICE_BOOTSTRAP] === controller) delete documentObject[DAILY_PRACTICE_BOOTSTRAP];
+    },
+  };
+  documentObject[DAILY_PRACTICE_BOOTSTRAP] = controller;
+  windowObject?.addEventListener?.("pagehide", onPageHide, { once: true });
   if (notebookShortcut) notebookShortcut.innerHTML = notebookShortcutMarkup();
-  if (summary) void mountSummary(summary);
-  if (challenge) void mountChallenge(challenge);
-  if (notebook) void mountNotebook(notebook);
+  const mounts = [];
+  if (summary) mounts.push(mountSummary(summary, { documentObject, registry, store, mountStreak, logError }));
+  if (challenge) mounts.push(mountChallenge(challenge, { registry, store, logError }));
+  if (notebook) mounts.push(mountNotebook(notebook, { locationObject: windowObject?.location, store, logError }));
+  controller.ready = Promise.all(mounts);
+  return controller;
 }

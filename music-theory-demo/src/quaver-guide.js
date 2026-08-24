@@ -1,3 +1,5 @@
+import { ensureRiveRuntime } from './daily-streak-rive.js';
+
 const STORAGE_KEY = 'listening-desk:quaver-preferences';
 const GUIDE_EVENT = 'listening-desk:quaver';
 
@@ -25,20 +27,6 @@ function readPreferences(storage) {
 
 function savePreferences(storage, preferences) {
   try { storage?.setItem(STORAGE_KEY, JSON.stringify(preferences)); } catch {}
-}
-
-function ensureRiveRuntime() {
-  if (window.rive?.Rive) return Promise.resolve();
-  const existing = document.querySelector('script[data-rive-runtime]');
-  if (existing) return new Promise(resolve => existing.addEventListener('load', resolve, { once: true }));
-
-  return new Promise(resolve => {
-    const script = document.createElement('script');
-    script.src = 'vendor/rive-2.39.2.js';
-    script.dataset.riveRuntime = 'true';
-    script.onload = script.onerror = () => resolve();
-    document.head.append(script);
-  });
 }
 
 function createGuideRoot() {

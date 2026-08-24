@@ -20,6 +20,53 @@ function makeStreakElement() {
 }
 
 describe("daily streak Rive adapter", () => {
+  it("shares one in-flight runtime load between concurrent callers", async () => {
+    const listeners = { load: [], error: [] };
+    const script = {
+      dataset: {},
+      addEventListener(type, listener) { listeners[type].push(listener); },
+    };
+    let existingScript = null;
+    const documentObject = {
+      querySelector() { return existingScript; },
+      createElement() { return script; },
+      head: { append(candidate) { existingScript = candidate; } },
+    };
+    const runtimeGlobal = {};
+
+    const first = streakRive.ensureRiveRuntime({ documentObject, runtimeGlobal });
+    const second = streakRive.ensureRiveRuntime({ documentObject, runtimeGlobal });
+
+    assert.equal(first, second);
+    assert.equal(listeners.load.length, 1);
+    assert.equal(listeners.error.length, 1);
+
+    class FakeRive {}
+    runtimeGlobal.rive = { Rive: FakeRive };
+    listeners.load[0]();
+    assert.equal(await first, FakeRive);
+  });
+
+  it("resolves a late caller after an existing shared runtime script has failed", async () => {
+    let listenerRegistrations = 0;
+    const failedScript = {
+      dataset: { riveRuntimeState: "failed" },
+      addEventListener() { listenerRegistrations += 1; },
+    };
+    const documentObject = {
+      querySelector() { return failedScript; },
+      createElement() { assert.fail("must not replace a terminal failed script"); },
+    };
+
+    const result = await Promise.race([
+      streakRive.ensureRiveRuntime({ documentObject, runtimeGlobal: {} }),
+      new Promise(resolve => setTimeout(() => resolve("timed-out"), 25)),
+    ]);
+
+    assert.equal(result, null);
+    assert.equal(listenerRegistrations, 0);
+  });
+
   it("waits for the pinned shared runtime before mounting on a fresh page", async () => {
     assert.equal(typeof streakRive.ensureRiveRuntime, "function");
     let loadListener;

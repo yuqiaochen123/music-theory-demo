@@ -2,6 +2,7 @@
 const STREAK_FIRE_SOURCE = "assets/rive/dynamic-streak-fire.riv";
 const RIVE_RUNTIME_SOURCE = "vendor/rive-2.39.2.js";
 const RIVE_WASM_SOURCE = "vendor/rive-2.39.2.wasm";
+const RIVE_RUNTIME_PROMISE = Symbol.for("listeningDesk.riveRuntimePromise");
 
 export function ensureRiveRuntime({
   documentObject = globalThis.document,
@@ -19,16 +20,28 @@ export function ensureRiveRuntime({
 
   const existingScript = documentObject.querySelector("script[data-rive-runtime]");
   const script = existingScript ?? documentObject.createElement("script");
+  if (script.dataset.riveRuntimeState === "failed") return script[RIVE_RUNTIME_PROMISE] ?? Promise.resolve(null);
+  if (script.dataset.riveRuntimeState === "loaded") return script[RIVE_RUNTIME_PROMISE] ?? Promise.resolve(getRuntime());
+  if (script[RIVE_RUNTIME_PROMISE]) return script[RIVE_RUNTIME_PROMISE];
   if (!existingScript) {
     script.src = RIVE_RUNTIME_SOURCE;
     script.dataset.riveRuntime = "true";
   }
+  script.dataset.riveRuntimeState = "loading";
 
-  return new Promise((resolve) => {
-    script.addEventListener("load", () => resolve(getRuntime()), { once: true });
-    script.addEventListener("error", () => resolve(null), { once: true });
+  const runtimePromise = new Promise((resolve) => {
+    script.addEventListener("load", () => {
+      script.dataset.riveRuntimeState = "loaded";
+      resolve(getRuntime());
+    }, { once: true });
+    script.addEventListener("error", () => {
+      script.dataset.riveRuntimeState = "failed";
+      resolve(null);
+    }, { once: true });
     if (!existingScript) documentObject.head.append(script);
   });
+  script[RIVE_RUNTIME_PROMISE] = runtimePromise;
+  return runtimePromise;
 }
 
 export async function mountDailyStreak(element, streak, {

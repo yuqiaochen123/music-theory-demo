@@ -1,17 +1,5 @@
-import { isNeutralBackdropPixel, nextNotebookDialogueIndex, NOTEBOOK_DIALOGUES } from "./daily-practice-ui.js?v=20260824-compact2";
-
-function ensureRiveRuntime() {
-  if (window.rive?.Rive) return Promise.resolve();
-  const existing = document.querySelector("script[data-rive-runtime]");
-  if (existing) return new Promise(resolve => existing.addEventListener("load", resolve, { once: true }));
-  return new Promise(resolve => {
-    const script = document.createElement("script");
-    script.src = "vendor/rive-2.39.2.js";
-    script.dataset.riveRuntime = "true";
-    script.onload = script.onerror = resolve;
-    document.head.append(script);
-  });
-}
+import { isNeutralBackdropPixel, nextNotebookDialogueIndex, NOTEBOOK_DIALOGUES } from "./daily-practice-ui.js";
+import { ensureRiveRuntime } from "./daily-streak-rive.js";
 
 function copyWithoutBackdrop(source, output) {
   const context = output.getContext("2d", { willReadFrequently: true });

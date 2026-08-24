@@ -89,12 +89,13 @@ describe("daily practice persistence", () => {
     assert.deepEqual(challenge.completed_exercise_ids, [exerciseId]);
   });
 
-  it("loads only completed challenge dates for the selected grade", async () => {
+  it("loads only the current learner's completed challenge dates for the selected grade", async () => {
     const { client, store } = makeStore();
     client.tables.daily_challenges.push(
       { id: "one", student_id: "student-1", grade: 5, challenge_date: "2026-08-24", completed_at: "2026-08-24T12:00:00Z" },
       { id: "two", student_id: "student-1", grade: 5, challenge_date: "2026-08-25", completed_at: null },
       { id: "three", student_id: "student-1", grade: 4, challenge_date: "2026-08-23", completed_at: "2026-08-23T12:00:00Z" },
+      { id: "four", student_id: "student-2", grade: 5, challenge_date: "2026-08-22", completed_at: "2026-08-22T12:00:00Z" },
     );
     assert.deepEqual(await store.loadCompletedChallengeDates({ grade: 5 }), ["2026-08-24"]);
   });

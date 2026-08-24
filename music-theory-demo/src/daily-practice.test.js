@@ -48,6 +48,13 @@ describe("daily practice domain", () => {
     }), 3);
   });
 
+  it("counts calendar days across the spring daylight-saving transition", () => {
+    assert.equal(calculateDailyStreak({
+      completedDates: ["2026-03-07", "2026-03-08", "2026-03-09"],
+      today: "2026-03-09",
+    }), 3);
+  });
+
   it("flattens a validated registry with stable topic metadata", () => {
     const result = flattenExerciseBank({
       rhythm: { name: "Rhythm", exercises: [{ id: "r1", answer: "3" }] },

@@ -38,6 +38,7 @@ export function createDailyPracticeStore({ client = null, progressStore = defaul
   async function loadCompletedChallengeDates({ grade = 5 } = {}) {
     const studentId = await progressStore.initializeStudent();
     const db = await getClient();
+    // 从数据库读：只读取当前学生当前年级已完成的每日挑战日期，用于派生连续练习天数。
     const { data, error } = await db.from("daily_challenges")
       .select("challenge_date")
       .eq("student_id", studentId)

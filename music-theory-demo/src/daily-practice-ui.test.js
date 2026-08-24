@@ -23,6 +23,55 @@ const registry = {
   intervals: { name: "Intervals", exercises: [{ id: "i1", prompt: "Name the interval" }] },
 };
 
+function summaryEnvironment(events = []) {
+  const summary = {
+    innerHTML: "",
+    querySelector(selector) {
+      assert.equal(selector, "[data-daily-streak]");
+      return { kind: "streak-slot" };
+    },
+  };
+  const roots = new Map([["[data-daily-practice-summary]", summary]]);
+  const lifecycleListeners = new Map();
+  const documentObject = {
+    querySelector(selector) { return roots.get(selector) ?? null; },
+  };
+  const windowObject = {
+    ListeningDeskPractice: registry,
+    location: { search: "" },
+    addEventListener(type, listener) {
+      lifecycleListeners.set(type, listener);
+    },
+    removeEventListener(type, listener) {
+      if (lifecycleListeners.get(type) === listener) lifecycleListeners.delete(type);
+    },
+  };
+  let challengeCalls = 0;
+  let mountCalls = 0;
+  const store = {
+    async getOrCreateChallenge() { challengeCalls += 1; return challenge; },
+    async loadNotebook() { return []; },
+    async loadCompletedChallengeDates() { return ["2026-08-24"]; },
+  };
+  const mountStreak = async () => {
+    mountCalls += 1;
+    const id = mountCalls;
+    events.push(`mount-${id}`);
+    return { cleanup() { events.push(`cleanup-${id}`); } };
+  };
+  return {
+    documentObject,
+    events,
+    lifecycleListeners,
+    mountStreak,
+    store,
+    summary,
+    windowObject,
+    get challengeCalls() { return challengeCalls; },
+    get mountCalls() { return mountCalls; },
+  };
+}
+
 describe("daily practice UI", () => {
   it("renders signed-out practice as a compact inline strip", () => {
     const html = summaryMarkup({ signedOut: true });
@@ -71,6 +120,56 @@ describe("daily practice UI", () => {
     });
 
     assert.deepEqual(result, { challenge, reviewCount: 2, streak: 1 });
+  });
+
+  it("bootstraps once when the module is evaluated under different query URLs", async () => {
+    const suffix = `${Date.now()}-${process.pid}`;
+    const firstModule = await import(`./daily-practice-ui.js?bootstrap-first-${suffix}`);
+    const secondModule = await import(`./daily-practice-ui.js?bootstrap-second-${suffix}`);
+    const environment = summaryEnvironment();
+    const options = {
+      documentObject: environment.documentObject,
+      windowObject: environment.windowObject,
+      store: environment.store,
+      registry,
+      mountStreak: environment.mountStreak,
+    };
+
+    assert.equal(typeof firstModule.bootstrapDailyPractice, "function");
+    const first = firstModule.bootstrapDailyPractice(options);
+    const second = secondModule.bootstrapDailyPractice(options);
+    await first.ready;
+
+    assert.equal(second, first);
+    assert.equal(environment.challengeCalls, 1);
+    assert.equal(environment.mountCalls, 1);
+    assert.equal(environment.lifecycleListeners.size, 1);
+  });
+
+  it("cleans the active streak before remount and on page teardown", async () => {
+    const environment = summaryEnvironment();
+    const options = {
+      documentObject: environment.documentObject,
+      windowObject: environment.windowObject,
+      store: environment.store,
+      registry,
+      mountStreak: environment.mountStreak,
+    };
+    const first = dailyUi.bootstrapDailyPractice(options);
+    await first.ready;
+
+    await dailyUi.mountSummary(environment.summary, {
+      documentObject: environment.documentObject,
+      store: environment.store,
+      registry,
+      mountStreak: environment.mountStreak,
+    });
+
+    assert.deepEqual(environment.events, ["mount-1", "cleanup-1", "mount-2"]);
+    environment.lifecycleListeners.get("pagehide")();
+    assert.deepEqual(environment.events, ["mount-1", "cleanup-1", "mount-2", "cleanup-2"]);
+    first.cleanup();
+    assert.deepEqual(environment.events, ["mount-1", "cleanup-1", "mount-2", "cleanup-2"]);
   });
 
   it("keeps the Grade 5 daily shortcut visually small and mobile-safe", () => {
@@ -151,16 +250,10 @@ describe("daily practice UI", () => {
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
     assert.match(grade, /src\/daily-practice\.css\?v=20260825-streak1/);
-    assert.match(grade, /src\/daily-practice-ui\.js\?v=20260825-streak1/);
+    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-streak2/);
+    assert.doesNotMatch(grade, /<script[^>]+src="src\/daily-practice-ui\.js/);
     assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
     for (const page of [daily, notebook]) assert.match(page, /src\/daily-practice\.css\?v=20260823-daily1/);
-  });
-
-  it("loads, calculates, and mounts the Grade 5 daily streak", () => {
-    const source = readFileSync(new URL("./daily-practice-ui.js", import.meta.url), "utf8");
-    assert.match(source, /loadCompletedChallengeDates\(\{ grade: 5 \}\)/);
-    assert.match(source, /calculateDailyStreak\(\{ completedDates, today: dailyDate\(\) \}\)/);
-    assert.match(source, /mountDailyStreak\(root\.querySelector\("\[data-daily-streak\]"\), streak\)/);
   });
 
   it("floats the Grade 5 daily entry at the bottom without covering learning content", () => {
@@ -195,7 +288,7 @@ describe("daily practice UI", () => {
     const grade = readFileSync(new URL("../grade-4.html", import.meta.url), "utf8");
     assert.match(grade, /src\/daily-practice\.css\?v=20260824-compact3/);
     assert.match(grade, /data-notebook-shortcut/);
-    assert.match(grade, /src\/daily-practice-ui\.js\?v=20260824-compact2/);
+    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-streak2/);
     assert.match(grade, /src\/notebook-shortcut\.js\?v=20260824-compact2/);
   });
 });
