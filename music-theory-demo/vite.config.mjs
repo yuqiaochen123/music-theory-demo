@@ -17,6 +17,8 @@ export default defineConfig({
         login: path.resolve(root, "login.html"),
         topic: path.resolve(root, "topic.html"),
         practice: path.resolve(root, "practice.html"),
+        "daily-challenge": path.resolve(root, "daily-challenge.html"),
+        "mistake-notebook": path.resolve(root, "mistake-notebook.html"),
         "vexflow-cadence-proof": path.resolve(root, "vexflow-cadence-proof.html"),
       },
     },

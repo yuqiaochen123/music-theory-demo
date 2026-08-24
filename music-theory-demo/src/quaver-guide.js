@@ -147,6 +147,14 @@ function startTransparentRiveRender(sourceCanvas, displayCanvas) {
 
 export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   if (!root) return { emit() {}, destroy() {} };
+  const restore = document.createElement('button');
+  restore.type = 'button';
+  restore.className = 'quaver-restore';
+  restore.setAttribute('data-quaver-restore', '');
+  restore.setAttribute('aria-label', 'Show Quaver');
+  restore.textContent = '♪ Show Quaver';
+  restore.hidden = true;
+  document.body.append(restore);
   const canvas = root.querySelector('[data-quaver-canvas]');
   canvas.dataset.quaverSource = '';
   const displayCanvas = document.createElement('canvas');
@@ -237,9 +245,17 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   };
 
   minimize?.addEventListener('click', () => {
-    preferences.minimized = !preferences.minimized;
-    reflectPreferences();
-    savePreferences(storage, preferences);
+    root.hidden = true;
+    restore.hidden = false;
+    restore.focus();
+  });
+  restore.addEventListener('click', () => {
+    restore.hidden = true;
+    root.hidden = false;
+    root.dataset.mood = 'welcome';
+    showMessage('I’m back—let’s keep going!', 4200, true);
+    schedulePosition();
+    minimize?.focus();
   });
   chatToggle?.addEventListener('click', () => {
     if (!chatForm) return;
@@ -397,6 +413,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
       document.removeEventListener('pointermove', onPointerMove);
       stopTransparentRender?.();
       riveInstance?.cleanup?.();
+      restore.remove();
     },
   };
 }

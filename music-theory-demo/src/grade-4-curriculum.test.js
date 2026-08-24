@@ -56,7 +56,7 @@ test('Grade 4 lesson registry is distinct, complete and notation-led',()=>{
 test('Grade 4 practice and shared pages are grade-aware',()=>{
   const practice=loadRegistry('src/grade-4-practice-data.js','ListeningDeskGrade4Practice',['src/grade-4-topic-data.js']);
   assert.equal(Object.keys(practice).length,14);
-  for(const [id,topic] of Object.entries(practice)) assert.equal(topic.exercises.length,12,`${id} needs twelve exercises`);
+  for(const [id,topic] of Object.entries(practice)) assert.equal(topic.exercises.length,13,`${id} needs thirteen exercises`);
   assert.match(read('topic.html'),/ListeningDeskGrade4Topics/);
   assert.match(read('practice.html'),/ListeningDeskGrade4Practice/);
   assert.match(read('practice.html'),/recordAnswer\(\{grade/);

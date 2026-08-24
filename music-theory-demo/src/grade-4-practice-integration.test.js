@@ -56,6 +56,10 @@ test('rhythm questions expose separate metronome and duration-aware playback con
   assert.match(page,/Play rhythm \+ metronome/);
 });
 
+test('a question can suppress playback when audio would reveal the answer',()=>{
+  assert.match(page,/question\.disablePlayback===true/);
+});
+
 test('full-rhythm tones sustain evenly and cut off at the written boundary',()=>{
   assert.match(page,/strictCutoff=false/);
   assert.match(page,/gain\.gain\.setValueAtTime\(volume,end-\.006\)/);

@@ -19,7 +19,9 @@
   <link rel="stylesheet" href="src/redesign.css?v=20260819-visible1">
   <link rel="stylesheet" href="src/horizontal-flow.css?v=20260814-flow7">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
-  <link rel="stylesheet" href="src/quaver-guide.css?v=20260822-tutor12">
+  <link rel="stylesheet" href="src/daily-practice.css?v=20260824-compact3">
+  <link rel="stylesheet" href="src/quaver-guide.css?v=20260824-mobile1">
+  <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
 </head>
 <body class="grade-five-body">
   <div class="page-transition-curtain" aria-hidden="true" hidden></div>
@@ -30,7 +32,7 @@
     <a class="mastery-callout" href="practice.html?grade=4&amp;mode=mastery"><span>Grade 4 mastery check · 28 untimed questions</span><span class="mastery-callout__action">Start →</span></a>
     <section class="grade-dashboard" aria-labelledby="grade-progress-heading"><div class="grade-dashboard-head"><div><p class="eyebrow">Your learning history</p><h2 id="grade-progress-heading">Grade 4 progress</h2></div><p class="progress-sync" data-progress-sync aria-live="polite">Loading saved progress…</p></div><div data-grade-dashboard><p class="empty-activity">Loading your saved lessons and exercise results…</p></div></section>
     <div class="curriculum">
-      <section class="curriculum-section"><div class="section-head"><h2>Rhythm and notation</h2><span>Modules 01–03</span></div><div class="category-progress" data-category-progress role="img" aria-label="Rhythm and notation progress: 0%"><strong>0%</strong></div><div class="topic-grid">
+      <section class="curriculum-section"><div class="section-head"><h2>Rhythm and notation</h2><span>Modules 01–03</span></div><div data-notebook-shortcut></div><div class="category-progress" data-category-progress role="img" aria-label="Rhythm and notation progress: 0%"><strong>0%</strong></div><div class="topic-grid">
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=rhythm-note-values"><span class="module-number">01</span><span class="status">Available</span><h3>Rhythm and note values</h3><p>Breves, double dots, rests and duplets.</p></a>
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=time-signatures"><span class="module-number">02</span><span class="status">Available</span><h3>Time signatures and grouping</h3><p>Simple and compound metre with accurate grouping.</p></a>
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=clefs"><span class="module-number">03</span><span class="status">Available</span><h3>Alto clef and pitch comparison</h3><p>Compare the same sounding pitch in treble, alto and bass.</p></a>
@@ -56,9 +58,12 @@
   </main>
   <footer hidden>Grade 4 · 14 of 14 topics available</footer>
   <script type="module" src="src/auth-nav.js"></script>
+  <script type="module" src="src/daily-practice-ui.js?v=20260824-compact2"></script>
+  <script type="module" src="src/notebook-shortcut.js?v=20260824-compact2"></script>
+  <script type="module" src="src/notebook-overlay.js?v=20260824-overlay1"></script>
   <!-- 先加载固定版本的 Supabase 浏览器客户端，确保进度模块能恢复登录会话。 -->
   <script src="vendor/supabase-2.111.0.js"></script>
   <script type="module">import{loadGradeDashboard,renderCachedCategoryProgress}from'./src/progress-ui.js?v=20260806-progress-animation2';renderCachedCategoryProgress();loadGradeDashboard(4);</script>
-  <script src="src/interface.js?v=20260806-ui5"></script><script type="module" src="src/motion.js?v=20260819-visible1"></script><script type="module" src="src/quaver-guide.js?v=20260822-tutor12"></script>
+  <script src="src/interface.js?v=20260806-ui5"></script><script type="module" src="src/motion.js?v=20260819-visible1"></script><script type="module" src="src/quaver-guide.js?v=20260824-expand1"></script>
 </body>
 </html>

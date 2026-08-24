@@ -8,7 +8,7 @@ const context = { window: { VexFlow: {} } };
 vm.createContext(context);
 vm.runInContext(source, context);
 
-const { accidentalFor, responsiveWidth } = context.window.ListeningDeskNotation;
+const { accidentalFor, accidentalForKey, responsiveWidth } = context.window.ListeningDeskNotation;
 
 describe("notation accidental parsing", () => {
   it("does not confuse the note B with the flat accidental", () => {
@@ -20,6 +20,21 @@ describe("notation accidental parsing", () => {
     assert.equal(accidentalFor("eb/4"), "b");
     assert.equal(accidentalFor("f#/4"), "#");
     assert.equal(accidentalFor("c/4"), null);
+  });
+
+  it("omits accidentals already supplied by the key signature", () => {
+    assert.equal(accidentalForKey("f#/4", "G"), null);
+    assert.equal(accidentalForKey("c#/5", "D"), null);
+    assert.equal(accidentalForKey("bb/4", "F"), null);
+    assert.equal(accidentalForKey("eb/5", "Bb"), null);
+  });
+
+  it("prints only chromatic changes and cancellations beyond the key signature", () => {
+    assert.equal(accidentalForKey("g#/4", "A"), null);
+    assert.equal(accidentalForKey("g##/4", "A"), "##");
+    assert.equal(accidentalForKey("f/4", "G"), "n");
+    assert.equal(accidentalForKey("f##/5", "G#m"), "##");
+    assert.equal(accidentalForKey("e#/5", "G#m"), "#");
   });
 });
 

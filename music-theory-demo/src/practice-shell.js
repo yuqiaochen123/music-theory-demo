@@ -1,4 +1,11 @@
 (function installPracticeShell(global) {
+  function questionsFor(labels, exerciseId) {
+    const exercises = labels?.exercises ?? [];
+    if (!exerciseId) return exercises;
+    const requested = exercises.find(exercise => String(exercise.id) === String(exerciseId));
+    return requested ? [requested] : exercises;
+  }
+
   function bootstrap({ document, search = global.location?.search ?? "" } = {}) {
     const params = new URLSearchParams(search);
     const grade = params.get("grade") === "4" ? 4 : 5;
@@ -34,5 +41,5 @@
     }
     return topic;
   }
-  global.ListeningDeskPracticeShell = { bootstrap };
+  global.ListeningDeskPracticeShell = { bootstrap, questionsFor };
 })(window);

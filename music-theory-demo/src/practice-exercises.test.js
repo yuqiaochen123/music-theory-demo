@@ -24,10 +24,10 @@ describe("interval practice exercise bank", () => {
     const spellings = Array.from(intervals, (exercise) => exercise.notes.join(","));
     assert.equal(spellings.length, 10);
     assert.equal(new Set(spellings).size, 10);
-    assert.match(practiceSource, /notes:\['g\/3','bb\/3'\],midis:\[55,58\]/);
-    assert.match(practiceSource, /notes:\['d\/4','f#\/4'\],midis:\[62,66\]/);
-    assert.match(practiceSource, /notes:\['e\/4','g#\/4'\],midis:\[64,68\]/);
-    assert.match(practiceSource, /notes:\['f\/4','ab\/4'\],midis:\[65,68\]/);
+    assert.match(practiceSource, /notes:\['c\/4','db\/4'\],midis:\[60,61\]/);
+    assert.match(practiceSource, /notes:\['c\/4','f#\/4'\],midis:\[60,66\]/);
+    assert.match(practiceSource, /notes:\['e\/4','c\/5'\],midis:\[64,72\]/);
+    assert.match(practiceSource, /notes:\['d\/4','d\/5'\],midis:\[62,74\]/);
   });
 
   it("matches every written staff pitch to its playback MIDI pitch", () => {
@@ -39,7 +39,8 @@ describe("interval practice exercise bank", () => {
         Array.from(exercise.midis),
         `${exercise.notes.join("–")} does not match ${exercise.midis.join("–")}`,
       );
-      assert.equal(exercise.midis[1] - exercise.midis[0], exercise.answer === "major" ? 4 : 3);
+      const semitones = {"Minor second":1,"Major second":2,"Minor third":3,"Major third":4,"Perfect fourth":5,"Augmented fourth":6,"Perfect fifth":7,"Minor sixth":8,"Major seventh":11,Octave:12};
+      assert.equal(exercise.midis[1] - exercise.midis[0], semitones[exercise.answer]);
     }
   });
 });

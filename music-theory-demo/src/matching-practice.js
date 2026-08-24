@@ -19,9 +19,15 @@ export function checkMatches(state, exercise) {
     : { correct: false, code: "incorrect", message: "Some matches need another look. You can rearrange them and check again." };
 }
 
-export function mountMatchingPractice({ container, exercise, notation, onResult }) {
+export function playMatchingTarget(target, play) {
+  if (!target?.midis?.length || typeof play !== "function") return false;
+  play(target.midis, target.playbackDurations);
+  return true;
+}
+
+export function mountMatchingPractice({ container, exercise, notation, play, onResult }) {
   let state = createMatchingState(exercise);
-  container.innerHTML = `<div class="matching-practice"><p class="matching-instruction">Drag a term onto each clue, or select a term and then select its clue.</p><div class="matching-labels">${exercise.labels.map(label => `<button type="button" draggable="true" data-match-label="${label.id}" aria-pressed="false">${label.text}</button>`).join("")}</div><div class="matching-targets">${exercise.targets.map(target => `<button type="button" data-match-target="${target.id}"><span class="matching-clue">${target.label || "Music clue"}</span><span data-assignment>Choose a term</span><span class="matching-notation" data-target-notation="${target.id}"></span></button>`).join("")}</div><button type="button" class="matching-check" data-check-matches>Check matches</button><p class="matching-status" data-matching-status aria-live="polite"></p></div>`;
+  container.innerHTML = `<div class="matching-practice"><p class="matching-instruction">Drag a term onto each clue, or select a term and then select its clue.</p><div class="matching-labels">${exercise.labels.map(label => `<button type="button" draggable="true" data-match-label="${label.id}" aria-pressed="false">${label.text}</button>`).join("")}</div><div class="matching-targets">${exercise.targets.map(target => `<div class="matching-target-card"><button type="button" data-match-target="${target.id}"><span class="matching-clue">${target.label || "Music clue"}</span><span data-assignment>Choose a term</span><span class="matching-notation" data-target-notation="${target.id}"></span></button>${target.midis?.length ? `<button type="button" class="matching-play" data-play-match="${target.id}" aria-label="Hear ${target.label || "music clue"}">▶ Hear excerpt</button>` : ""}</div>`).join("")}</div><button type="button" class="matching-check" data-check-matches>Check matches</button><p class="matching-status" data-matching-status aria-live="polite"></p></div>`;
   const find = selector => container.querySelector(selector);
 
   exercise.targets.forEach(target => {
@@ -33,12 +39,15 @@ export function mountMatchingPractice({ container, exercise, notation, onResult 
   function render() {
     container.querySelectorAll("[data-match-label]").forEach(button => {
       button.setAttribute("aria-pressed", String(state.selectedLabel === button.dataset.matchLabel));
-      button.dataset.assigned = String(Object.values(state.assignments).includes(button.dataset.matchLabel));
+      const assigned = Object.values(state.assignments).includes(button.dataset.matchLabel);
+      button.dataset.assigned = String(assigned);
+      const label = exercise.labels.find(item => item.id === button.dataset.matchLabel);
+      button.setAttribute("aria-label", assigned ? `${label.text}, placed` : label.text);
     });
     container.querySelectorAll("[data-match-target]").forEach(button => {
       const labelId = state.assignments[button.dataset.matchTarget];
       const label = exercise.labels.find(item => item.id === labelId);
-      button.querySelector("[data-assignment]").textContent = label?.text || "Choose a term";
+      button.querySelector("[data-assignment]").textContent = label ? label.text : "Choose a term";
       button.dataset.filled = String(Boolean(label));
     });
   }
@@ -61,6 +70,9 @@ export function mountMatchingPractice({ container, exercise, notation, onResult 
     button.addEventListener("click", () => chooseTarget(button.dataset.matchTarget));
     button.addEventListener("dragover", event => event.preventDefault());
     button.addEventListener("drop", event => { event.preventDefault(); chooseTarget(button.dataset.matchTarget, event.dataTransfer.getData("text/plain")); });
+  });
+  container.querySelectorAll("[data-play-match]").forEach(button => {
+    button.addEventListener("click", () => playMatchingTarget(exercise.targets.find(target => target.id === button.dataset.playMatch), play));
   });
   find("[data-check-matches]").addEventListener("click", () => {
     const result = checkMatches(state, exercise);

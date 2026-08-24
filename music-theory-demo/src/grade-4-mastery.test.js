@@ -43,6 +43,20 @@ test('uses a deterministic seed without mutating source exercises',()=>{
   assert.equal(JSON.stringify(registry),sourceBefore);
 });
 
+test('mastery questions never ask learners to infer the syllabus boundary',()=>{
+  const {registry,buildGrade4MasteryAssessment}=loadMastery();
+  const metaWording=/grade\s*4|curriculum|syllabus|requirement|notation sample|application sample|(?:first|second|third|fourth) excerpt/i;
+  for(let seed=1;seed<=20;seed+=1){
+    const assessment=buildGrade4MasteryAssessment(registry,{seed});
+    for(const exercise of assessment.exercises){
+      assert.doesNotMatch(exercise.prompt,metaWording,`${exercise.id} has syllabus-facing prompt wording`);
+      for(const choice of exercise.choices||[]){
+        assert.doesNotMatch(String(choice),metaWording,`${exercise.id} has a syllabus-facing answer choice`);
+      }
+    }
+  }
+});
+
 test('rejects incomplete or type-repetitive Grade 4 registries',()=>{
   const {registry,buildGrade4MasteryAssessment}=loadMastery();
   const missing={...registry};

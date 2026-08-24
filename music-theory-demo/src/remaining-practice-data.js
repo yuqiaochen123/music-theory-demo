@@ -77,7 +77,12 @@
   const termsMatch=matching('term-1','Match each direction to its performance meaning.',[{id:'allegro',text:'Allegro'},{id:'dim',text:'Diminuendo'},{id:'ff',text:'Fortissimo'},{id:'rit',text:'Ritardando'}],[{id:'fast',label:'Fast and lively'},{id:'softer',label:'Gradually softer'},{id:'loud',label:'Very loud'},{id:'slower',label:'Gradually slower'}],{fast:'allegro',softer:'dim',loud:'ff',slower:'rit'});
   const musicalTerms=[termsMatch,q('term-2','What does cantabile mean?','In a singing style',['Detached','In a singing style','Very fast'],'cantabile','Shape a lyrical line.'),q('term-3','What does staccato request?','Short and detached',['Smooth and connected','Short and detached','Louder'],'· · ·','Articulation changes note length.'),q('term-4','What does legato request?','Smoothly connected',['Smoothly connected','Strongly accented','Slower'],'⌒','Connect the phrase.'),q('term-5','What does a tempo mean?','Return to the previous tempo',['Become faster','Return to the previous tempo','Pause'],'a tempo','Cancel a temporary tempo change.'),q('term-6','What does marcato mean?','Marked and emphasized',['Fading away','Marked and emphasized','Sweetly'],'marcato','Give notes clear emphasis.'),q('term-7','What does dolce mean?','Sweetly',['Angrily','Sweetly','Very quickly'],'dolce','Character direction.'),q('term-8','What does crescendo mean?','Gradually louder',['Gradually louder','Immediately loud','Gradually faster'],'cresc.','Dynamic change.'),q('term-9','What does adagio mean?','Slow',['Fast','Slow','Detached'],'adagio','Tempo direction.'),q('term-10','What does pianissimo mean?','Very soft',['Very soft','Moderately loud','Very loud'],'pp','Dynamic level.')];
 
-  const ornamentMatch=matching('orn-1','Match each ornament symbol to its name.',[{id:'trill',text:'Trill'},{id:'turn',text:'Turn'},{id:'mordent',text:'Mordent'},{id:'acciaccatura',text:'Acciaccatura'}],[{id:'tr',label:'tr'},{id:'turn-symbol',label:'∽'},{id:'mordent-symbol',label:'𝆝'},{id:'slash-note',label:'Slashed grace note'}],{tr:'trill','turn-symbol':'turn','mordent-symbol':'mordent','slash-note':'acciaccatura'});
+  const ornamentMatch=matching('orn-1','Match each ornament symbol and realization to its name.',[{id:'trill',text:'Trill'},{id:'turn',text:'Turn'},{id:'mordent',text:'Mordent'},{id:'acciaccatura',text:'Acciaccatura'}],[
+    {id:'tr',label:'Excerpt 1',notation:{type:'ornament',kind:'trill',principal:'d/5'},midis:[74,76,74,76,74,76,74,76,74],playbackDurations:[.1,.1,.1,.1,.1,.1,.1,.1,.28]},
+    {id:'turn-symbol',label:'Excerpt 2',notation:{type:'ornament',kind:'turn',principal:'d/5'},midis:[76,74,73,74],playbackDurations:[.15,.15,.15,.3]},
+    {id:'mordent-symbol',label:'Excerpt 3',notation:{type:'ornament',kind:'upper-mordent',principal:'e/5'},midis:[76,77,76],playbackDurations:[.11,.11,.34]},
+    {id:'slash-note',label:'Excerpt 4',notation:{type:'ornament',kind:'acciaccatura',principal:'e/5',grace:'d/5'},midis:[74,76],playbackDurations:[.08,.52]}
+  ],{tr:'trill','turn-symbol':'turn','mordent-symbol':'mordent','slash-note':'acciaccatura'});
   const ornaments=[ornamentMatch,q('orn-2','Which grace note leans expressively on the principal note?','Appoggiatura',['Appoggiatura','Acciaccatura','Turn'],'♫ → ♩','It takes time from the principal note.'),q('orn-3','A mordent makes…','A rapid single turn',['Repeated alternation','A rapid single turn','A long pause'],'𝆝','Principal and neighbouring note.'),q('orn-4','A turn circles around…','The principal note',['The tonic only','The principal note','The bass note'],'∽','Upper, principal, lower, principal.'),q('orn-5','Auxiliary notes follow the…','Key signature and accidentals',['Tempo only','Key signature and accidentals','Dynamic marking'],'♯ ♭','Pitch spelling still applies.'),q('orn-6','The structural note being decorated is the…','Principal note',['Passing note','Principal note','Pedal note'],'●','The ornament resolves around it.'),q('orn-7','Which ornament usually has the symbol tr?','Trill',['Turn','Trill','Mordent'],'tr','Standard abbreviation.'),q('orn-8','Which grace note usually has a slash?','Acciaccatura',['Acciaccatura','Appoggiatura','Trill'],'♪̸','The slash indicates crushed delivery.'),q('orn-9','Ornaments mainly add…','Decoration and expression',['A new key signature','Decoration and expression','A new time signature'],'✨','They elaborate existing notes.'),q('orn-10','Which ornament repeatedly alternates with the upper note?','Trill',['Trill','Mordent','Turn'],'tr','Rapid alternation.')];
 
   const familyMatch=matching('vi-1','Match each performer to its family or range.',[{id:'violin',text:'Violin'},{id:'oboe',text:'Oboe'},{id:'trumpet',text:'Trumpet'},{id:'soprano',text:'Soprano'}],[{id:'strings',label:'Strings'},{id:'woodwind',label:'Woodwind'},{id:'brass',label:'Brass'},{id:'highest',label:'Highest choir voice'}],{strings:'violin',woodwind:'oboe',brass:'trumpet',highest:'soprano'});
@@ -86,7 +91,7 @@
   const observationMatch=matching('mo-1','Match each musical pattern to the analytical term.',[{id:'motif',text:'Motif'},{id:'sequence',text:'Sequence'},{id:'pedal',text:'Pedal'},{id:'imitation',text:'Imitation'}],[{id:'short',label:'Short recurring idea'},{id:'new-pitch',label:'Pattern repeated at a new pitch'},{id:'held-bass',label:'Repeated bass under changing harmony'},{id:'passed',label:'Idea passed to another part'}],{short:'motif','new-pitch':'sequence','held-bass':'pedal',passed:'imitation'});
   const observation=[observationMatch,q('mo-2','One melody with chordal support is…','Melody and accompaniment',['Monophony','Melody and accompaniment','Imitation'],'line + chords','One line remains primary.'),q('mo-3','Several independent melodic lines create…','Polyphonic texture',['Monophonic texture','Polyphonic texture','A key signature'],'lines ↕','Lines have separate identities.'),q('mo-4','A phrase ending V–I uses a…','Perfect cadence',['Perfect cadence','Imperfect cadence','Sequence'],'V → I','Dominant resolves to tonic.'),q('mo-5','Two performers moving in the same rhythm create…','Homorhythmic texture',['Imitation','Homorhythmic texture','Sequence'],'♩ ♩ / ♩ ♩','Rhythms align vertically.'),q('mo-6','Moving to a new key is called…','Modulation',['Transposition','Modulation','Inversion'],'Key A → Key B','The tonal centre changes.'),q('mo-7','The strongest evidence for analysis comes from…','Features visible in the score',['Personal preference','Features visible in the score','The page number'],'evidence','Name the exact musical feature.'),q('mo-8','One unaccompanied melodic line has which texture?','Monophonic',['Monophonic','Polyphonic','Homorhythmic'],'single line','Only one melodic line sounds.'),q('mo-9','A melody passed between parts is…','Imitation',['Imitation','Staccato','Modulation'],'a → part 2','Another part copies the idea.'),q('mo-10','A pattern repeated at a new pitch level is a…','Sequence',['Sequence','Tie','Pedal'],'a → a↑','Shape repeats after transposition.')];
 
-  window.ListeningDeskPractice=Object.freeze({...window.ListeningDeskPractice,
+  const combinedPractice={...window.ListeningDeskPractice,
     'rhythm-note-values':bank('Rhythm and note values','rhythm','Read, hear and calculate authentic notation.',rnv),
     clefs:bank('Clefs and note reading','clef','Read pitches from real treble, bass, alto and tenor staves.',clefs),
     'clef-transposition':bank('Clef and octave transposition','transposition','Write answers directly on the destination staff.',clefTransposition),
@@ -96,5 +101,46 @@
     ornaments:bank('Ornaments','ornament','Match ornament symbols and understand their performance.',ornaments),
     'voices-instruments':bank('Voices and instruments','performer','Classify ranges, families, clefs and sound production.',voices),
     'musical-observation':bank('General musical observation','observation','Match and identify structural musical evidence.',observation)
+  };
+
+  const derivedNotation=(topicId,item)=>{
+    if(item.notation)return item.notation;
+    if(topicId==='intervals'&&item.notes)return {type:'interval',notes:item.notes};
+    if(topicId==='cadences'&&item.chords)return {type:'cadence',key:item.key,chords:item.chords};
+    if(topicId==='triads'&&item.notes)return {type:'triad',key:item.key,notes:item.notes,showAccidentals:!item.key};
+    if(topicId==='time-signatures'&&item.events)return {type:'rhythm',meter:item.meter,events:item.events,showTimeSignature:false};
+    if(['scales','scale-degrees'].includes(topicId)&&item.notes)return {type:'scale',notes:item.notes,descendingNotes:item.descendingNotes,key:item.key};
+    return null;
+  };
+  const varietyMatch=(topicId,practiceBank)=>{
+    const candidates=practiceBank.exercises.filter(item=>item.interaction!=='matching'&&item.interaction!=='notation-entry');
+    const unique=[];
+    for(const item of candidates){
+      if(unique.some(candidate=>candidate.answer===item.answer))continue;
+      const notation=derivedNotation(topicId,item);
+      const playbackMidis=item.midis||item.audio?.flat();
+      if((notation&&playbackMidis?.length)||item.concept)unique.push({...item,midis:playbackMidis,derivedNotation:notation});
+      if(unique.length===4)break;
+    }
+    const reversed=[...unique].reverse();
+    return matching(
+      `${topicId}-variety-match`,
+      unique.some(item=>item.derivedNotation)
+        ? 'Match each fresh score or listening excerpt to its musical answer.'
+        : 'Match each fresh musical clue to its most appropriate term.',
+      unique.map((item,index)=>({id:`variety-label-${index}`,text:item.answer})),
+      reversed.map((item,index)=>({
+        id:`variety-target-${index}`,
+        label:item.derivedNotation?`New excerpt ${index+1}`:item.concept.detail,
+        notation:item.derivedNotation,
+        midis:item.midis,
+        playbackDurations:item.playbackDurations
+      })),
+      Object.fromEntries(reversed.map((item,index)=>[`variety-target-${index}`,`variety-label-${unique.indexOf(item)}`]))
+    );
+  };
+  Object.entries(combinedPractice).forEach(([topicId,practiceBank])=>{
+    practiceBank.exercises.push(varietyMatch(topicId,practiceBank));
   });
+  window.ListeningDeskPractice=Object.freeze(combinedPractice);
 })();

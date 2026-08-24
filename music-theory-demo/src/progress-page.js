@@ -1,4 +1,5 @@
 import { progressStore } from './progress-store.js';
+import { dailyPracticeStore } from './daily-practice-store.js';
 
 const statusLabels = {
   not_started: 'Not started',
@@ -70,6 +71,9 @@ export async function recordAnswer({
   sourceTopicId,
   attemptNumber,
   isFirstAttempt,
+  exerciseType,
+  prompt,
+  challengeDate,
 }) {
   try {
     displaySync(syncElement, 'Saving answer…');
@@ -91,12 +95,30 @@ export async function recordAnswer({
       status: completed ? 'completed' : 'in_progress',
       progressPercent: Math.round((Number(exerciseNumber) / Number(totalExercises)) * 100),
     });
-    displaySync(syncElement, 'Answer and progress saved');
+    const enhanced = await recordDailyPracticeEnhancements({ grade, topicId: sourceTopicId ?? topicId, exerciseId, exerciseType, prompt, answerGiven, correctAnswer, isCorrect, challengeDate }, { syncElement });
+    if (enhanced) displaySync(syncElement, 'Answer and progress saved');
     return refreshed;
   } catch (error) {
     displaySync(syncElement, error?.code === 'AUTH_REQUIRED' ? 'Sign in to save answers and progress.' : 'This answer could not be saved. You can continue practising.', true);
     console.error(error);
     return null;
+  }
+}
+
+export async function recordDailyPracticeEnhancements(input, { store = dailyPracticeStore, syncElement } = {}) {
+  try {
+    await store.recordNotebookAnswer(input);
+    if (input.challengeDate) await store.recordDailyAnswer({
+      grade: input.grade,
+      date: input.challengeDate,
+      exerciseId: input.exerciseId,
+      isCorrect: input.isCorrect,
+    });
+    return true;
+  } catch (error) {
+    displaySync(syncElement, 'Answer saved. Review progress will sync later.', true);
+    console.error(error);
+    return false;
   }
 }
 

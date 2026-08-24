@@ -27,6 +27,22 @@ describe("new topic notation renderers",()=>{
     assert.equal(typeof notation.renderScale,"function");
   });
 
+  it("exports a dedicated renderer for written ornament signs and grace notes",()=>{
+    const notation=context.window.ListeningDeskNotation;
+    assert.equal(typeof notation.renderOrnament,"function");
+    const ornamentSource=source.slice(source.indexOf("function renderOrnament"),source.indexOf("function renderScale"));
+    assert.match(ornamentSource,/new VF\.Ornament/);
+    assert.match(ornamentSource,/new VF\.GraceNote/);
+    assert.match(ornamentSource,/new VF\.GraceNoteGroup/);
+    assert.match(ornamentSource,/"lower-mordent":\s*"mordentInverted"/);
+    assert.doesNotMatch(ornamentSource,/mordent_inverted/);
+    assert.match(ornamentSource,/stave\.setNoteStartX\(width \* 0\.28\)/);
+    assert.match(ornamentSource,/format\(\[voice\], Math\.min\(48, width \* 0\.18\)\)/);
+    assert.match(ornamentSource,/slash:\s*specification\.kind === "acciaccatura"/);
+    assert.match(ornamentSource,/new VF\.GraceNoteGroup\(\[graceNote\], specification\.kind === "appoggiatura"\)/);
+    assert.match(source,/specification\.type === "ornament"/);
+  });
+
   it("exports a clef-aware variable-duration melody renderer",()=>{
     const notation=context.window.ListeningDeskNotation;
     assert.equal(typeof notation.renderMelody,"function");
@@ -101,13 +117,21 @@ describe("new topic notation renderers",()=>{
     ),664);
   });
 
-  it("uses VexFlow voices, keyed staves and generated beams",()=>{
+  it("uses VexFlow voices, keyed staves and beams",()=>{
     assert.match(source,/VF\.StaveNote/);
     assert.match(source,/VF\.Voice/);
     assert.match(source,/VF\.Formatter/);
-    assert.match(source,/VF\.Beam\.generateBeams/);
+    assert.match(source,/new VF\.Beam/);
     assert.match(source,/addKeySignature/);
     assert.match(source,/addTimeSignature/);
+  });
+
+  it("uses VexFlow's simple sequential layout for scale notes",()=>{
+    const scaleSource=source.slice(source.indexOf("function renderScale"),source.indexOf("function renderKeySignature"));
+    assert.match(scaleSource,/staveNote\(\[key\],\s*specification\.showAccidentals\s*!==\s*false,\s*"q",\s*"treble",\s*specification\.key\)/);
+    assert.match(scaleSource,/VF\.Formatter\.SimpleFormat\(notes,/);
+    assert.match(scaleSource,/note\.setStave\(stave\)\.setContext\(context\)\.draw\(\)/);
+    assert.doesNotMatch(scaleSource,/new VF\.Voice/);
   });
 
   it("constructs rhythm beams before drawing notes so flags do not remain",()=>{
@@ -126,6 +150,13 @@ describe("new topic notation renderers",()=>{
     const rhythmSource=source.slice(source.indexOf("function renderRhythm"),source.indexOf("function renderScale"));
     assert.match(rhythmSource,/new VF\.Articulation\("a>"\)/);
     assert.match(rhythmSource,/event\.accent/);
+  });
+
+  it("defensively refuses to engrave articulations on rests",()=>{
+    const rhythmSource=source.slice(source.indexOf("function renderRhythm"),source.indexOf("function renderScale"));
+    assert.match(rhythmSource,/event\.accent\s*&&\s*!event\.rest/);
+    assert.match(rhythmSource,/event\.staccato\s*&&\s*!event\.rest/);
+    assert.match(rhythmSource,/event\.tieToNext\s*&&\s*!event\.rest/);
   });
 
   it("engraves rhythm rests, dots, ties and tuplets",()=>{
@@ -169,9 +200,10 @@ describe("new topic notation renderers",()=>{
     assert.ok(rhythmSource.indexOf("calculateOptimalStemDirection")<rhythmSource.indexOf("new VF.Beam"));
   });
 
-  it("creates scale beams before drawing the voice so quaver flags are suppressed",()=>{
-    const scaleSource=source.slice(source.indexOf("function renderScale"),source.indexOf("function render(element"));
-    assert.ok(scaleSource.indexOf("VF.Beam.generateBeams(notes)")<scaleSource.indexOf("voice.draw(context, stave)"));
+  it("draws scale notes individually without a fragile beamed voice",()=>{
+    const scaleSource=source.slice(source.indexOf("function renderScale"),source.indexOf("function renderKeySignature"));
+    assert.doesNotMatch(scaleSource,/VF\.Beam\.generateBeams\(notes\)/);
+    assert.doesNotMatch(scaleSource,/voice\.draw\(context, stave\)/);
   });
 
   it("renders separate ascent and descent staves for scales",()=>{
@@ -180,6 +212,13 @@ describe("new topic notation renderers",()=>{
     assert.match(scaleSource,/renderer\.resize\(width, singleDirection \? 170 : 320\)/);
     assert.match(scaleSource,/const ascendingY = singleDirection \? 20 : 26/);
     assert.match(scaleSource,/new VF\.Stave\(leftInset, 130, width - leftInset - 40\)/);
+  });
+
+  it("does not draw an empty second staff when no descending scale is supplied",()=>{
+    const scaleSource=source.slice(source.indexOf("function renderScale"),source.indexOf("function renderKeySignature"));
+    assert.match(scaleSource,/const hasDescending = Array\.isArray\(specification\.descendingNotes\) && specification\.descendingNotes\.length > 0/);
+    assert.match(scaleSource,/const singleDirection = specification\.singleDirection === true \|\| !hasDescending/);
+    assert.match(scaleSource,/const descendingNotes = hasDescending \? specification\.descendingNotes : \[\]/);
   });
 
   it("keeps scale notation free of overlapping technical-name annotations",()=>{

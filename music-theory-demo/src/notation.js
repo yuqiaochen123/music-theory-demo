@@ -11,11 +11,33 @@
     return match?.[1] || null;
   }
 
-  function staveNote(keys, showAccidentals, duration = "q", clef = "treble") {
+  const keySignatureCounts = {
+    C: 0, G: 1, D: 2, A: 3, E: 4, B: 5, "F#": 6, "C#": 7,
+    F: -1, Bb: -2, Eb: -3, Ab: -4, Db: -5, Gb: -6, Cb: -7,
+    Am: 0, Em: 1, Bm: 2, "F#m": 3, "C#m": 4, "G#m": 5, "D#m": 6, "A#m": 7,
+    Dm: -1, Gm: -2, Cm: -3, Fm: -4, Bbm: -5, Ebm: -6, Abm: -7,
+  };
+  const sharpOrder = ["f", "c", "g", "d", "a", "e", "b"];
+  const flatOrder = ["b", "e", "a", "d", "g", "c", "f"];
+
+  function accidentalForKey(key, keySignature = "C") {
+    const pitch = key.split("/")[0];
+    const letter = pitch[0]?.toLowerCase();
+    const writtenAccidental = accidentalFor(key) || "n";
+    const count = keySignatureCounts[keySignature] || 0;
+    const signatureAccidental = count > 0 && sharpOrder.slice(0, count).includes(letter)
+      ? "#"
+      : count < 0 && flatOrder.slice(0, -count).includes(letter)
+        ? "b"
+        : "n";
+    return writtenAccidental === signatureAccidental ? null : writtenAccidental;
+  }
+
+  function staveNote(keys, showAccidentals, duration = "q", clef = "treble", keySignature = null) {
     const note = new VF.StaveNote({ clef, keys, duration });
     if (showAccidentals) {
       keys.forEach((key, index) => {
-        const accidental = accidentalFor(key);
+        const accidental = keySignature ? accidentalForKey(key, keySignature) : accidentalFor(key);
         if (accidental) note.addModifier(new VF.Accidental(accidental), index);
       });
     }
@@ -92,8 +114,8 @@
       const note = staveNote(event.rest ? ["b/4"] : event.keys, false, duration);
       if (!event.rest) note.setStemDirection(note.calculateOptimalStemDirection());
       addDotToAll(note, event.dots);
-      if (event.accent) note.addModifier(new VF.Articulation("a>"), 0);
-      if (event.staccato) note.addModifier(new VF.Articulation("a."), 0);
+      if (event.accent && !event.rest) note.addModifier(new VF.Articulation("a>"), 0);
+      if (event.staccato && !event.rest) note.addModifier(new VF.Articulation("a."), 0);
       return note;
     });
     const tupletEvents = specification.events.map((event, index) => ({ event, note: notes[index] })).filter(({ event }) => event.tuplet);
@@ -117,7 +139,7 @@
         beams.push(new VF.Beam(items.map(({ note }) => note)));
       }
     });
-    const ties = specification.events.flatMap((event, index) => event.tieToNext && notes[index + 1] ? [new VF.StaveTie({ firstNote: notes[index], lastNote: notes[index + 1], firstIndexes: [0], lastIndexes: [0] })] : []);
+    const ties = specification.events.flatMap((event, index) => event.tieToNext && !event.rest && !specification.events[index + 1]?.rest && notes[index + 1] ? [new VF.StaveTie({ firstNote: notes[index], lastNote: notes[index + 1], firstIndexes: [0], lastIndexes: [0] })] : []);
     new VF.Formatter().joinVoices([voice]).formatToStave([voice], stave);
     voice.draw(context, stave);
     beams.forEach((beam) => beam.setContext(context).draw());
@@ -220,14 +242,42 @@
     element.rhythmInteractionDemo = { play, cancel };
   }
 
+  function renderOrnament(element, specification, options = {}) {
+    const width = responsiveWidth(element, options.width || 620);
+    const { context, stave } = prepare(element, width, 190, null, null, "treble");
+    stave.setNoteStartX(width * 0.28);
+    const mainNote = staveNote([specification.principal || "d/5"], true, "q");
+    const ornamentTypes = {
+      trill: "tr",
+      turn: "turn",
+      "upper-mordent": "mordent",
+      "lower-mordent": "mordentInverted",
+    };
+    if (ornamentTypes[specification.kind]) {
+      mainNote.addModifier(new VF.Ornament(ornamentTypes[specification.kind]), 0);
+    } else {
+      const graceNote = new VF.GraceNote({
+        keys: [specification.grace || "d/5"],
+        duration: "8",
+        slash: specification.kind === "acciaccatura",
+      });
+      mainNote.addModifier(new VF.GraceNoteGroup([graceNote], specification.kind === "appoggiatura"), 0);
+    }
+    const voice = new VF.Voice({ numBeats: 1, beatValue: 4 });
+    voice.addTickable(mainNote);
+    new VF.Formatter().joinVoices([voice]).format([voice], Math.min(48, width * 0.18));
+    voice.draw(context, stave);
+  }
+
   function renderScale(element, specification, options = {}) {
     const requestedWidth = options.width || 820;
     const responsiveScaleWidth = responsiveWidth(element, requestedWidth);
     const availableWidth = specification.degreeLabels
       ? Math.max(responsiveScaleWidth, requestedWidth)
       : responsiveScaleWidth;
-    const descendingNotes = specification.descendingNotes || [...specification.notes].reverse();
-    const singleDirection = specification.singleDirection === true;
+    const hasDescending = Array.isArray(specification.descendingNotes) && specification.descendingNotes.length > 0;
+    const descendingNotes = hasDescending ? specification.descendingNotes : [];
+    const singleDirection = specification.singleDirection === true || !hasDescending;
     const width = Math.max(
       scaleEngravingWidth(specification.notes, availableWidth),
       scaleEngravingWidth(descendingNotes, availableWidth),
@@ -252,15 +302,11 @@
     });
     function drawScalePath(keys, stave, labels) {
       const notes = keys.map((key, index) => {
-        const note = staveNote([key], specification.showAccidentals !== false, "8");
+        const note = staveNote([key], specification.showAccidentals !== false, "q", "treble", specification.key);
         return note;
       });
-      const voice = new VF.Voice({ numBeats: notes.length, beatValue: 8 });
-      voice.addTickables(notes);
-      const beams = VF.Beam.generateBeams(notes);
-      new VF.Formatter().joinVoices([voice]).formatToStave([voice], stave);
-      voice.draw(context, stave);
-      beams.forEach((beam) => beam.setContext(context).draw());
+      VF.Formatter.SimpleFormat(notes, Math.max(22, (stave.getWidth() - 110) / Math.max(1, notes.length - 1)));
+      notes.forEach(note => note.setStave(stave).setContext(context).draw());
       if (labels?.length === notes.length) {
         context.save();
         context.setFont("Arial, sans-serif", 11, 700);
@@ -304,12 +350,16 @@
     const tickables = [];
     const gridTickables = [];
     const shortNotesByBeat = new Map();
+    const selectedIndices = new Set(specification.selectedIndices || []);
+    const selectionColor = specification.selectionColor || "#1687d9";
     let cursorTickable = null;
     for (let slot = 0; slot < totalSlots;) {
       const placement = pitchBySlot.get(slot);
       if (placement) {
         const note = staveNote([placement.pitch], true, placement.duration, specification.clef);
-        if (placement.index === specification.selectedIndex) note.setKeyStyle(0, { fillStyle: "#1687d9", strokeStyle: "#1687d9" });
+        if (placement.index === specification.selectedIndex || selectedIndices.has(placement.index)) {
+          note.setKeyStyle(0, { fillStyle: selectionColor, strokeStyle: selectionColor });
+        }
         tickables.push(note);
         if (["8", "16"].includes(placement.duration)) {
           const beat = Math.floor(placement.slot / 4);
@@ -363,6 +413,15 @@
     beams.forEach((beam) => beam.setContext(context).draw());
     const svg = element.querySelector("svg");
     svg.dataset.slotCenters = JSON.stringify(gridTickables.map((tickable) => tickable.getAbsoluteX()));
+    const engravedNotes = tickables.filter(tickable => tickable instanceof VF.StaveNote && !tickable.isRest());
+    [...svg.querySelectorAll(".vf-notehead")].slice(0, engravedNotes.length).forEach((notehead, index) => {
+      notehead.dataset.engravedNote = String(index);
+    });
+    svg.dataset.notePositions = JSON.stringify(engravedNotes.map((note, index) => ({
+      index,
+      x: note.getAbsoluteX(),
+      y: note.getYs()[0],
+    })));
     const editorPitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5"];
     svg.dataset.pitchYs = JSON.stringify(Object.fromEntries(editorPitches.map((pitch) => {
       const probe = new VF.StaveNote({ clef: specification.clef, keys: [pitch], duration: "q" });
@@ -379,6 +438,8 @@
       renderTriad(element, specification, options);
     } else if (specification.type === "rhythm") {
       renderRhythm(element, specification, options);
+    } else if (specification.type === "ornament") {
+      renderOrnament(element, specification, options);
     } else if (specification.type === "scale") {
       renderScale(element, specification, options);
     } else if (specification.type === "key-signature") {
@@ -390,5 +451,5 @@
     }
   }
 
-  window.ListeningDeskNotation = { accidentalFor, responsiveWidth, scaleEngravingWidth, render, renderInterval, renderCadence, renderTriad, renderRhythm, renderScale, renderKeySignature, renderMelody };
+  window.ListeningDeskNotation = { accidentalFor, accidentalForKey, responsiveWidth, scaleEngravingWidth, render, renderInterval, renderCadence, renderTriad, renderRhythm, renderOrnament, renderScale, renderKeySignature, renderMelody };
 })();

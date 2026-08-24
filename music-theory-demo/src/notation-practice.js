@@ -28,7 +28,7 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
   container.innerHTML = `
     <div class="notation-practice">
       <p class="notation-instruction">${exercise.instruction}</p>
-      <section class="notation-score"><div class="notation-score__heading"><strong>Source · ${exercise.source.key || "C major"}</strong><button type="button" data-play-source>▶ Play source</button></div><div data-source-staff></div></section>
+      <section class="notation-score${exercise.hideSourceNotation ? " notation-score--aural" : ""}"><div class="notation-score__heading"><strong>${exercise.hideSourceNotation ? "Listen to the source" : `Source · ${exercise.source.key || "C major"}`}</strong><button type="button" data-play-source>▶ Play source</button></div><div data-source-staff></div></section>
       <div class="notation-toolbar" aria-label="Notation entry tools">
         <div class="notation-tool-group" aria-label="Note value">
           <button type="button" data-duration="q" aria-label="Crotchet">♩</button><button type="button" data-duration="8" aria-label="Quaver">♪</button><button type="button" data-duration="16" aria-label="Semiquaver">♬</button>
@@ -53,7 +53,9 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
   const noteList = find("[data-note-list]");
 
   function draw() {
-    notation.renderMelody(sourceStaff, { ...state.source, clef: state.source.clef || "treble", rests: [] }, { width: 820 });
+    if (exercise.hideSourceNotation) sourceStaff.replaceChildren();
+    else if (exercise.sourceNotation) notation.render(sourceStaff, exercise.sourceNotation, { width: 820 });
+    else notation.renderMelody(sourceStaff, { ...state.source, clef: state.source.clef || "treble", rests: [] }, { width: 820 });
     notation.renderMelody(answerStaff, {
       notes: state.editor.notes, slots: state.editor.slots, durations: state.editor.durations,
       clef: (exercise.expected || exercise.answer).clef || "treble", key: (exercise.expected || exercise.answer).key,

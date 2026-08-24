@@ -1,0 +1,54 @@
+/* Shared guardrails: content must remain readable and reachable on every viewport. */
+html { width:100%; max-width:100%; overflow-x:hidden; -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+body { width:100%; max-width:100%; overflow-x:hidden; }
+main, section, article, aside, header, footer, nav, div { min-width:0; }
+img, video, canvas { max-width:100%; height:auto; }
+svg { max-width:100%; }
+button, a, p, h1, h2, h3, h4, label, span { overflow-wrap:anywhere; }
+table { max-width:100%; }
+body[data-topic="time-signatures"] .example:nth-child(odd) { border-left:0!important; }
+.lesson-guide-card { height:auto!important; min-height:min(500px, 100%); max-height:100%; overflow-y:auto!important; }
+.lesson-guide-notation:has(.grade4-note-inspector) { padding-bottom:28px!important; }
+.grade4-note-inspector { padding-bottom:18px!important; }
+.grade4-note-target { margin-bottom:2px; }
+.lesson-guide-footer { min-width:0; flex-wrap:wrap; }
+.lesson-guide-footer>p { min-width:0; flex:1 1 240px; overflow-wrap:anywhere; }
+.lesson-guide-controls { min-width:0; flex:1 1 420px; flex-wrap:wrap; justify-content:flex-end; }
+.lesson-guide-controls button { min-width:0; flex:1 1 190px; white-space:normal; }
+
+@media (max-width:900px) {
+  body { min-width:0!important; }
+  header nav, .topbar nav { min-width:0; overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:none; }
+  header nav::-webkit-scrollbar, .topbar nav::-webkit-scrollbar { display:none; }
+  .lesson-body>.lesson-page { height:calc(100dvh - 76px)!important; min-height:0; }
+  .lesson-carousel { min-height:0; }
+  .lesson-slide { height:100%!important; max-height:none!important; overflow-x:hidden!important; overflow-y:auto!important; overscroll-behavior-y:contain; -webkit-overflow-scrolling:touch; scroll-padding-bottom:170px; padding-bottom:max(170px, calc(120px + env(safe-area-inset-bottom)))!important; }
+  .lesson-guide-slide, .rhythm-guide-slide { place-items:start center!important; overflow-y:auto!important; }
+  .lesson-guide-card, .rhythm-guide-card { height:auto!important; min-height:100%; overflow:visible!important; }
+  .lesson-guide-footer { min-width:0; align-items:stretch!important; flex-direction:column!important; }
+  .rhythm-copy { min-width:0; grid-template-columns:1fr!important; }
+  .lesson-guide-controls { display:grid!important; width:100%; grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr)); }
+  .lesson-guide-controls button { min-width:0; width:100%; white-space:normal; }
+  .lesson-guide-notation, .rhythm-notation, .notation, .editor-notation { max-width:100%; overflow-x:auto!important; overscroll-behavior-inline:contain; -webkit-overflow-scrolling:touch; }
+  .lesson-dots { max-width:calc(100vw - 32px)!important; }
+  footer { height:auto!important; min-height:56px; flex-wrap:wrap; }
+}
+
+@media (max-width:720px) {
+  .lesson-body>.lesson-page { height:calc(100dvh - 64px)!important; }
+}
+
+@media (max-width:420px) {
+  .lesson-body .hero h1, .hero h1 { font-size:clamp(36px,12vw,48px)!important; overflow-wrap:anywhere; }
+  .lesson-guide-card h2, .rhythm-guide-card h2 { font-size:clamp(28px,9vw,38px)!important; }
+  .lesson-guide-slide, .rhythm-guide-slide { padding:12px!important; }
+  .lesson-guide-card, .rhythm-guide-card { padding:18px 14px!important; }
+  .lesson-guide-controls { display:grid!important; grid-template-columns:1fr; }
+  .lesson-guide-controls button { width:100%; }
+}
+
+@media (max-height:650px) and (max-width:900px) {
+  .lesson-slide { padding-bottom:max(145px, calc(100px + env(safe-area-inset-bottom)))!important; }
+  .lesson-guide-card, .rhythm-guide-card { gap:10px!important; }
+  .lesson-guide-notation, .rhythm-notation { min-height:120px!important; }
+}

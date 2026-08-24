@@ -14,10 +14,17 @@ describe("site-wide live notation", () => {
     }
   });
 
+  it("uses the current notation renderer cache key on direct-file pages", () => {
+    for (const page of [read("topic.html"), read("practice.html")]) {
+      assert.match(page, /src\/notation\.js\?v=20260824-selection9/);
+      assert.doesNotMatch(page, /src\/notation\.js\?v=20260823-keysignature1/);
+    }
+  });
+
   it("stores written spellings separately from playback MIDI", () => {
     const practice = read("src/practice-data.js");
-    assert.match(practice, /notes:\['g\/3','bb\/3'\],midis:\[55,58\]/);
-    assert.match(practice, /notes:\['d\/4','f#\/4'\],midis:\[62,66\]/);
+    assert.match(practice, /notes:\['c\/4','db\/4'\],midis:\[60,61\]/);
+    assert.match(practice, /notes:\['c\/4','f#\/4'\],midis:\[60,66\]/);
     assert.match(practice, /key:'A',chords:\[\['g#\/4','b\/4','e\/5'\]/);
   });
 });

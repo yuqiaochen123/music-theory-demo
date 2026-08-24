@@ -1,17 +1,17 @@
 (function () {
   const intervals=[
-    {answer:'major',notes:['c/4','e/4'],midis:[60,64]},
-    {answer:'minor',notes:['c/4','eb/4'],midis:[60,63]},
-    {answer:'major',notes:['g/3','b/3'],midis:[55,59]},
-    {answer:'minor',notes:['g/3','bb/3'],midis:[55,58]},
-    {answer:'major',notes:['d/4','f#/4'],midis:[62,66]},
-    {answer:'minor',notes:['a/3','c/4'],midis:[57,60]},
-    {answer:'major',notes:['e/4','g#/4'],midis:[64,68]},
-    {answer:'minor',notes:['e/4','g/4'],midis:[64,67]},
-    {answer:'major',notes:['f/4','a/4'],midis:[65,69]},
-    {answer:'minor',notes:['f/4','ab/4'],midis:[65,68]}
+    {id:'int-1',answer:'Minor second',choices:['Minor second','Major second','Minor third'],notes:['c/4','db/4'],midis:[60,61]},
+    {id:'int-2',answer:'Major second',choices:['Minor second','Major second','Minor third'],notes:['d/4','e/4'],midis:[62,64]},
+    {id:'int-3',answer:'Minor third',choices:['Major second','Minor third','Major third'],notes:['e/4','g/4'],midis:[64,67]},
+    {id:'int-4',answer:'Major third',choices:['Minor third','Major third','Perfect fourth'],notes:['f/4','a/4'],midis:[65,69]},
+    {id:'int-5',answer:'Perfect fourth',choices:['Major third','Perfect fourth','Augmented fourth'],notes:['g/3','c/4'],midis:[55,60]},
+    {id:'int-6',answer:'Augmented fourth',choices:['Perfect fourth','Augmented fourth','Perfect fifth'],notes:['c/4','f#/4'],midis:[60,66]},
+    {id:'int-7',answer:'Perfect fifth',choices:['Augmented fourth','Perfect fifth','Minor sixth'],notes:['d/4','a/4'],midis:[62,69]},
+    {id:'int-8',answer:'Minor sixth',choices:['Perfect fifth','Minor sixth','Major sixth'],notes:['e/4','c/5'],midis:[64,72]},
+    {id:'int-9',answer:'Major seventh',choices:['Minor seventh','Major seventh','Octave'],notes:['c/4','b/4'],midis:[60,71]},
+    {id:'int-10',answer:'Octave',choices:['Major seventh','Octave','Compound second'],notes:['d/4','d/5'],midis:[62,74]}
   ];
-  const intervalPrompts=['Classify the written third.','Listen and identify the quality of this third.','Which quality matches both the spelling and sound?'];
+  const intervalPrompts=['Name the complete written interval.','Count the letter span, then use the sound to identify its quality.','Which interval name matches both the spelling and semitone distance?'];
   intervals.forEach((exercise,index)=>exercise.prompt=intervalPrompts[index%intervalPrompts.length]);
   const cadences=[
     {answer:'perfect',key:'F',chords:[['e/4','g/4','c/5'],['f/4','a/4','c/5']],audio:[[64,67,72],[65,69,72]]},
@@ -39,7 +39,7 @@
     {answer:'IV',prompt:'Which chord is this in G major?',choices:['I','ii','IV','V'],key:'G',roman:'IV',quality:'major',inversion:1,root:'c',notes:['e/4','g/4','c/5'],midis:[64,67,72]},
     {answer:'V',prompt:'Which chord is this in D major?',choices:['I','ii','IV','V'],key:'D',roman:'V',quality:'major',inversion:2,root:'a',notes:['e/4','a/4','c#/5'],midis:[64,69,73]}
   ];
-  const rhythm=(answer,prompt,choices,meter,groups,specs)=>{let position=0,groupIndex=0,nextBoundary=groups[0];const events=specs.map((spec,index)=>{while(position>=nextBoundary&&groupIndex<groups.length-1){groupIndex++;nextBoundary+=groups[groupIndex]}const accent=position===0||position===nextBoundary-groups[groupIndex];const event={keys:[accent?'e/5':index%2?'d/5':'c/5'],duration:spec.duration,group:groupIndex+1,accent};if(spec.rest)event.rest=true;if(spec.dots)event.dots=spec.dots;position+=spec.units;return event});return {answer,prompt,choices,meter,groups,durations:specs.map(spec=>spec.units),unit:meter[1],events,midis:events.map(event=>event.keys[0]==='e/5'?76:event.keys[0]==='d/5'?74:72),showTimeSignature:false}};
+  const rhythm=(answer,prompt,choices,meter,groups,specs)=>{let position=0,groupIndex=0,nextBoundary=groups[0];const events=specs.map((spec,index)=>{while(position>=nextBoundary&&groupIndex<groups.length-1){groupIndex++;nextBoundary+=groups[groupIndex]}const accent=!spec.rest&&(position===0||position===nextBoundary-groups[groupIndex]);const event={keys:[accent?'e/5':index%2?'d/5':'c/5'],duration:spec.duration,group:groupIndex+1};if(accent)event.accent=true;if(spec.rest)event.rest=true;if(spec.dots)event.dots=spec.dots;position+=spec.units;return event});return {answer,prompt,choices,meter,groups,durations:specs.map(spec=>spec.units),unit:meter[1],events,midis:events.map(event=>event.keys[0]==='e/5'?76:event.keys[0]==='d/5'?74:72),showTimeSignature:false}};
   const note=(duration,units,dots=0)=>({duration,units,dots});
   const rest=(duration,units,dots=0)=>({duration,units,dots,rest:true});
   const timeSignatures=[
@@ -95,7 +95,7 @@
   const signaturePrompts=['Identify the relative major and minor pair.','Which pair uses exactly this key signature?','Read the accidentals, then choose both possible tonal centres.'];
   keySignatures.forEach((exercise,index)=>exercise.prompt=signaturePrompts[index%signaturePrompts.length]);
   window.ListeningDeskPractice = Object.freeze({
-    "intervals": {name:'Intervals',title:'Identify the<br><em>interval.</em>',lead:'Use the staff notation and sound. Every written third appears once.',question:'What interval is this?',playLabel:'▶ Play interval',answers:[['major','Major third'],['minor','Minor third']],exercises:intervals},
+    "intervals": {name:'Intervals',title:'Identify the<br><em>interval.</em>',lead:'Use letter span, accidental spelling and sound to identify varied simple intervals.',question:'What interval is this?',playLabel:'▶ Play interval',answers:[],exercises:intervals},
     "cadences": {name:'Cadences',title:'Identify the<br><em>cadence.</em>',lead:'Read the key signature, then use the notation and sound to decide where the phrase leads.',question:'What cadence is this?',playLabel:'▶ Play cadence',answers:[['perfect','Perfect cadence'],['imperfect','Imperfect cadence']],exercises:cadences},
     "triads": {name:'Triads and chords',title:'Identify the<br><em>triad.</em>',lead:'Use the notation, key and sound to identify quality, inversion or function.',question:'What triad is this?',playLabel:'▶ Play triad',answers:[],exercises:triads},
     "time-signatures": {name:'Time signatures and grouping',title:'Identify the<br><em>metre.</em>',lead:'Follow the written grouping and audible accents.',question:'What metre is this?',playLabel:'▶ Play rhythm',answers:[],exercises:timeSignatures},

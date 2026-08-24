@@ -104,7 +104,7 @@ test('uses a borderless fixed companion layer', async () => {
   assert.match(css, /@media\s*\(max-width:\s*600px\)/);
 });
 
-test('uses real canvas transparency without blending Quaver or the tutor message into the lesson', async () => {
+test('keeps Quaver transparent while placing tutor text on a readable solid bubble', async () => {
   const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
   const guideRule = css.match(/\.quaver-guide\s*\{([^}]*)\}/s)?.[1] || '';
   const stageRule = css.match(/\.quaver-guide__stage\s*\{([^}]*)\}/s)?.[1] || '';
@@ -116,6 +116,7 @@ test('uses real canvas transparency without blending Quaver or the tutor message
   assert.match(stageRule, /box-shadow:\s*none/);
   assert.match(stageRule, /mix-blend-mode:\s*normal/);
   assert.match(bubbleRule, /background:\s*#f1dce4/);
+  assert.match(bubbleRule, /box-shadow:\s*0 8px 24px/);
   assert.match(bubbleRule, /color:\s*#2a0b1c/);
   assert.match(bubbleRule, /mix-blend-mode:\s*normal/);
   assert.match(riveCanvasRule, /background:\s*transparent/);
@@ -126,8 +127,8 @@ test('uses real canvas transparency without blending Quaver or the tutor message
 test('loads the transparent Quaver styling without a stale cached artboard', async () => {
   for (const file of ['index.html', 'grade.html', 'grade-4.html', 'grade-5.html', 'topic.html', 'practice.html', 'login.html']) {
     const html = await readFile(resolve(root, file), 'utf8');
-    assert.match(html, /src\/quaver-guide\.css\?v=20260822-tutor12/, file);
-    assert.match(html, /src\/quaver-guide\.js\?v=20260822-tutor12/, file);
+    assert.match(html, /src\/quaver-guide\.css\?v=20260824-mobile1/, file);
+    assert.match(html, /src\/quaver-guide\.js\?v=20260824-expand1/, file);
   }
 });
 
@@ -158,7 +159,7 @@ test('raises the companion above protected controls', async () => {
 
 test('keeps the floating companion accessible on small and reduced-motion displays', async () => {
   const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
-  assert.match(css, /@media\s*\(max-width:\s*600px\)[\s\S]*width:\s*76px/);
+  assert.match(css, /@media\s*\(max-width:\s*600px\)[\s\S]*width:\s*64px/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*animation:\s*none\s*!important/);
   assert.match(css, /\.quaver-guide__controls button:focus-visible/);
 });
@@ -185,18 +186,18 @@ test('keeps follow-up questions visible on the left of Quaver chat', async () =>
   assert.match(css, /\[data-quaver-chat\]\s*\{[^}]*flex-basis:\s*100%/s);
 });
 
-test('removes Hide tips and minimizes only the follow-up panel while Quaver stays visible', async () => {
+test('hides Quaver when minimized and leaves an expandable restore button', async () => {
   const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
   const practice = await readFile(resolve(root, 'practice.html'), 'utf8');
   const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
   assert.doesNotMatch(source, /data-quaver-mute|Hide tips|Show tips/);
   assert.doesNotMatch(practice, /data-quaver-mute|Hide tips/);
-  assert.match(source, /preferences\.minimized\s*=\s*!preferences\.minimized/);
-  assert.match(source, /Show chat/);
-  assert.doesNotMatch(css, /data-minimized="true"[^,\{]*\.quaver-guide__stage/);
-  assert.doesNotMatch(css, /data-minimized="true"[^,\{]*\.quaver-guide__bubble/);
-  assert.match(css, /data-minimized="true"[^}]*data-quaver-chat-toggle[\s\S]*display:\s*none/);
-  assert.match(css, /data-minimized="true"[^}]*data-quaver-chat\][\s\S]*display:\s*none/);
+  assert.match(source, /data-quaver-minimize[\s\S]*addEventListener\(['"]click['"][\s\S]*root\.hidden\s*=\s*true/);
+  assert.match(source, /data-quaver-restore/);
+  assert.match(source, /restore[\s\S]*addEventListener\(['"]click['"][\s\S]*root\.hidden\s*=\s*false/);
+  assert.doesNotMatch(source, /preferences\.minimized\s*=\s*!preferences\.minimized/);
+  assert.match(css, /\.quaver-guide\[hidden\][\s\S]*display:\s*none/);
+  assert.match(css, /\.quaver-restore\s*\{/);
 });
 
 test('does not repeat follow-up replies in the top explanation bubble', async () => {

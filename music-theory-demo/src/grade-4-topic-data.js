@@ -6,6 +6,7 @@
   const scale=(key,written,descendingNotes=[])=>({type:'scale',key,notes:written,descendingNotes});
   const triad=(key,written)=>({type:'triad',key,notes:written});
   const keySignature=key=>({type:'key-signature',key});
+  const ornament=(kind,principal='d/5',extra={})=>({type:'ornament',kind,principal,...extra});
   const part=(label,midis)=>[label,midis];
   const ex=(label,rule,notation,explanation,midis,extra={})=>({
     label,rule,notation,explanation,audioType:notation.type==='rhythm'?'rhythm':midis.length>1?'sequence':'note',parts:[part(`Hear ${label.toLowerCase()}`,midis),part('Hear the anchor',midis.slice(0,1))],...extra
@@ -70,7 +71,7 @@
       ex('Major third','C to E is a third in C major.',notes(['c/4','e/4']),'Three letter names and four semitones make a major third.',[60,64]),
       ex('Minor sixth','E to C is a sixth in C major.',notes(['e/4','c/5']),'Both notes belong to C major; the result is a minor sixth.',[64,72]),
       ex('Perfect fifth','D to A is a fifth in D major.',notes(['d/4','a/4']),'A fifth belonging to the key is perfect here.',[62,69]),
-      ex('Major seventh','D flat to C is a seventh in D-flat major.',notes(['db/4','c/5']),'Use the stated key rather than respelling the lower note.',[61,72])
+      ex('Major seventh','D flat to C spans seven letter names and eleven semitones.',notes(['db/4','c/5']),'D flat to C spans seven letter names and eleven semitones, so it is a major seventh.',[61,72])
     ]),
     triads:topic('Primary triads','Construct root-position I, IV and V.','Major and minor keys through five signs.','Start on the named scale degree and stack alternate scale notes.','Root-position tonic, subdominant and dominant chords in all permitted keys.',[
       ex('I in B major','The tonic triad is B–D sharp–F sharp.',triad('B',['b/3','d#/4','f#/4']),'B remains the lowest note in root position.',[59,63,66]),
@@ -85,16 +86,18 @@
       ex('Tenuto','Hold the note for its full value.',rhythm([q(['c/5'],'q'),q(['d/5'],'q'),q(['e/5'],'h')]),'Tenuto affects articulation, not written duration.',[60,62,64])
     ]),
     ornaments:topic('Ornaments','Recognise and name six signs.','Trill, turn, mordents and grace notes.','Identify the written sign before considering its possible realization.','Recognition and naming of trill, turn, upper/lower mordent, acciaccatura and appoggiatura.',[
-      ex('Trill','Rapidly alternate the main note and upper neighbour.',notes(['d/5','e/5']),'The trill sign sits above the main note.',[74,76],{ornament:'Trill'}),
-      ex('Turn','Move above, through, below and back to the main note.',notes(['d/5']),'The sideways S-shaped sign identifies a turn.',[76,74,73,74],{ornament:'Turn'}),
-      ex('Upper and lower mordents','A mordent makes one quick neighbour movement.',notes(['e/5','d/5']),'The stroke distinguishes the Lower mordent from the Upper mordent.',[76,77,76,76,75,76],{ornament:'Upper mordent · Lower mordent'}),
-      ex('Grace-note ornaments','Acciaccatura is crushed; Appoggiatura leans on the beat.',rhythm([q(['d/5'],'8'),q(['e/5'],'h')]),'Compare the slashed Acciaccatura with the unslashed Appoggiatura.',[74,76],{ornament:'Acciaccatura · Appoggiatura'})
+      ex('Trill','Rapidly alternate the main note and upper neighbour.',ornament('trill','d/5'),'The written “tr” sign calls for repeated alternation with the upper neighbour.',[74,76,74,76,74,76,74,76,74],{ornament:'Trill',playbackDurations:[.1,.1,.1,.1,.1,.1,.1,.1,.28]}),
+      ex('Turn','Move above, through, below and back to the main note.',ornament('turn','d/5'),'The sideways S-shaped sign above the D is a turn.',[76,74,73,74],{ornament:'Turn',playbackDurations:[.15,.15,.15,.3]}),
+      ex('Upper mordent','Move once to the upper neighbour and return immediately.',ornament('upper-mordent','e/5'),'The plain mordent sign gives E–F–E in this example.',[76,77,76],{ornament:'Upper mordent',playbackDurations:[.11,.11,.34]}),
+      ex('Lower mordent','Move once to the lower neighbour and return immediately.',ornament('lower-mordent','e/5'),'The crossed mordent sign gives E–D–E in this example.',[76,74,76],{ornament:'Lower mordent',playbackDurations:[.11,.11,.34]}),
+      ex('Acciaccatura','Crush the slashed grace note quickly before the main note.',ornament('acciaccatura','e/5',{grace:'d/5'}),'The slash through the small grace note identifies an acciaccatura.',[74,76],{ornament:'Acciaccatura',playbackDurations:[.08,.52]}),
+      ex('Appoggiatura','Let the unslashed grace note lean expressively on the beat.',ornament('appoggiatura','e/5',{grace:'d/5'}),'The small grace note has no slash and takes a perceptible share of the main note’s time.',[74,76],{ornament:'Appoggiatura',playbackDurations:[.3,.3]})
     ]),
     'orchestral-instruments':topic('Orchestral instruments','Recognise instruments in a score.','Simple Grade 4 passage questions.','Use the instrument name and its written line as evidence.','Simple questions about standard orchestral instruments in a musical passage.',[
       ex('Viola','Viola commonly reads alto clef.',notes(['c/4'],'alto'),'The alto clef is a strong visual clue for viola.',[60],{instrument:'Viola'}),
       ex('Flute','Flute is normally written in treble clef.',notes(['g/5'],'treble'),'Its line often occupies the upper register.',[79],{instrument:'Flute'}),
       ex('Cello','Cello commonly reads bass clef at this level.',notes(['c/3'],'bass'),'Use the low written range and instrument label together.',[48],{instrument:'Cello'}),
-      ex('Oboe','Oboe is normally written in treble clef.',notes(['d/5'],'treble'),'Grade 4 questions identify standard instruments in context.',[74],{instrument:'Oboe'})
+      ex('Oboe','Oboe is normally written in treble clef.',notes(['d/5'],'treble'),'The treble clef and upper register are consistent with an oboe line.',[74],{instrument:'Oboe'})
     ]),
     'musical-observation':topic('Passage analysis','Combine Grade 4 knowledge.','Read before you calculate.','Use key, metre, clef, markings and melodic detail as connected evidence.','Simple questions about a musical passage using cumulative Grade 4 knowledge.',[
       ex('Identify the key','Combine signature with opening and ending notes.',keySignature('A'),'Three sharps suggest A major or F-sharp minor; the phrase supplies context.',[69]),

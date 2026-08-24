@@ -80,12 +80,12 @@ describe("remaining Grade 5 modules",()=>{
     }
   });
 
-  it("provides ten stable practice questions for every new module",()=>{
+  it("provides eleven stable practice questions for every new module",()=>{
     for(const slug of slugs){
       const bank=practice[slug];
       assert.ok(bank,`${slug} practice is missing`);
-      assert.equal(bank.exercises.length,10,`${slug} must have ten exercises`);
-      assert.equal(new Set(bank.exercises.map(item=>item.id)).size,10);
+      assert.equal(bank.exercises.length,11,`${slug} must have eleven exercises`);
+      assert.equal(new Set(bank.exercises.map(item=>item.id)).size,11);
       for(const question of bank.exercises){
         assert.ok(question.prompt);
         assert.ok(question.answer);

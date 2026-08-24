@@ -5,8 +5,15 @@ import { describe, it } from "node:test";
 const page = (name) => readFileSync(new URL(`../${name}`, import.meta.url), "utf8");
 const topic = page("topic.html");
 const styles = page("src/horizontal-flow.css");
+const responsiveStyles = page("src/responsive-safety.css");
 
 describe("learning journey pages", () => {
+  it("keeps every guide card and its footer content inside the visible border", () => {
+    assert.match(responsiveStyles, /\.lesson-guide-card\s*\{[^}]*height:auto!important[^}]*overflow-y:auto!important/);
+    assert.match(responsiveStyles, /\.lesson-guide-footer>p\s*\{[^}]*min-width:0[^}]*overflow-wrap:anywhere/);
+    assert.doesNotMatch(responsiveStyles, /lesson-guide-notation:has\([^)]*grade4-note-inspector[^}]*min-height:310px/);
+  });
+
   it("uses one grade-context navigation label instead of separate Grades and Grade 5 links", () => {
     const chooser = page("index.html");
     const gradeFive = page("grade-5.html");
@@ -195,7 +202,7 @@ describe("learning journey pages", () => {
     const practiceStyles = page("src/practice.css");
     assert.doesNotMatch(practice, />Listening practice</i);
     assert.match(practice, /class="practice-body"/);
-    assert.match(practice, /src\/practice\.css\?v=20260823-mastery1/);
+    assert.match(practice, /src\/practice\.css\?v=20260824-selection11/);
     assert.match(practiceStyles, /\.practice-body\s*\{[^}]*background:\s*#eee8e5/);
     assert.match(practiceStyles, /\.practice-body \.exercise\s*\{[^}]*background:\s*#fff\s*!important/);
     assert.match(practiceStyles, /\.practice-body \.notation\s*\{[^}]*background:\s*#fbf8f3/);
