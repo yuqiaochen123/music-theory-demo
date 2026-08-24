@@ -42,6 +42,21 @@ describe("daily practice UI", () => {
     assert.doesNotMatch(html, /Mistake Notebook/);
   });
 
+  it("renders an accessible streak slot at the right of the daily dock", () => {
+    const html = summaryMarkup({ challenge, streak: 7 });
+    assert.match(html, /data-daily-streak/);
+    assert.match(html, /aria-label="7 day practice streak"/);
+    assert.match(html, /data-daily-streak-canvas/);
+    assert.match(html, /data-daily-streak-fallback/);
+    assert.match(html, />7<\/span>/);
+  });
+
+  it("shows an unsaved starting streak when signed out", () => {
+    const html = summaryMarkup({ signedOut: true, streak: 1 });
+    assert.match(html, /aria-label="1 day practice streak"/);
+    assert.match(html, /Sign in/);
+  });
+
   it("keeps the Grade 5 daily shortcut visually small and mobile-safe", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.daily-practice-summary\{[^}]*max-width:680px[^}]*margin:0 auto/);
@@ -114,22 +129,35 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260825-dock1/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260825-streak1/);
+    assert.match(grade, /src\/daily-practice-ui\.js\?v=20260825-streak1/);
+    assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
     for (const page of [daily, notebook]) assert.match(page, /src\/daily-practice\.css\?v=20260823-daily1/);
+  });
+
+  it("loads, calculates, and mounts the Grade 5 daily streak", () => {
+    const source = readFileSync(new URL("./daily-practice-ui.js", import.meta.url), "utf8");
+    assert.match(source, /loadCompletedChallengeDates\(\{ grade: 5 \}\)/);
+    assert.match(source, /calculateDailyStreak\(\{ completedDates, today: dailyDate\(\) \}\)/);
+    assert.match(source, /mountDailyStreak\(root\.querySelector\("\[data-daily-streak\]"\), streak\)/);
   });
 
   it("floats the Grade 5 daily entry at the bottom without covering learning content", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.grade-five-body \.grade-five-topbar\{[^}]*height:58px[^}]*font-size:clamp\(18px,2vw,25px\)/);
     assert.match(css, /\.grade-five-body>\.grade-five-page\{[^}]*height:calc\(100vh - 58px\)[^}]*padding-top:12px/);
-    assert.match(css, /\.grade-five-page \.daily-practice-summary\{[^}]*position:fixed[^}]*bottom:18px[^}]*left:50%[^}]*z-index:32[^}]*max-width:620px/);
+    assert.match(css, /\.grade-five-page \.daily-practice-summary\{[^}]*position:fixed[^}]*bottom:18px[^}]*left:50%[^}]*z-index:32[^}]*max-width:690px/);
     assert.match(css, /\.grade-five-page \.daily-practice-summary\{[^}]*transform:translateX\(-50%\)/);
     assert.match(css, /\.grade-five-page \.daily-practice-summary \.today-card\{[^}]*padding:6px 10px/);
     assert.match(css, /\.grade-five-page \.curriculum-tabs\{[^}]*height:38px[^}]*margin-bottom:10px/);
-    assert.match(css, /\.grade-five-page \.curriculum-section\{[^}]*padding-bottom:96px/);
-    assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:92px!important\}/);
+    assert.match(css, /\.daily-practice-summary \.today-panel--compact\{[^}]*grid-template-columns:minmax\(0,1fr\) 52px/);
+    assert.match(css, /\.daily-streak\{[^}]*width:52px[^}]*height:52px/);
+    assert.match(css, /\.daily-streak__fallback\{[^}]*position:absolute/);
+    assert.match(css, /@media\(max-width:520px\)\{[^}]*\.daily-streak\{width:46px;height:46px/);
+    assert.match(css, /\.grade-five-page \.curriculum-section\{[^}]*padding-bottom:108px/);
+    assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:104px!important\}/);
     assert.match(css, /\.grade-five-page \.daily-practice-summary\{bottom:10px;width:calc\(100% - 24px\)\}/);
-    assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:112px!important\}/);
+    assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:124px!important\}/);
   });
 
   it("keeps the mistake notebook inside a padded, responsive reading column", () => {

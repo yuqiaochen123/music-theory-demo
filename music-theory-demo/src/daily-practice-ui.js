@@ -1,5 +1,6 @@
-import { dailyDate, flattenExerciseBank, selectDailyChallenge } from "./daily-practice.js";
+import { calculateDailyStreak, dailyDate, flattenExerciseBank, selectDailyChallenge } from "./daily-practice.js";
 import { dailyPracticeStore } from "./daily-practice-store.js";
+import { mountDailyStreak } from "./daily-streak-rive.js";
 
 const roleLabels = { weak: "Weak topic", review: "Spaced review", wildcard: "Wildcard" };
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
@@ -32,11 +33,16 @@ function exerciseFor(registry, item) {
   return { topicName: topic?.name ?? item.topicId, exercise };
 }
 
-export function summaryMarkup({ challenge, reviewCount = 0, signedOut = false } = {}) {
-  if (signedOut) return `<section class="today-panel today-panel--signed-out"><div class="today-signed-out-copy"><strong>Daily practice</strong><span>Sign in to get a challenge shaped around your weak topics.</span></div><a class="today-action" href="login.html">Sign in</a></section>`;
+function streakMarkup(streak = 1) {
+  const value = Math.max(1, Math.round(Number(streak) || 1));
+  return `<span class="daily-streak" data-daily-streak aria-label="${value} day practice streak" title="Dynamic streak fire by aristote · CC BY"><canvas data-daily-streak-canvas width="96" height="96" aria-hidden="true"></canvas><span class="daily-streak__fallback" data-daily-streak-fallback aria-hidden="true">🔥 <span>${value}</span></span></span>`;
+}
+
+export function summaryMarkup({ challenge, reviewCount = 0, signedOut = false, streak = 1 } = {}) {
+  if (signedOut) return `<section class="today-panel today-panel--signed-out"><div class="today-signed-out-copy"><strong>Daily practice</strong><span>Sign in to get a challenge shaped around your weak topics.</span></div><a class="today-action" href="login.html">Sign in</a>${streakMarkup(streak)}</section>`;
   const completed = challenge?.completed_exercise_ids?.length ?? 0;
   const finished = completed === 4;
-  return `<section class="today-panel today-panel--compact" aria-label="Today's practice"><a class="today-card${finished ? " today-card--complete" : ""}" href="daily-challenge.html"><span class="today-icon" aria-hidden="true">${finished ? "✓" : "4"}</span><span><strong>Daily practice</strong><small>${finished ? "Completed today" : `${completed}/4 complete`}</small></span><b>${finished ? "View" : "Continue"} →</b></a></section>`;
+  return `<section class="today-panel today-panel--compact" aria-label="Today's practice"><a class="today-card${finished ? " today-card--complete" : ""}" href="daily-challenge.html"><span class="today-icon" aria-hidden="true">${finished ? "✓" : "4"}</span><span><strong>Daily practice</strong><small>${finished ? "Completed today" : `${completed}/4 complete`}</small></span><b>${finished ? "View" : "Continue"} →</b></a>${streakMarkup(streak)}</section>`;
 }
 
 export function notebookShortcutMarkup({ reviewCount } = {}) {
@@ -74,11 +80,19 @@ export function notebookMarkup({ status = "to_review", items = [] } = {}) {
 async function mountSummary(root) {
   root.innerHTML = '<p class="daily-loading">Preparing today’s practice…</p>';
   try {
-    const [challenge, notebook] = await Promise.all([dailyPracticeStore.getOrCreateChallenge({ grade: 5, registry: window.ListeningDeskPractice }), dailyPracticeStore.loadNotebook({ grade: 5, status: "to_review" })]);
-    root.innerHTML = summaryMarkup({ challenge, reviewCount: notebook.length });
+    const [challenge, notebook, completedDates] = await Promise.all([
+      dailyPracticeStore.getOrCreateChallenge({ grade: 5, registry: window.ListeningDeskPractice }),
+      dailyPracticeStore.loadNotebook({ grade: 5, status: "to_review" }),
+      dailyPracticeStore.loadCompletedChallengeDates({ grade: 5 }),
+    ]);
+    const streak = calculateDailyStreak({ completedDates, today: dailyDate() });
+    root.innerHTML = summaryMarkup({ challenge, reviewCount: notebook.length, streak });
+    await mountDailyStreak(root.querySelector("[data-daily-streak]"), streak);
     renderNotebookShortcut(notebook.length);
   } catch (error) {
-    root.innerHTML = summaryMarkup({ signedOut: true });
+    const streak = 1;
+    root.innerHTML = summaryMarkup({ signedOut: true, streak });
+    await mountDailyStreak(root.querySelector("[data-daily-streak]"), streak);
     renderNotebookShortcut();
     if (error?.code !== "AUTH_REQUIRED") console.error(error);
   }
