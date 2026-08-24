@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   applyNotebookAnswer,
+  calculateDailyStreak,
   dailyDate,
   flattenExerciseBank,
   selectDailyChallenge,
@@ -15,6 +16,38 @@ const exercises = [
 ].map(([topicId, id]) => ({ id, topicId, prompt: id }));
 
 describe("daily practice domain", () => {
+  it("starts at one without completed history", () => {
+    assert.equal(calculateDailyStreak({ completedDates: [], today: "2026-08-25" }), 1);
+  });
+
+  it("counts unique consecutive completed local dates", () => {
+    assert.equal(calculateDailyStreak({
+      completedDates: ["2026-08-23", "2026-08-24", "2026-08-25", "2026-08-25"],
+      today: "2026-08-25",
+    }), 3);
+  });
+
+  it("keeps yesterday's streak alive during an unfinished current day", () => {
+    assert.equal(calculateDailyStreak({
+      completedDates: ["2026-08-22", "2026-08-23", "2026-08-24"],
+      today: "2026-08-25",
+    }), 3);
+  });
+
+  it("resets to one after one entire missed day", () => {
+    assert.equal(calculateDailyStreak({
+      completedDates: ["2026-08-22", "2026-08-23"],
+      today: "2026-08-25",
+    }), 1);
+  });
+
+  it("crosses month and year boundaries using calendar days", () => {
+    assert.equal(calculateDailyStreak({
+      completedDates: ["2025-12-31", "2026-01-01", "2026-01-02"],
+      today: "2026-01-02",
+    }), 3);
+  });
+
   it("flattens a validated registry with stable topic metadata", () => {
     const result = flattenExerciseBank({
       rhythm: { name: "Rhythm", exercises: [{ id: "r1", answer: "3" }] },

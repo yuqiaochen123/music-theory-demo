@@ -20,6 +20,30 @@ export function dailyDate(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
+function calendarDate(value) {
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  return dailyDate(value);
+}
+
+function previousCalendarDate(date) {
+  const [year, month, day] = calendarDate(date).split("-").map(Number);
+  const previous = new Date(Date.UTC(year, month - 1, day - 1));
+  return `${previous.getUTCFullYear()}-${String(previous.getUTCMonth() + 1).padStart(2, "0")}-${String(previous.getUTCDate()).padStart(2, "0")}`;
+}
+
+export function calculateDailyStreak({ completedDates = [], today = dailyDate() } = {}) {
+  const current = calendarDate(today);
+  const completed = new Set(completedDates.map(calendarDate));
+  let cursor = completed.has(current) ? current : previousCalendarDate(current);
+  if (!completed.has(cursor)) return 1;
+  let streak = 0;
+  while (completed.has(cursor)) {
+    streak += 1;
+    cursor = previousCalendarDate(cursor);
+  }
+  return Math.max(1, streak);
+}
+
 export function flattenExerciseBank(registry = {}) {
   return Object.entries(registry).flatMap(([topicId, topic]) =>
     (topic.exercises ?? []).filter(exercise => exercise?.id).map(exercise => ({
