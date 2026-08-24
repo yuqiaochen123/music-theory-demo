@@ -33,6 +33,19 @@
 .grade-five-page [data-notebook-shortcut]{top:34px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:26px}.notebook-shortcut__bubble{right:calc(100% + 3px);top:52px;width:145px;border-radius:14px 14px 4px 14px}.notebook-shortcut__bubble::after{display:block;right:-13px;top:50%;border:7px solid transparent;border-left-color:rgba(246,241,233,.13);transform:translateY(-50%)}
 @media(max-width:720px){.grade-five-page [data-notebook-shortcut]{top:66px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:34px}.notebook-shortcut__bubble{right:calc(100% + 3px);top:40px;width:118px}}
 
+/* Grade 5 compact control strip: keep navigation secondary to the lesson grid. */
+.grade-five-body .grade-five-topbar{height:58px;font-size:clamp(18px,2vw,25px)}
+.grade-five-body .grade-five-close{top:5px;width:48px;height:48px;font-size:42px}
+.grade-five-body>.grade-five-page{height:calc(100vh - 58px);padding-top:12px}
+.grade-five-page .daily-practice-summary{max-width:620px;margin:0 auto 10px}
+.grade-five-page .daily-practice-summary .today-card{padding:6px 10px}
+.grade-five-page .daily-practice-summary .today-icon{width:30px;height:30px;font-size:13px}
+.grade-five-page .daily-practice-summary .today-card strong{font-size:14px}
+.grade-five-page .curriculum-tabs{height:38px;margin-bottom:10px;gap:6px}
+.grade-five-page .curriculum-tabs button{padding:7px 12px;font-size:13px}
+.grade-five-page .curriculum{height:calc(100% - 92px)}
+@media(max-width:720px){.grade-five-body .grade-five-topbar{height:54px}.grade-five-body>.grade-five-page{height:calc(100vh - 54px);padding-top:9px}.grade-five-page .daily-practice-summary{margin-bottom:8px}.grade-five-page .curriculum-tabs{height:36px;margin-bottom:8px}.grade-five-page .curriculum-tabs button{padding:6px 10px}.grade-five-page .curriculum{height:calc(100% - 84px)}}
+
 /* Keep the standalone daily pages clear inside the shared rounded app shell. */
 .daily-feature-body main.daily-feature-main{width:min(920px,calc(100% - 40px));min-height:calc(100vh - 108px);margin:0 auto 28px;padding:clamp(38px,5vw,58px) clamp(24px,5vw,54px) clamp(52px,7vw,76px);box-sizing:border-box}
 .daily-feature-body .daily-back{margin-bottom:clamp(28px,4vw,42px)}

@@ -114,8 +114,17 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260824-compact3/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260825-compact4/);
     for (const page of [daily, notebook]) assert.match(page, /src\/daily-practice\.css\?v=20260823-daily1/);
+  });
+
+  it("keeps the Grade 5 heading, daily entry, and subject tabs compact", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.grade-five-body \.grade-five-topbar\{[^}]*height:58px[^}]*font-size:clamp\(18px,2vw,25px\)/);
+    assert.match(css, /\.grade-five-body>\.grade-five-page\{[^}]*height:calc\(100vh - 58px\)[^}]*padding-top:12px/);
+    assert.match(css, /\.grade-five-page \.daily-practice-summary\{[^}]*max-width:620px[^}]*margin:0 auto 10px/);
+    assert.match(css, /\.grade-five-page \.daily-practice-summary \.today-card\{[^}]*padding:6px 10px/);
+    assert.match(css, /\.grade-five-page \.curriculum-tabs\{[^}]*height:38px[^}]*margin-bottom:10px/);
   });
 
   it("keeps the mistake notebook inside a padded, responsive reading column", () => {
