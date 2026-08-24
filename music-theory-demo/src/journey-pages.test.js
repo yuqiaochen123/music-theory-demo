@@ -75,11 +75,15 @@ describe("learning journey pages", () => {
 
   it("uses one site-wide plum palette with the middle tone as the primary color", () => {
     const palette = page("src/palette.css");
+    const redesign = page("src/redesign.css");
     for (const token of ["#2A0B1C", "#631838", "#9A2F5A", "#D2A36B", "#F6F1E9"]) {
       assert.match(palette, new RegExp(token, "i"));
     }
     assert.match(palette, /--brand-primary:\s*var\(--palette-500\)/);
     assert.match(palette, /--brand-accent:\s*var\(--palette-300\)/);
+    assert.doesNotMatch(redesign, /--red:\s*#[0-9a-f]{3,8}/i);
+    assert.match(redesign, /--red:\s*var\(--brand-primary,\s*#9A2F5A\)/i);
+    assert.match(redesign, /\.grade-picker-page \.grade:nth-child\(5\)\s*\{[^}]*background:\s*var\(--brand-primary,\s*#9A2F5A\)/i);
     assert.match(palette, /\.lesson-body,\s*\.grade-five-body\s*\{[^}]*background:\s*var\(--brand-primary\)\s*!important/);
     for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html"]) {
       assert.match(page(file), /src\/palette\.css\?v=20260803-palette1/);

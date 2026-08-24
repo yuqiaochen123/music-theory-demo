@@ -1,8 +1,8 @@
 /* Listening Desk — red editorial presentation layer.
    This file intentionally does not target notation, SVG or canvas elements. */
 :root {
-  --red: #b3132b;
-  --red-dark: #6f0d20;
+  --red: var(--brand-primary, #9A2F5A);
+  --red-dark: var(--brand-deep, #631838);
   --red-soft: #f6e7e9;
   --rose: #d99aa5;
   --paper: #fffdfc;
@@ -10,7 +10,7 @@
   --ink: #211c1d;
   --muted: #74696b;
   --line: #d8cfcc;
-  --blue: #b3132b;
+  --blue: var(--brand-primary, #9A2F5A);
   color: var(--ink);
   background: #f3efec;
 }
@@ -312,7 +312,7 @@ h1 em { font-style: normal; font-weight: 600; }
 .grade-picker-page .grade:nth-child(2) { grid-column: 3 / 5; background: #bd6370; }
 .grade-picker-page .grade:nth-child(3) { grid-column: 5 / 7; background: #a83f50; }
 .grade-picker-page .grade:nth-child(4) { grid-column: 2 / 4; background: #93283c; }
-.grade-picker-page .grade:nth-child(5) { grid-column: 4 / 6; background: var(--red); transform: none; }
+.grade-picker-page .grade:nth-child(5) { grid-column: 4 / 6; background: var(--brand-primary, #9A2F5A); transform: none; }
 .grade-picker-page .grade b,
 .grade-picker-page .grade span,
 .grade-picker-page .grade small[data-progress-summary] { color: #fff; }
@@ -448,8 +448,8 @@ main.practice-wrap { padding-top: 0 !important; }
 
 /* App-stage direction: lifted from the reference's calm, colourful workout flow. */
 :root {
-  --red: #c90032;
-  --red-dark: #960027;
+  --red: var(--brand-primary, #9A2F5A);
+  --red-dark: var(--brand-deep, #631838);
   --red-soft: #f5d2dc;
   --paper: #ffffff;
   --stage-card: rgba(255, 255, 255, .32);
