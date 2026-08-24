@@ -35,6 +35,19 @@ export function createDailyPracticeStore({ client = null, progressStore = defaul
     return data ?? [];
   }
 
+  async function loadCompletedChallengeDates({ grade = 5 } = {}) {
+    const studentId = await progressStore.initializeStudent();
+    const db = await getClient();
+    const { data, error } = await db.from("daily_challenges")
+      .select("challenge_date")
+      .eq("student_id", studentId)
+      .eq("grade", Number(grade))
+      .not("completed_at", "is", null)
+      .order("challenge_date", { ascending: false });
+    throwIfError(error, "Unable to load the practice streak");
+    return [...new Set((data ?? []).map(row => row.challenge_date).filter(Boolean))];
+  }
+
   async function getOrCreateChallenge({ grade = 5, date = dailyDate(), registry } = {}) {
     const studentId = await progressStore.initializeStudent();
     const existing = await challengeRow(studentId, grade, date);
@@ -120,7 +133,7 @@ export function createDailyPracticeStore({ client = null, progressStore = defaul
     return notebookRow(studentId, { grade, topicId, exerciseId });
   }
 
-  return { getOrCreateChallenge, loadNotebook, recordDailyAnswer, recordNotebookAnswer, hideNotebookItem };
+  return { getOrCreateChallenge, loadCompletedChallengeDates, loadNotebook, recordDailyAnswer, recordNotebookAnswer, hideNotebookItem };
 }
 
 export const dailyPracticeStore = createDailyPracticeStore();

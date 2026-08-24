@@ -12,6 +12,10 @@ function memoryClient() {
     insert(payload) { this.operation = "insert"; this.payload = payload; return this; }
     update(payload) { this.operation = "update"; this.payload = payload; return this; }
     eq(field, value) { this.filters.push(row => row[field] === value); return this; }
+    not(field, operator, value) {
+      if (operator === "is") this.filters.push(row => row[field] !== value);
+      return this;
+    }
     order(field, { ascending } = {}) { this.ordering = { field, ascending }; return this; }
     maybeSingle() { this.single = true; return this; }
     then(resolve) { resolve(this.execute()); }
@@ -83,6 +87,16 @@ describe("daily practice persistence", () => {
     const challenge = await store.recordDailyAnswer({ grade: 5, date: "2026-08-23", exerciseId, isCorrect: true });
     assert.equal(challenge.first_attempt_results[exerciseId], false);
     assert.deepEqual(challenge.completed_exercise_ids, [exerciseId]);
+  });
+
+  it("loads only completed challenge dates for the selected grade", async () => {
+    const { client, store } = makeStore();
+    client.tables.daily_challenges.push(
+      { id: "one", student_id: "student-1", grade: 5, challenge_date: "2026-08-24", completed_at: "2026-08-24T12:00:00Z" },
+      { id: "two", student_id: "student-1", grade: 5, challenge_date: "2026-08-25", completed_at: null },
+      { id: "three", student_id: "student-1", grade: 4, challenge_date: "2026-08-23", completed_at: "2026-08-23T12:00:00Z" },
+    );
+    assert.deepEqual(await store.loadCompletedChallengeDates({ grade: 5 }), ["2026-08-24"]);
   });
 
   it("defines owner-only permanent-account RLS and explicit grants", () => {
