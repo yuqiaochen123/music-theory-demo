@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { mountDailyStreak } from "./daily-streak-rive.js";
 
@@ -66,6 +67,15 @@ describe("daily streak Rive adapter", () => {
 
     assert.equal(constructions, 0);
     assert.equal(element.fallback.hidden, false);
+  });
+
+  it("keeps the loaded fallback visible when reduced motion is enabled later", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    const hiddenRule = css.indexOf(".daily-streak__fallback[hidden]{display:none}");
+    const reducedRule = css.indexOf("@media(prefers-reduced-motion:reduce){.daily-streak canvas{display:none}.daily-streak__fallback[hidden]{display:grid}}");
+
+    assert.ok(hiddenRule >= 0);
+    assert.ok(reducedRule > hiddenRule);
   });
 
   it("preserves the fallback when Rive construction throws", async () => {

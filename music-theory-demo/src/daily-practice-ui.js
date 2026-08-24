@@ -35,7 +35,8 @@ function exerciseFor(registry, item) {
 
 function streakMarkup(streak = 1) {
   const value = Math.max(1, Math.round(Number(streak) || 1));
-  return `<span class="daily-streak" data-daily-streak aria-label="${value} day practice streak" title="Dynamic streak fire by aristote · CC BY"><canvas data-daily-streak-canvas width="96" height="96" aria-hidden="true"></canvas><span class="daily-streak__fallback" data-daily-streak-fallback aria-hidden="true">🔥 <span>${value}</span></span></span>`;
+  const unit = value === 1 ? "day" : "days";
+  return `<span class="daily-streak" data-daily-streak role="img" aria-label="${value} ${unit} practice streak" title="Dynamic streak fire by aristote · CC BY"><canvas data-daily-streak-canvas width="96" height="96" aria-hidden="true"></canvas><span class="daily-streak__fallback" data-daily-streak-fallback aria-hidden="true">🔥 <span>${value}</span></span></span>`;
 }
 
 export function summaryMarkup({ challenge, reviewCount = 0, signedOut = false, streak = 1 } = {}) {
@@ -77,18 +78,23 @@ export function notebookMarkup({ status = "to_review", items = [] } = {}) {
   }).join("")}</div>`;
 }
 
+export async function loadSummaryData({ registry = globalThis.window?.ListeningDeskPractice, store = dailyPracticeStore } = {}) {
+  const [challenge, notebook, completedDates] = await Promise.all([
+    store.getOrCreateChallenge({ grade: 5, registry }),
+    store.loadNotebook({ grade: 5, status: "to_review" }),
+    store.loadCompletedChallengeDates({ grade: 5 }).catch(() => []),
+  ]);
+  const streak = calculateDailyStreak({ completedDates, today: dailyDate() });
+  return { challenge, reviewCount: notebook.length, streak };
+}
+
 async function mountSummary(root) {
   root.innerHTML = '<p class="daily-loading">Preparing today’s practice…</p>';
   try {
-    const [challenge, notebook, completedDates] = await Promise.all([
-      dailyPracticeStore.getOrCreateChallenge({ grade: 5, registry: window.ListeningDeskPractice }),
-      dailyPracticeStore.loadNotebook({ grade: 5, status: "to_review" }),
-      dailyPracticeStore.loadCompletedChallengeDates({ grade: 5 }),
-    ]);
-    const streak = calculateDailyStreak({ completedDates, today: dailyDate() });
-    root.innerHTML = summaryMarkup({ challenge, reviewCount: notebook.length, streak });
+    const { challenge, reviewCount, streak } = await loadSummaryData({ registry: window.ListeningDeskPractice });
+    root.innerHTML = summaryMarkup({ challenge, reviewCount, streak });
     await mountDailyStreak(root.querySelector("[data-daily-streak]"), streak);
-    renderNotebookShortcut(notebook.length);
+    renderNotebookShortcut(reviewCount);
   } catch (error) {
     const streak = 1;
     root.innerHTML = summaryMarkup({ signedOut: true, streak });

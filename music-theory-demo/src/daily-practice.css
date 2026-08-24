@@ -49,7 +49,7 @@
 .grade-five-page .curriculum-section{box-sizing:border-box;padding-bottom:108px}
 .grade-five-body .quaver-guide{--quaver-safe-bottom:104px!important}
 @media(max-width:720px){.grade-five-body .grade-five-topbar{height:54px}.grade-five-body>.grade-five-page{height:calc(100vh - 54px);padding-top:9px}.grade-five-page .daily-practice-summary{bottom:10px;width:calc(100% - 24px)}.grade-five-page .curriculum-tabs{height:36px;margin-bottom:8px}.grade-five-page .curriculum-tabs button{padding:6px 10px}.grade-five-page .curriculum{height:calc(100% - 44px)}.grade-five-page .curriculum-section{padding-bottom:116px}.grade-five-body .quaver-guide{--quaver-safe-bottom:124px!important}}
-@media(prefers-reduced-motion:reduce){.daily-streak canvas{display:none}.daily-streak__fallback{display:grid}}
+@media(prefers-reduced-motion:reduce){.daily-streak canvas{display:none}.daily-streak__fallback[hidden]{display:grid}}
 
 /* Keep the standalone daily pages clear inside the shared rounded app shell. */
 .daily-feature-body main.daily-feature-main{width:min(920px,calc(100% - 40px));min-height:calc(100vh - 108px);margin:0 auto 28px;padding:clamp(38px,5vw,58px) clamp(24px,5vw,54px) clamp(52px,7vw,76px);box-sizing:border-box}

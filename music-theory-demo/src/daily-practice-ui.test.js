@@ -45,7 +45,8 @@ describe("daily practice UI", () => {
   it("renders an accessible streak slot at the right of the daily dock", () => {
     const html = summaryMarkup({ challenge, streak: 7 });
     assert.match(html, /data-daily-streak/);
-    assert.match(html, /aria-label="7 day practice streak"/);
+    assert.match(html, /role="img"/);
+    assert.match(html, /aria-label="7 days practice streak"/);
     assert.match(html, /data-daily-streak-canvas/);
     assert.match(html, /data-daily-streak-fallback/);
     assert.match(html, />7<\/span>/);
@@ -55,6 +56,21 @@ describe("daily practice UI", () => {
     const html = summaryMarkup({ signedOut: true, streak: 1 });
     assert.match(html, /aria-label="1 day practice streak"/);
     assert.match(html, /Sign in/);
+  });
+
+  it("keeps signed-in summary data when streak history cannot load", async () => {
+    assert.equal(typeof dailyUi.loadSummaryData, "function");
+    const notebook = [{ id: "one" }, { id: "two" }];
+    const result = await dailyUi.loadSummaryData({
+      registry,
+      store: {
+        async getOrCreateChallenge() { return challenge; },
+        async loadNotebook() { return notebook; },
+        async loadCompletedChallengeDates() { throw new Error("history unavailable"); },
+      },
+    });
+
+    assert.deepEqual(result, { challenge, reviewCount: 2, streak: 1 });
   });
 
   it("keeps the Grade 5 daily shortcut visually small and mobile-safe", () => {
