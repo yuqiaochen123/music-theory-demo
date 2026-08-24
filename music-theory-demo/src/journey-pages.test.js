@@ -202,7 +202,7 @@ describe("learning journey pages", () => {
     const practiceStyles = page("src/practice.css");
     assert.doesNotMatch(practice, />Listening practice</i);
     assert.match(practice, /class="practice-body"/);
-    assert.match(practice, /src\/practice\.css\?v=20260824-selection11/);
+    assert.match(practice, /src\/practice\.css\?v=20260824-matching1/);
     assert.match(practiceStyles, /\.practice-body\s*\{[^}]*background:\s*#eee8e5/);
     assert.match(practiceStyles, /\.practice-body \.exercise\s*\{[^}]*background:\s*#fff\s*!important/);
     assert.match(practiceStyles, /\.practice-body \.notation\s*\{[^}]*background:\s*#fbf8f3/);

@@ -243,15 +243,15 @@
 .matching-labels button { border: 1px solid var(--brand-primary, #9a2f5a); border-radius: 999px; background: #fff; color: var(--brand-deep, #631838); padding: 10px 15px; font: inherit; font-weight: 800; cursor: grab; }
 .matching-labels button[aria-pressed="true"] { background: var(--brand-primary, #9a2f5a); color: #fff; }
 .matching-labels button[data-assigned="true"] { border-color:#b96b8b; background:#f4e8ed; color:var(--brand-deep, #631838); box-shadow:none; }
-.matching-targets { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.matching-targets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
 .matching-target-card { display:grid; align-content:start; gap:8px; }
-.matching-target-card > [data-match-target] { display: grid; grid-template-rows:auto auto 1fr; gap: 10px; width:100%; min-height: 130px; border: 2px dashed #d8bac5; border-radius: 10px; background: #fff; padding: 16px; color: var(--brand-ink, #2a0b1c); font: inherit; text-align: left; cursor: pointer; }
+.matching-target-card > [data-match-target] { display: grid; grid-template-rows:auto auto minmax(190px,1fr); gap: 10px; width:100%; min-height: 310px; border: 2px dashed #d8bac5; border-radius: 10px; background: #fff; padding: 16px; color: var(--brand-ink, #2a0b1c); font: inherit; text-align: left; cursor: pointer; }
 .matching-target-card > [data-match-target][data-filled="true"] { border-style:solid; border-color:#b96b8b; background:#f5e9ee; box-shadow:none; }
 .matching-play { justify-self:start; border:0; border-radius:999px; background:#f1dce4; padding:8px 12px; color:var(--brand-deep,#631838); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
 .matching-clue { font-size: 24px; font-weight: 850; }
 .matching-targets [data-assignment] { color:var(--brand-primary, #9a2f5a); font-weight:850; }
 .matching-notation { display:grid; align-self:center; justify-self:center; place-items:center; width:100%; overflow:hidden; }
-.matching-notation svg { display:block; max-width:100%; margin-inline:auto; }
+.matching-notation svg { display:block; width:100%; max-width:520px; height:auto; margin-inline:auto; }
 .matching-check { justify-self: start; border: 0; border-radius: 8px; background: var(--brand-primary, #9a2f5a); color: #fff; padding: 12px 18px; font: inherit; font-weight: 850; }
 .matching-status { margin: 0; min-height: 24px; font-weight: 750; }
 .matching-status[data-result="correct"] { color: #1d7146; }

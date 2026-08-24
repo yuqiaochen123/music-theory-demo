@@ -47,4 +47,20 @@ describe("accessible matching practice", () => {
     const source = readFileSync(new URL("./matching-practice.js", import.meta.url), "utf8");
     assert.match(source, /data-play-match/);
   });
+
+  it("uses spacious engraving for multi-event matching excerpts", () => {
+    const source = readFileSync(new URL("./matching-practice.js", import.meta.url), "utf8");
+    const styles = readFileSync(new URL("./practice.css", import.meta.url), "utf8");
+    assert.match(source, /notation\.render\(notationTarget, target\.notation, \{ width: 520 \}\)/);
+    assert.match(styles, /\.matching-notation svg\s*\{[^}]*width:\s*100%/);
+  });
+
+  it("resumes one reusable audio context and tolerates missing durations and written rests", () => {
+    const page = readFileSync(new URL("../practice.html", import.meta.url), "utf8");
+    assert.match(page, /let timedAudioContext=null/);
+    assert.match(page, /async function playTimedNotes\(midis,durations=\[\]\)/);
+    assert.match(page, /timedAudioContext\|\|=new Audio\(\)/);
+    assert.match(page, /if\(timedAudioContext\.state==='suspended'\)await timedAudioContext\.resume\(\)/);
+    assert.match(page, /if\(!Number\.isFinite\(midi\)\)\{start=end;return\}/);
+  });
 });

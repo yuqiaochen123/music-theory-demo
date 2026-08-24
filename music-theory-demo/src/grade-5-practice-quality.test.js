@@ -129,6 +129,17 @@ describe("Grade 5 practice quality", () => {
     }
   });
 
+  it("gives every time-signature matching excerpt complete timed playback with silent rests", () => {
+    const exercise = practice["time-signatures"].exercises.find(item => item.id === "time-signatures-variety-match");
+    for (const target of exercise.targets) {
+      assert.equal(target.midis.length, target.playbackDurations.length, target.id);
+      assert.ok(target.playbackDurations.every(duration => duration > 0), target.id);
+      target.notation.events.forEach((event, index) => {
+        assert.equal(target.midis[index] === null, Boolean(event.rest), `${target.id} event ${index + 1}`);
+      });
+    }
+  });
+
   it("makes the Grade 5 trill a sustained, listenable repeated alternation", () => {
     const target = practice.ornaments.exercises.find(item => item.id === "orn-1").targets.find(item => item.id === "tr");
     assert.equal(target.notation.kind, "trill");

@@ -33,7 +33,7 @@ export function mountMatchingPractice({ container, exercise, notation, play, onR
   exercise.targets.forEach(target => {
     if (!target.notation) return;
     const notationTarget = find(`[data-target-notation="${target.id}"]`);
-    try { notation.render(notationTarget, target.notation, { width: 320 }); } catch { notationTarget.textContent = "Notation unavailable"; }
+    try { notation.render(notationTarget, target.notation, { width: 520 }); } catch { notationTarget.textContent = "Notation unavailable"; }
   });
 
   function render() {

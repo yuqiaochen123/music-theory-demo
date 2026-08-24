@@ -18,7 +18,7 @@ test("direct score selection supports toggling, correction, and retry", () => {
 test("the practice page loads the current selection styles and branded action buttons", () => {
   const page = readFileSync(new URL("../practice.html", import.meta.url), "utf8");
   const css = readFileSync(new URL("./practice.css", import.meta.url), "utf8");
-  assert.match(page, /practice\.css\?v=20260824-selection11/);
+  assert.match(page, /practice\.css\?v=20260824-matching1/);
   assert.match(page, /score-selection-practice\.js\?v=20260824-selection11/);
   assert.match(css, /\.score-selection-actions button\s*\{/);
   assert.match(css, /\.score-note-target\[aria-pressed="true"\]/);

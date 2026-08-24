@@ -129,13 +129,17 @@
         ? 'Match each fresh score or listening excerpt to its musical answer.'
         : 'Match each fresh musical clue to its most appropriate term.',
       unique.map((item,index)=>({id:`variety-label-${index}`,text:item.answer})),
-      reversed.map((item,index)=>({
-        id:`variety-target-${index}`,
-        label:item.derivedNotation?`New excerpt ${index+1}`:item.concept.detail,
-        notation:item.derivedNotation,
-        midis:item.midis,
-        playbackDurations:item.playbackDurations
-      })),
+      reversed.map((item,index)=>{
+        const rhythmEvents=topicId==='time-signatures'?item.events:null;
+        const unitSeconds=item.unit?0.44*4/item.unit:0.24;
+        return {
+          id:`variety-target-${index}`,
+          label:item.derivedNotation?`New excerpt ${index+1}`:item.concept.detail,
+          notation:item.derivedNotation,
+          midis:rhythmEvents?rhythmEvents.map((event,eventIndex)=>event.rest?null:item.midis[eventIndex]):item.midis,
+          playbackDurations:rhythmEvents?item.durations.map(duration=>duration*unitSeconds):item.playbackDurations
+        };
+      }),
       Object.fromEntries(reversed.map((item,index)=>[`variety-target-${index}`,`variety-label-${unique.indexOf(item)}`]))
     );
   };
