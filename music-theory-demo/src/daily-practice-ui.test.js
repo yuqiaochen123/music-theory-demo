@@ -80,6 +80,11 @@ describe("daily practice UI", () => {
     assert.match(css, /@media\(max-width:520px\)\{[^}]*\.daily-practice-summary/);
   });
 
+  it("prevents the signed-out mobile streak from flex shrinking", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.daily-streak\{[^}]*flex:none/);
+  });
+
   it("renders the animated notebook shortcut as a direct notebook link", () => {
     assert.equal(typeof dailyUi.notebookShortcutMarkup, "function");
     const html = dailyUi.notebookShortcutMarkup({ reviewCount: 3 });

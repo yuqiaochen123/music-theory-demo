@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { mountDailyStreak } from "./daily-streak-rive.js";
+import * as streakRive from "./daily-streak-rive.js";
+
+const { mountDailyStreak } = streakRive;
 
 function makeStreakElement() {
   const canvas = {};
@@ -18,6 +20,71 @@ function makeStreakElement() {
 }
 
 describe("daily streak Rive adapter", () => {
+  it("waits for the pinned shared runtime before mounting on a fresh page", async () => {
+    assert.equal(typeof streakRive.ensureRiveRuntime, "function");
+    let loadListener;
+    let appendedScript;
+    let constructions = 0;
+    let riveOptions;
+    let wasmUrl;
+    const script = {
+      dataset: {},
+      addEventListener(type, listener) {
+        if (type === "load") loadListener = listener;
+      },
+    };
+    const documentObject = {
+      querySelector(selector) {
+        assert.equal(selector, "script[data-rive-runtime]");
+        return null;
+      },
+      createElement(name) {
+        assert.equal(name, "script");
+        return script;
+      },
+      head: {
+        append(candidate) { appendedScript = candidate; },
+      },
+    };
+    const runtimeGlobal = {};
+    const number = { value: 0 };
+    class FakeRive {
+      constructor(options) {
+        constructions += 1;
+        riveOptions = options;
+        this.viewModelInstance = { number: () => number };
+        queueMicrotask(() => options.onLoad());
+      }
+      resizeDrawingSurfaceToCanvas() {}
+      cleanup() {}
+    }
+    const element = makeStreakElement();
+
+    const mounting = mountDailyStreak(element, 8, {
+      reducedMotion: false,
+      loadRuntime: () => streakRive.ensureRiveRuntime({ documentObject, runtimeGlobal }),
+    });
+    await Promise.resolve();
+
+    assert.equal(appendedScript, script);
+    assert.equal(script.src, "vendor/rive-2.39.2.js");
+    assert.equal(script.dataset.riveRuntime, "true");
+    assert.equal(constructions, 0);
+
+    runtimeGlobal.rive = {
+      Rive: FakeRive,
+      RuntimeLoader: { setWasmUrl(value) { wasmUrl = value; } },
+    };
+    loadListener();
+    await mounting;
+
+    assert.equal(wasmUrl, "vendor/rive-2.39.2.wasm");
+    assert.equal(constructions, 1);
+    assert.equal(riveOptions.src, "assets/rive/dynamic-streak-fire.riv");
+    assert.equal(number.value, 8);
+    assert.equal(element.fallback.hidden, true);
+  });
+
   it("binds the streak number into the approved local Rive animation", async () => {
     let options;
     let resizeCalls = 0;
