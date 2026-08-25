@@ -147,7 +147,23 @@
 .daily-practice-overlay .daily-feature-topbar{position:sticky;top:0;height:54px;border-radius:28px 28px 0 0;background:rgba(99,24,56,.88)}
 .daily-practice-overlay .daily-feature-close{border:0;background:transparent;cursor:pointer}
 .daily-practice-overlay .daily-feature-close:hover,.daily-practice-overlay .daily-feature-close:focus-visible{transform:rotate(7deg) scale(1.08);opacity:.82}
+.notebook-overlay{position:fixed;z-index:1250;inset:0;display:grid;visibility:hidden;place-items:center;padding:clamp(28px,7vh,72px) clamp(24px,6vw,80px);box-sizing:border-box;isolation:isolate}
+.notebook-overlay.is-open{visibility:visible}
+.notebook-overlay__backdrop{position:absolute;z-index:-1;inset:0;width:100%;height:100%;padding:0;border:0;background:rgba(42,11,28,.34);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);cursor:pointer}
+.notebook-overlay.is-open .notebook-overlay__backdrop{animation:daily-practice-backdrop-in .6s ease-out both}
+.notebook-overlay__panel{width:min(820px,calc(100% - 48px));max-height:82dvh;min-height:0;border:1px solid rgba(246,241,233,.38);border-radius:28px;background:rgba(99,24,56,.88);box-shadow:inset 0 1px 0 rgba(246,241,233,.42),0 30px 80px rgba(42,11,28,.38);overflow-y:auto}
+.notebook-overlay.is-open .notebook-overlay__panel{animation:daily-practice-overlay-in .6s cubic-bezier(.22,.7,.3,1) both}
+.notebook-overlay .daily-feature-topbar{position:sticky;top:0;height:54px;border-radius:28px 28px 0 0;background:rgba(99,24,56,.88)}
+.notebook-overlay .daily-feature-close{border:0;background:transparent;cursor:pointer}
+.notebook-overlay .daily-feature-close:hover,.notebook-overlay .daily-feature-close:focus-visible{transform:rotate(7deg) scale(1.08);opacity:.82}
 .daily-practice-overlay .daily-feature-body main.daily-feature-main{width:calc(100% - 28px);min-height:0;margin:0 auto 14px;padding:32px 38px 36px;border-radius:20px;background:#f6f1e9}
+.notebook-overlay .daily-feature-body main.daily-feature-main{width:calc(100% - 28px);min-height:0;margin:0 auto 14px;padding:32px 38px 36px;border-radius:20px;background:#f6f1e9}
+.notebook-overlay__head{position:static;width:auto;margin:0;padding:0 0 24px;border:0;background:transparent;color:#2a0b1c}
+.notebook-overlay__head .eyebrow{margin:0 0 8px;color:#9a2f5a!important;font-size:12px}
+.notebook-overlay__head h2{margin:0;color:#2a0b1c;font-size:clamp(38px,4.8vw,52px);font-weight:750;line-height:1.03;letter-spacing:-.045em}
+.notebook-overlay__head h2 em{color:#9a2f5a;font-style:normal}
+.notebook-overlay__head>p:last-child{max-width:590px;margin:12px 0 0;color:#74666b;font-size:15px;line-height:1.5}
+.notebook-overlay__content{min-width:0;min-height:0;padding:0;overflow:visible}
 .daily-practice-overlay .daily-page-head h1{font-size:clamp(38px,4.8vw,52px)}
 .daily-practice-overlay .daily-page-head>p:last-child{margin-top:12px;font-size:15px;color:#74666b}
 .daily-practice-overlay .daily-question-list{gap:8px;margin-top:24px}
@@ -157,9 +173,9 @@
 .daily-practice-overlay .daily-question strong{color:#2a0b1c}
 .daily-practice-overlay .daily-question a{min-width:72px;padding:9px 16px;border:1px solid #9a2f5a;border-radius:999px;background:#f6f1e9;color:#631838;font-size:13px;font-weight:700}
 .daily-practice-overlay .daily-question a:hover,.daily-practice-overlay .daily-question a:focus-visible{background:#9a2f5a;color:#f6f1e9}
-.daily-practice-overlay-open{overflow:hidden!important}
-.daily-practice-overlay.is-closing{opacity:0;transition:opacity .18s ease}
+.daily-practice-overlay-open,.notebook-overlay-open{overflow:hidden!important}
+.daily-practice-overlay.is-closing,.notebook-overlay.is-closing{opacity:0;transition:opacity .18s ease}
 @keyframes daily-practice-overlay-in{from{opacity:0;transform:translateY(12px) scale(.985)}}
 @keyframes daily-practice-backdrop-in{from{opacity:0}}
-@media(max-width:620px){.daily-practice-overlay{padding:16px 8px}.daily-practice-overlay__panel{width:calc(100% - 16px);max-height:calc(100dvh - 32px);border-radius:22px}.daily-practice-overlay .daily-feature-topbar{border-radius:22px 22px 0 0}.daily-practice-overlay .daily-feature-body main.daily-feature-main{width:calc(100% - 16px);margin-bottom:8px;padding:26px 20px 30px;border-radius:16px}.daily-practice-overlay .daily-question{border-radius:14px}.daily-practice-overlay .daily-question a{border-radius:999px}}
-@media(prefers-reduced-motion:reduce){.daily-practice-overlay.is-open .daily-practice-overlay__backdrop,.daily-practice-overlay.is-open .daily-practice-overlay__panel{animation:none}.daily-practice-overlay.is-closing{transition:none}}
+@media(max-width:620px){.daily-practice-overlay,.notebook-overlay{padding:16px 8px}.daily-practice-overlay__panel,.notebook-overlay__panel{width:calc(100% - 16px);max-height:calc(100dvh - 32px);border-radius:22px}.daily-practice-overlay .daily-feature-topbar,.notebook-overlay .daily-feature-topbar{border-radius:22px 22px 0 0}.daily-practice-overlay .daily-feature-body main.daily-feature-main,.notebook-overlay .daily-feature-body main.daily-feature-main{width:calc(100% - 16px);margin-bottom:8px;padding:26px 20px 30px;border-radius:16px}.daily-practice-overlay .daily-question{border-radius:14px}.daily-practice-overlay .daily-question a{border-radius:999px}.notebook-overlay__head{padding-bottom:20px}.notebook-overlay__head h2{font-size:clamp(34px,10vw,44px)}}
+@media(prefers-reduced-motion:reduce){.daily-practice-overlay.is-open .daily-practice-overlay__backdrop,.daily-practice-overlay.is-open .daily-practice-overlay__panel,.notebook-overlay.is-open .notebook-overlay__backdrop,.notebook-overlay.is-open .notebook-overlay__panel{animation:none}.daily-practice-overlay.is-closing,.notebook-overlay.is-closing{transition:none}}

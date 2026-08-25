@@ -14,6 +14,19 @@ describe("mistake notebook overlay", () => {
     assert.match(html, /data-notebook-overlay-content/);
   });
 
+  it("uses the same glass shell and cream content sheet as Daily Practice", () => {
+    const html = notebookOverlayMarkup();
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(html, /class="notebook-overlay__panel daily-feature-body"/);
+    assert.match(html, /class="daily-feature-topbar"/);
+    assert.match(html, /class="daily-feature-close"/);
+    assert.match(html, /<main class="daily-feature-main">/);
+    assert.match(css, /\.notebook-overlay\{[^}]*place-items:center/);
+    assert.match(css, /\.notebook-overlay__backdrop\{[^}]*backdrop-filter:blur\(12px\)/);
+    assert.match(css, /\.notebook-overlay__panel\{[^}]*border-radius:28px[^}]*background:rgba\(99,24,56,\.88\)/);
+    assert.match(css, /\.notebook-overlay \.daily-feature-body main\.daily-feature-main\{[^}]*border-radius:20px[^}]*background:#f6f1e9/);
+  });
+
   it("switches notebook tabs inside the overlay instead of navigating", () => {
     assert.equal(notebookStatusFromHref("mistake-notebook.html"), "to_review");
     assert.equal(notebookStatusFromHref("mistake-notebook.html?status=resolved"), "resolved");
@@ -24,8 +37,15 @@ describe("mistake notebook overlay", () => {
     for (const pageName of ["grade-4.html", "grade-5.html"]) {
       const html = readFileSync(new URL(`../${pageName}`, import.meta.url), "utf8");
       assert.match(html, /src\/notebook-overlay\.js/);
+      assert.match(html, /src\/notebook-overlay\.js\?v=20260825-glass2/);
       assert.match(html, /src\/notebook-shortcut\.js\?v=20260825-book2/);
     }
+  });
+
+  it("claims notebook shortcuts before the global page-navigation transition", () => {
+    const source = readFileSync(new URL("./notebook-overlay.js", import.meta.url), "utf8");
+    assert.match(source, /event\.preventDefault\(\);\s*event\.stopPropagation\(\);/);
+    assert.match(source, /document\.addEventListener\("click",[\s\S]*?\}, true\);/);
   });
 
   it("contains long notebook content without border collisions", () => {
