@@ -5,10 +5,10 @@ import {
   writeArrivalMarker,
 } from './page-navigation.js?v=20260806-prism3';
 
-const NAVIGATION_FALLBACK_MS = 180;
+const NAVIGATION_FALLBACK_MS = 260;
+const DIRECTIONAL_FALLBACK_MS = 440;
 const root = document.documentElement;
-const curtain = document.querySelector('.page-transition-curtain');
-const supportsNativeTransitions = 'startViewTransition' in document;
+let curtain = document.querySelector('.page-transition-curtain');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const prefetched = new Set();
 const previewEvent = {
@@ -23,6 +23,19 @@ const previewEvent = {
 // Keep every page visible even when an earlier cached stylesheet still expects
 // the retired `is-ready` entry-state class.
 document.body.classList.add('is-ready');
+if (!document.querySelector('link[href*="page-transitions.css"]')) {
+  const transitionStyles = document.createElement('link');
+  transitionStyles.rel = 'stylesheet';
+  transitionStyles.href = 'src/page-transitions.css?v=20260825-smooth2';
+  document.head.append(transitionStyles);
+}
+if (!curtain) {
+  curtain = document.createElement('div');
+  curtain.className = 'page-transition-curtain';
+  curtain.setAttribute('aria-hidden', 'true');
+  document.body.prepend(curtain);
+}
+if (curtain) curtain.hidden = false;
 
 let clickAudioContext = null;
 
@@ -62,7 +75,8 @@ document.addEventListener('keydown', event => {
 }, true);
 
 const arrivedThroughCurtain = consumeArrivalMarker(window.sessionStorage);
-if (supportsNativeTransitions || !arrivedThroughCurtain) {
+if (arrivedThroughCurtain) root.classList.add('is-transition-arriving');
+if (!arrivedThroughCurtain) {
   root.classList.remove('is-transition-arriving');
 } else {
   requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -85,16 +99,57 @@ document.addEventListener('pointerenter', prefetchLink, true);
 document.addEventListener('focusin', prefetchLink);
 document.addEventListener('touchstart', prefetchLink, { passive: true });
 
+function directionalNavigation(destination, direction) {
+  const isDrop = direction === 'grade-drop';
+  const layer = document.createElement('div');
+  layer.className = isDrop ? 'page-transition-underlay' : 'page-transition-arrival';
+  layer.setAttribute('aria-hidden', 'true');
+  if (isDrop) {
+    layer.innerHTML = `
+      <div class="page-transition-grade-preview">
+        <p>Music theory that you can hear</p>
+        <h2>Choose your <em>grade.</em></h2>
+        <div><span>Grade 1</span><span>Grade 2</span><span>Grade 3</span><span>Grade 4</span><strong>Grade 5</strong></div>
+      </div>`;
+  } else {
+    layer.innerHTML = '<strong class="page-transition-grade-title">Grade 5</strong>';
+  }
+  document.body.append(layer);
+
+  let navigated = false;
+  const navigate = () => {
+    if (navigated) return;
+    navigated = true;
+    if (!isDrop) writeArrivalMarker(window.sessionStorage);
+    window.location.assign(destination.href);
+  };
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    root.classList.add(isDrop ? 'is-grade-dropping' : 'is-grade-rising');
+    window.setTimeout(navigate, reducedMotion ? 0 : DIRECTIONAL_FALLBACK_MS);
+  }));
+}
+
 document.addEventListener('click', event => {
   const link = linkFromEvent(event);
   const destination = eligibleNavigation(link, event, window.location.href);
   if (!destination) return;
 
   link.classList.add('is-pressed');
-  if (supportsNativeTransitions || !curtain) return;
-
   event.preventDefault();
-  if (root.classList.contains('is-transitioning')) return;
+  if (root.classList.contains('is-transitioning')
+    || root.classList.contains('is-grade-dropping')
+    || root.classList.contains('is-grade-rising')) return;
+
+  const directional = link.dataset.pageTransition;
+  if (!reducedMotion && ['grade-drop', 'grade-rise'].includes(directional)) {
+    directionalNavigation(destination, directional);
+    return;
+  }
+
+  if (!curtain) {
+    window.location.assign(destination.href);
+    return;
+  }
 
   let navigated = false;
   const navigate = () => {
@@ -117,7 +172,7 @@ document.addEventListener('click', event => {
 });
 
 window.addEventListener('pageshow', () => {
-  root.classList.remove('is-transitioning');
+  root.classList.remove('is-transitioning', 'is-grade-dropping', 'is-grade-rising');
   if (!consumeArrivalMarker(window.sessionStorage)) {
     root.classList.remove('is-transition-arriving');
   }

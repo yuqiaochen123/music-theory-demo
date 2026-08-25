@@ -73,8 +73,12 @@ describe("curtain navigation helpers", () => {
     }
   });
 
-  it("leaves file URLs and malformed destinations to native navigation", () => {
-    assert.equal(eligibleNavigation(anchor("topic.html"), click(), "file:///tmp/index.html"), null);
+  it("supports local file pages while rejecting mixed-protocol and malformed destinations", () => {
+    assert.equal(
+      eligibleNavigation(anchor("topic.html"), click(), "file:///tmp/index.html")?.href,
+      "file:///tmp/topic.html",
+    );
+    assert.equal(eligibleNavigation(anchor("https://example.com/topic.html"), click(), "file:///tmp/index.html"), null);
     assert.equal(eligibleNavigation(anchor("http://[invalid"), click(), "http://localhost:3000/"), null);
   });
 

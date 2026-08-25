@@ -46,6 +46,19 @@ test('supports the Grade 4 breve as eight crotchet beats',()=>{
   assert.equal(event.duration,4);
 });
 
+test('plays tied notes of the same pitch as one continuous sound',()=>{
+  const {buildRhythmTimeline}=loadPlayback();
+  const timeline=buildRhythmTimeline({meter:[4,4],events:[
+    {keys:['e/5'],duration:'q',tieToNext:true},
+    {keys:['e/5'],duration:'q'},
+    {rest:true,duration:'h'}
+  ]},{quarterSeconds:.48});
+  assert.deepEqual(Array.from(timeline,event=>({time:event.time,duration:event.duration,rest:event.rest,midi:event.midi})),[
+    {time:0,duration:.96,rest:false,midi:76},
+    {time:.96,duration:.96,rest:true,midi:null}
+  ]);
+});
+
 test('synchronizes the written rhythm with metronome pulses for its full duration',()=>{
   const {buildAccompaniedRhythmTimeline}=loadPlayback();
   const combined=buildAccompaniedRhythmTimeline({meter:[6,8],events:[

@@ -1,5 +1,5 @@
 import { requestTutorExplanation } from './ai-tutor.js';
-import { buildIncorrectFeedback, buildTutorRequest, createTutorController } from './ai-tutor-ui.js';
+import { buildIncorrectFeedback, buildTutorRequest, createTutorController } from './ai-tutor-ui.js?v=20260825-concise1';
 
 const feedbackElement = document.querySelector('#feedback');
 

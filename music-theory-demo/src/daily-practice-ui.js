@@ -42,11 +42,12 @@ function streakMarkup(streak = 1) {
   return `<span class="daily-streak" data-daily-streak role="img" aria-label="${value} ${unit} practice streak" title="Dynamic streak fire by aristote · CC BY"><canvas data-daily-streak-canvas width="96" height="96" aria-hidden="true"></canvas><span class="daily-streak__fallback" data-daily-streak-fallback aria-hidden="true">🔥 <span>${value}</span></span></span>`;
 }
 
-export function summaryMarkup({ challenge, reviewCount = 0, signedOut = false, streak = 1 } = {}) {
+export function summaryMarkup({ challenge, reviewCount = 0, signedOut = false, loading = false, streak = 1 } = {}) {
   if (signedOut) return `<section class="today-panel today-panel--signed-out"><div class="today-signed-out-copy"><strong>Daily practice</strong><span>Sign in to get a challenge shaped around your weak topics.</span></div><a class="today-action" href="login.html">Sign in</a>${streakMarkup(streak)}</section>`;
+  if (loading) return `<section class="today-panel today-panel--compact" aria-label="Today's practice" aria-busy="true"><div class="today-card today-card--loading" aria-disabled="true"><span class="today-icon" aria-hidden="true">4</span><span><strong>Daily practice</strong><small>Preparing today's practice…</small></span><b>Preparing…</b></div></section>`;
   const completed = challenge?.completed_exercise_ids?.length ?? 0;
   const finished = completed === 4;
-  return `<section class="today-panel today-panel--compact" aria-label="Today's practice"><a class="today-card${finished ? " today-card--complete" : ""}" href="daily-challenge.html"><span class="today-icon" aria-hidden="true">${finished ? "✓" : "4"}</span><span><strong>Daily practice</strong><small>${finished ? "Completed today" : `${completed}/4 complete`}</small></span><b>${finished ? "View" : "Continue"} →</b></a>${streakMarkup(streak)}</section>`;
+  return `<section class="today-panel today-panel--compact" aria-label="Today's practice"><a class="today-card${finished ? " today-card--complete" : ""}" href="daily-challenge.html"><span class="today-icon" aria-hidden="true">${finished ? "✓" : "4"}</span><span><strong>Daily practice</strong><small>${finished ? "Completed today" : `${completed}/4 complete`}</small></span>${streakMarkup(streak)}<b>${finished ? "View" : "Continue"} →</b></a></section>`;
 }
 
 export function notebookShortcutMarkup({ reviewCount } = {}) {
@@ -109,7 +110,7 @@ export async function mountSummary(root, {
   root[SUMMARY_MOUNT_GENERATION] = generation;
   root[ACTIVE_STREAK_CONTROLLER]?.cleanup?.();
   delete root[ACTIVE_STREAK_CONTROLLER];
-  root.innerHTML = '<p class="daily-loading">Preparing today’s practice…</p>';
+  root.innerHTML = summaryMarkup({ loading: true });
   let streak = 1;
   try {
     const summary = await loadSummaryData({ registry, store });
@@ -129,7 +130,7 @@ export async function mountSummary(root, {
   else root[ACTIVE_STREAK_CONTROLLER] = controller;
 }
 
-async function mountChallenge(root, {
+export async function mountChallenge(root, {
   registry = globalThis.window?.ListeningDeskPractice,
   store = dailyPracticeStore,
   logError = globalThis.console?.error,

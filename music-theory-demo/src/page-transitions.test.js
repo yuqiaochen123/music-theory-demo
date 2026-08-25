@@ -10,6 +10,7 @@ const entryPages = [
   "topic.html",
   "practice.html",
   "login.html",
+  "daily-challenge.html",
   "vexflow-cadence-proof.html",
 ];
 
@@ -22,7 +23,7 @@ describe("seamless cross-page navigation", () => {
 
       assert.notEqual(criticalBackground, -1, `${filename} is missing its first-paint background`);
       assert.ok(criticalBackground < firstStylesheet, `${filename} loads external CSS before its first-paint background`);
-      assert.match(html, /href="src\/page-transitions\.css\?v=20260805-transition1"/);
+      assert.match(html, /href="src\/page-transitions\.css\?v=20260825-smooth2"/);
     }
   });
 
@@ -32,15 +33,15 @@ describe("seamless cross-page navigation", () => {
     assert.doesNotMatch(styles, /@view-transition|::view-transition/);
   });
 
-  it("keeps the transition curtain hidden so it can never block the interface", () => {
-    const curtain = '<div class="page-transition-curtain" aria-hidden="true" hidden></div>';
+  it("keeps one inert transition curtain ready for cross-page animation", () => {
+    const curtain = '<div class="page-transition-curtain" aria-hidden="true"></div>';
     const arrivalBootstrap = /sessionStorage\.getItem\('listening-desk:page-transition'\)[\s\S]*is-transition-arriving/;
 
     for (const filename of entryPages) {
       const html = page(filename);
       assert.equal((html.match(/class="page-transition-curtain"/g) || []).length, 1, `${filename} needs one curtain`);
       assert.match(html, arrivalBootstrap, `${filename} needs the early arrival bootstrap`);
-      assert.ok(html.indexOf(curtain) > html.indexOf("<body"), `${filename} hidden curtain must be inside the body`);
+      assert.ok(html.indexOf(curtain) > html.indexOf("<body"), `${filename} curtain must be inside the body`);
     }
   });
 
@@ -49,10 +50,30 @@ describe("seamless cross-page navigation", () => {
 
     assert.match(styles, /\.page-transition-curtain\s*\{[^}]*position:\s*fixed[^}]*inset:\s*0[^}]*z-index:\s*2147483647/);
     assert.match(styles, /\.page-transition-curtain\s*\{[^}]*background:\s*var\(--brand-primary,\s*#9a2f5a\)/i);
-    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*pointer-events:\s*none[^}]*opacity:\s*0[^}]*140ms/);
-    assert.match(styles, /html\.is-transitioning \.page-transition-curtain\s*\{[^}]*pointer-events:\s*auto[^}]*opacity:\s*1[^}]*110ms/);
+    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*pointer-events:\s*none[^}]*opacity:\s*0[^}]*220ms/);
+    assert.match(styles, /html\.is-transitioning \.page-transition-curtain\s*\{[^}]*pointer-events:\s*auto[^}]*opacity:\s*1[^}]*180ms/);
     assert.match(styles, /html\.is-transition-arriving \.page-transition-curtain\s*\{[^}]*opacity:\s*1/);
     assert.doesNotMatch(styles, /\.page-transition-curtain\s*\{[^}]*translate|\.page-transition-curtain\s*\{[^}]*scale/);
     assert.match(styles, /prefers-reduced-motion:\s*reduce[\s\S]*\.page-transition-curtain\s*\{[^}]*transition-duration:\s*0\.01ms\s*!important/);
+  });
+
+  it("uses a directional reveal for entering and leaving Grade 5", () => {
+    const index = page("index.html");
+    const gradeFive = page("grade-5.html");
+    const motion = page("src/motion.js");
+    const styles = page("src/page-transitions.css");
+
+    assert.match(index, /data-grade="5"[^>]*data-page-transition="grade-rise"/);
+    assert.match(gradeFive, /class="grade-five-close"[^>]*data-page-transition="grade-drop"/);
+    assert.match(motion, /page-transition-underlay/);
+    assert.match(motion, /page-transition-arrival/);
+    assert.match(motion, /page-transition-grade-preview/);
+    assert.doesNotMatch(motion, /createElement\('iframe'\)/);
+    assert.match(motion, /if \(!isDrop\) writeArrivalMarker/);
+    assert.match(motion, /DIRECTIONAL_FALLBACK_MS = 440/);
+    assert.match(styles, /\.page-transition-grade-preview/);
+    assert.match(styles, /html\.is-grade-dropping/);
+    assert.match(styles, /html\.is-grade-rising/);
+    assert.match(styles, /translateY\(100vh\)/);
   });
 });

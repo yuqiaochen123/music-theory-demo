@@ -34,11 +34,14 @@
 }
 
 .quaver-guide[data-chat-open="true"] {
-  width: min(360px, calc(100vw - 32px));
+  box-sizing: border-box;
+  width: min(430px, calc(100vw - 32px));
+  padding: 18px;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "chat" "input" "stage" "send" "controls";
+  grid-template-areas: "chat" "stage" "controls";
   align-items: stretch;
   gap: 10px;
+  contain: layout paint;
 }
 
 .quaver-guide[data-chat-open="true"]::before {
@@ -50,9 +53,7 @@
   opacity: 1;
 }
 
-.quaver-guide[hidden],
-.quaver-guide[data-minimized="true"] [data-quaver-chat-toggle],
-.quaver-guide[data-minimized="true"] [data-quaver-chat] { display: none; }
+.quaver-guide[hidden] { display: none; }
 
 .quaver-restore {
   position: fixed;
@@ -110,6 +111,9 @@
 .quaver-guide__stage canvas[hidden],
 .quaver-guide__fallback[hidden] { display: none; }
 
+/* The SVG is retained as an inaccessible asset reference, never as a visible loading state. */
+.quaver-guide__fallback { display: none; }
+
 .quaver-guide__stage canvas[data-quaver-source] {
   position: absolute;
   opacity: 0;
@@ -146,8 +150,7 @@
 
 .quaver-guide:hover .quaver-guide__controls,
 .quaver-guide:focus-within .quaver-guide__controls,
-.quaver-guide[data-chat-ready="true"] .quaver-guide__controls,
-.quaver-guide[data-minimized="true"] .quaver-guide__controls {
+.quaver-guide[data-chat-ready="true"] .quaver-guide__controls {
   opacity: 1;
   transform: translateY(0);
 }
@@ -180,9 +183,10 @@
 
 [data-quaver-chat] {
   grid-area: chat;
-  display: contents;
-  flex-basis: 100%;
-  order: 10;
+  display: grid;
+  grid-template-areas: "messages" "input" "send";
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 8px;
   width: 100%;
   padding: 0;
@@ -196,14 +200,16 @@
 [data-quaver-chat][hidden] { display: none; }
 
 .quaver-chat__messages {
-  grid-area: chat;
+  grid-area: messages;
   display: grid;
   gap: 7px;
+  min-width: 0;
   max-height: min(48vh, 360px);
   overflow-y: auto;
 }
 
 .quaver-chat__message {
+  min-width: 0;
   max-width: 86%;
   margin: 0;
   padding: 8px 10px;
@@ -212,6 +218,7 @@
   font-size: 14px;
   font-weight: 650;
   line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .quaver-chat__message--user {
@@ -229,9 +236,7 @@
   color: #fff;
 }
 
-.quaver-chat__composer { display: contents; }
-
-.quaver-chat__composer button {
+[data-quaver-chat] > button[type="submit"] {
   grid-area: send;
   width: 100%;
   border: 1px solid #9a2f5a;
@@ -256,11 +261,17 @@
   font-size: 12px;
 }
 
-[data-quaver-chat] input:focus { outline: 3px solid #f0b84c; outline-offset: 2px; }
+[data-quaver-chat] input:focus {
+  outline: 0;
+  border-color: #9a2f5a;
+  box-shadow: 0 0 0 3px rgba(154, 47, 90, .18);
+}
 
 .quaver-guide[data-chat-open="true"] .quaver-guide__stage {
   justify-self: center;
 }
+
+.quaver-guide[data-chat-open="true"] .quaver-guide__bubble { display: none; }
 
 .quaver-guide[data-chat-open="true"] .quaver-guide__controls {
   justify-self: center;
@@ -314,7 +325,8 @@
   .quaver-guide__controls { display:flex; justify-content:flex-end; flex-wrap:wrap; }
   .quaver-guide__controls button { min-height:38px; padding:8px 11px; }
   .quaver-guide[data-chat-open="true"] {
-    width:min(330px, calc(100vw - 16px));
+    width:min(360px, calc(100vw - 16px));
+    padding:14px;
     grid-template-columns: minmax(0, 1fr);
   }
 }

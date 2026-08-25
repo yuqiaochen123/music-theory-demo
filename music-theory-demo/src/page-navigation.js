@@ -28,8 +28,11 @@ export function eligibleNavigation(anchor, event, currentUrl) {
   try {
     const current = new URL(currentUrl);
     const destination = new URL(anchor.href, current);
-    if (!/^https?:$/.test(current.protocol) || !/^https?:$/.test(destination.protocol)) return null;
-    if (destination.origin !== current.origin) return null;
+    const localFileNavigation = current.protocol === "file:" && destination.protocol === "file:";
+    const sameOriginWebNavigation = /^https?:$/.test(current.protocol)
+      && /^https?:$/.test(destination.protocol)
+      && destination.origin === current.origin;
+    if (!localFileNavigation && !sameOriginWebNavigation) return null;
     if (destination.hash && destination.pathname === current.pathname && destination.search === current.search) return null;
     return destination;
   } catch {

@@ -140,6 +140,12 @@ describe("new topic notation renderers",()=>{
     assert.doesNotMatch(rhythmSource,/voice\.draw[\s\S]*VF\.Beam\.generateBeams/);
   });
 
+  it("beams grouped quavers, semiquavers, and demisemiquavers",()=>{
+    const rhythmSource=source.slice(source.indexOf("function renderRhythm"),source.indexOf("function renderScale"));
+    assert.match(rhythmSource,/BEAMABLE_DURATIONS\s*=\s*new Set\(\["8",\s*"16",\s*"32"\]\)/);
+    assert.match(rhythmSource,/items\.every\(\(\{ event \}\) => BEAMABLE_DURATIONS\.has\(event\.duration\) && !event\.rest\)/);
+  });
+
   it("can hide the printed metre in an assessment without changing lesson defaults",()=>{
     const rhythmSource=source.slice(source.indexOf("function renderRhythm"),source.indexOf("function renderScale"));
     assert.match(rhythmSource,/specification\.showTimeSignature === false \? null/);

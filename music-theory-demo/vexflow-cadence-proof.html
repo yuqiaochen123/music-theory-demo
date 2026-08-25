@@ -6,7 +6,7 @@
     <title>VexFlow Cadence Proof</title>
     <style>html{background:#f3efec}</style>
     <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
-    <link rel="stylesheet" href="src/page-transitions.css?v=20260805-transition1">
+    <link rel="stylesheet" href="src/page-transitions.css?v=20260825-smooth2">
     <style>
       * { box-sizing: border-box; }
       body { margin: 0; min-height: 100vh; background: #f4f7fd; color: #102048; font-family: Arial, Helvetica, sans-serif; }
@@ -30,7 +30,7 @@
     </style>
   </head>
   <body>
-    <div class="page-transition-curtain" aria-hidden="true" hidden></div>
+    <div class="page-transition-curtain" aria-hidden="true"></div>
     <main>
       <p class="eyebrow">Isolated engraving proof — existing pages unchanged</p>
       <h1>A-major perfect cadence</h1>
@@ -48,8 +48,9 @@
     </main>
 
     <script src="vendor/vexflow-5.0.0.js"></script>
-    <script type="module" src="src/motion.js?v=20260819-visible1"></script>
-    <script>
+    <script type="module" src="src/motion.js?v=20260825-smooth2"></script>
+    <script type="module">
+      import { pianoPlayer } from './src/piano-audio.js?v=20260825-timing2';
       (() => {
         const result = document.getElementById("result");
         const VF = window.VexFlow;
@@ -74,20 +75,8 @@
         voice.draw(context, stave);
 
         document.getElementById("play").addEventListener("click", () => {
-          const audio = new (window.AudioContext || window.webkitAudioContext)();
-          const play = (midi, start, duration) => {
-            const oscillator = audio.createOscillator();
-            const gain = audio.createGain();
-            oscillator.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
-            gain.gain.setValueAtTime(0.0001, audio.currentTime + start);
-            gain.gain.exponentialRampToValueAtTime(0.22, audio.currentTime + start + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + start + duration);
-            oscillator.connect(gain).connect(audio.destination);
-            oscillator.start(audio.currentTime + start);
-            oscillator.stop(audio.currentTime + start + duration + 0.03);
-          };
-          [68, 71, 76].forEach((midi) => play(midi, 0, 0.7));
-          [69, 73, 76].forEach((midi) => play(midi, 0.78, 1.15));
+          pianoPlayer.play([68, 71, 76], { duration: .7 });
+          pianoPlayer.play([69, 73, 76], { delay: .78, duration: 1.15 });
           result.textContent = "Played: E major (V) → A major (I).";
         });
       })();

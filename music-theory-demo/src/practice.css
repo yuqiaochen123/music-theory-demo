@@ -188,6 +188,23 @@
   box-shadow: none !important;
 }
 
+.practice-body .show-answer {
+  justify-self: start;
+  margin: 0;
+  padding: 12px 17px;
+  border: 1px solid #d9a9bd;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--brand-primary, #9a2f5a);
+  font: inherit;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.practice-body .show-answer:hover {
+  background: #fff4f8;
+}
+
 .practice-body .notation.notation--entry {
   display: block;
   height: auto !important;

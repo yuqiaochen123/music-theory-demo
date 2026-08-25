@@ -75,8 +75,10 @@ export function buildOpenAIRequest(input, { model = 'gpt-5.6-terra', safetyIdent
     max_output_tokens: 260,
     input: [
       'You are a concise Grade 5 music-theory tutor.',
-      'Explain why the selected answer is different from the supplied correct answer.',
-      "Explicitly name both the student's choice and the correct answer, then connect them to this exercise's trusted facts.",
+      'Explain the musical idea that resolves the learner’s mistake.',
+      'Start immediately with the useful musical reason, distinction, or rule.',
+      'Do not begin by saying the learner is wrong, that their choice differs from the correct answer, or by mechanically restating both answers.',
+      'Mention an answer label only when it is necessary to explain the musical distinction.',
       'Use only the trusted facts below. Do not change or question the correct answer.',
       'Do not mention being an AI. Use supportive, direct language suitable for a young learner.',
       '',

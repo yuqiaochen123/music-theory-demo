@@ -60,8 +60,15 @@ test('a question can suppress playback when audio would reveal the answer',()=>{
   assert.match(page,/question\.disablePlayback===true/);
 });
 
-test('full-rhythm tones sustain evenly and cut off at the written boundary',()=>{
-  assert.match(page,/strictCutoff=false/);
-  assert.match(page,/gain\.gain\.setValueAtTime\(volume,end-\.006\)/);
-  assert.match(page,/strictCutoff:true/);
+test('full-rhythm notes use the duration-aware sampled-piano scheduler',()=>{
+  assert.match(page,/import \{ pianoPlayer \} from '\.\/src\/piano-audio\.js/);
+  assert.match(page,/pianoPlayer\.playEvents\(timeline/);
+  assert.match(page,/pianoPlayer\.playEvents\(combined\.rhythm/);
+});
+
+test('rhythm and metronome share the sampled-piano audio clock and exact start time',()=>{
+  assert.match(page,/await pianoPlayer\.prepare\(combined\.rhythm\.map\(event=>event\.midi\)\)/);
+  assert.match(page,/const audio=pianoPlayer\.context,base=audio\.currentTime\+\.08/);
+  assert.match(page,/pianoPlayer\.playEvents\(combined\.rhythm,\{startAt:base\}\)/);
+  assert.match(page,/start:base\+click\.time/);
 });

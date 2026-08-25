@@ -27,12 +27,19 @@
 
   function buildRhythmTimeline(specification,{quarterSeconds=.48}={}){
     let cursor=0;
-    return (specification.events||[]).map(event=>{
+    let previousSource=null;
+    const timeline=[];
+    (specification.events||[]).forEach(event=>{
       const duration=eventQuarterUnits(event)*quarterSeconds;
       const scheduled={time:cursor,duration,rest:!!event.rest,midi:event.rest?null:writtenPitchToMidi(event.keys?.[0])};
       cursor+=duration;
-      return scheduled;
+      const preceding=timeline[timeline.length-1];
+      const continuesTie=!!previousSource?.tieToNext&&!scheduled.rest&&!preceding?.rest&&scheduled.midi!==null&&scheduled.midi===preceding?.midi;
+      if(continuesTie)preceding.duration+=duration;
+      else timeline.push(scheduled);
+      previousSource=event;
     });
+    return timeline;
   }
 
   function metronomePulseQuarterUnits([beats,beatValue]){

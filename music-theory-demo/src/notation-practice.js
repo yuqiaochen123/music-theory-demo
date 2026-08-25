@@ -2,7 +2,7 @@ import {
   NATURAL_PITCHES, addNote, applyAccidental, canPlaceNote, clearPhrase, createEditorState,
   deleteSelected, noteMidi, pitchLabel, placeAtCursor, rhythmicRests, selectNote, undo,
 } from "./clef-transposition-editor.js";
-import { pitchFromStaffPoint, yForPitch } from "./clef-transposition-editor-ui.js";
+import { ledgerLineYsForPitch, pitchFromStaffPoint, yForPitch } from "./clef-transposition-editor-ui.js?v=20260825-ledgers1";
 import { validateNotationAnswer } from "./notation-answer.js";
 
 export function createNotationPracticeState(exercise) {
@@ -102,6 +102,8 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
     const rect = svg.getBoundingClientRect();
     let pitchYs = null;
     try { pitchYs = JSON.parse(svg.dataset.pitchYs || "null"); } catch {}
+    let staffLineYs = null;
+    try { staffLineYs = JSON.parse(svg.dataset.staffLineYs || "null"); } catch {}
     const pitch = pitchFromStaffPoint(event.clientY, rect, pitchYs);
     const x = Number(svg.dataset.cursorX);
     if (!pitch || !Number.isFinite(x) || !canPlaceNote(state.editor, state.editor.cursorSlot, state.duration)) {
@@ -114,6 +116,18 @@ export function mountNotationPractice({ container, exercise, notation, play, onR
     preview.setAttribute("data-notation-pointer-preview", "");
     preview.setAttribute("pointer-events", "none");
     preview.replaceChildren();
+    ledgerLineYsForPitch(y, staffLineYs).forEach((ledgerY) => {
+      const ledger = document.createElementNS(namespace, "line");
+      ledger.setAttribute("x1", String(x - 11));
+      ledger.setAttribute("x2", String(x + 11));
+      ledger.setAttribute("y1", String(ledgerY));
+      ledger.setAttribute("y2", String(ledgerY));
+      ledger.setAttribute("stroke", "#1687d9");
+      ledger.setAttribute("stroke-width", "2");
+      ledger.setAttribute("stroke-linecap", "round");
+      ledger.setAttribute("data-hover-ledger-line", "");
+      preview.append(ledger);
+    });
     const head = document.createElementNS(namespace, "ellipse");
     head.setAttribute("cx", String(x));
     head.setAttribute("cy", String(y));

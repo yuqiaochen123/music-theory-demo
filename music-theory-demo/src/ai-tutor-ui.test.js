@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildIncorrectFeedback, buildTutorRequest, createTutorController } from './ai-tutor-ui.js';
+import { buildIncorrectFeedback, buildTutorRequest, cleanTutorExplanation, createTutorController } from './ai-tutor-ui.js';
 
 class FakeElement {
   constructor(tagName, ownerDocument) {
@@ -62,6 +62,35 @@ test('renders successful model output as text in the tutor region', async () => 
   assert.equal(region.children[0].textContent, 'AI tutor');
   assert.equal(region.children[1].textContent, '<b>C to E is four semitones.</b>');
   assert.equal(region.children[2].textContent, 'Try this: Count each half-step.');
+});
+
+test('removes redundant correctness preambles and starts with the useful musical explanation', () => {
+  assert.equal(
+    cleanTutorExplanation('Your choice, “incorrect,” is different from the correct answer, “correct.” In this exercise, rewriting an extract one octave higher preserves every pitch name and raises its register.'),
+    'In this exercise, rewriting an extract one octave higher preserves every pitch name and raises its register.',
+  );
+  assert.equal(
+    cleanTutorExplanation('Your answer is incorrect. C to E-flat spans three semitones, so it is a minor third.'),
+    'C to E-flat spans three semitones, so it is a minor third.',
+  );
+});
+
+test('cleans redundant model preambles before Quaver displays them', async () => {
+  const { feedback } = fixture();
+  const messages = [];
+  const controller = createTutorController({
+    feedbackElement: feedback,
+    useFloatingGuide: true,
+    onExplanation: message => messages.push(message),
+    requestExplanation: async () => ({
+      explanation: 'Your choice, “incorrect,” is different from the correct answer, “correct.” Rewriting one octave higher preserves the letter name.',
+      tip: 'Move every note up eight letter names.',
+    }),
+  });
+
+  await controller.explain({ exerciseId: 'one', selectedAnswer: 'incorrect', correctAnswer: 'correct', facts: [] });
+
+  assert.equal(messages[0], 'Rewriting one octave higher preserves the letter name. Try this: Move every note up eight letter names.');
 });
 
 test('shows an exercise-specific answer guide when the AI request fails', async () => {

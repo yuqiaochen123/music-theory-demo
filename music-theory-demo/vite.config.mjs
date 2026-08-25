@@ -6,12 +6,19 @@ import { fileURLToPath } from "node:url";
 const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@opentelemetry/api': path.resolve(root, 'src/optional-opentelemetry.js'),
+    },
+  },
   build: {
     outDir: "dist/client",
     rollupOptions: {
       input: {
         index: path.resolve(root, "index.html"),
         grade: path.resolve(root, "grade.html"),
+        "grade-2": path.resolve(root, "grade-2.html"),
+        "grade-3": path.resolve(root, "grade-3.html"),
         "grade-4": path.resolve(root, "grade-4.html"),
         "grade-5": path.resolve(root, "grade-5.html"),
         login: path.resolve(root, "login.html"),

@@ -55,12 +55,9 @@ describe("accessible matching practice", () => {
     assert.match(styles, /\.matching-notation svg\s*\{[^}]*width:\s*100%/);
   });
 
-  it("resumes one reusable audio context and tolerates missing durations and written rests", () => {
+  it("routes matching playback through the duration-aware piano player", () => {
     const page = readFileSync(new URL("../practice.html", import.meta.url), "utf8");
-    assert.match(page, /let timedAudioContext=null/);
     assert.match(page, /async function playTimedNotes\(midis,durations=\[\]\)/);
-    assert.match(page, /timedAudioContext\|\|=new Audio\(\)/);
-    assert.match(page, /if\(timedAudioContext\.state==='suspended'\)await timedAudioContext\.resume\(\)/);
-    assert.match(page, /if\(!Number\.isFinite\(midi\)\)\{start=end;return\}/);
+    assert.match(page, /pianoPlayer\.playTimed\(midis,durations\)/);
   });
 });

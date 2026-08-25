@@ -1,11 +1,25 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { hoveredNoteIndexFromStaffPoint, pitchFromStaffPoint, previewFromStaffPoint, scaleSlotCenters, selectedIndexFromStaffPoint, slotFromStaffPoint, yForPitch } from "./clef-transposition-editor-ui.js";
+import { hoveredNoteIndexFromStaffPoint, ledgerLineYsForPitch, pitchFromStaffPoint, previewFromStaffPoint, scaleSlotCenters, selectedIndexFromStaffPoint, slotFromStaffPoint, yForPitch } from "./clef-transposition-editor-ui.js";
 
 const topicPage = readFileSync(new URL("../topic.html", import.meta.url), "utf8");
+const practicePage = readFileSync(new URL("../practice.html", import.meta.url), "utf8");
+const notationPracticeSource = readFileSync(new URL("./notation-practice.js", import.meta.url), "utf8");
 
 describe("clef transposition lesson editor", () => {
+  it("cache-busts the ledger-line helper through the browser module chain", () => {
+    assert.match(notationPracticeSource, /clef-transposition-editor-ui\.js\?v=20260825-ledgers1/);
+    assert.match(practicePage, /notation-practice\.js\?v=20260825-ledgers1/);
+  });
+  it("places accurate ledger lines around hover notes outside the five-line staff", () => {
+    const staffLines = [72, 82, 92, 102, 112];
+    assert.deepEqual(ledgerLineYsForPitch(67, staffLines), []);
+    assert.deepEqual(ledgerLineYsForPitch(57, staffLines), [62]);
+    assert.deepEqual(ledgerLineYsForPitch(42, staffLines), [62, 52, 42]);
+    assert.deepEqual(ledgerLineYsForPitch(117, staffLines), []);
+    assert.deepEqual(ledgerLineYsForPitch(127, staffLines), [122]);
+  });
   it("mounts only on the clef-transposition lesson", () => {
     assert.match(topicPage, /id="clef-editor"/);
     assert.match(topicPage, /topic === 'clef-transposition'/);
@@ -105,8 +119,8 @@ describe("clef transposition lesson editor", () => {
     const uiSource = readFileSync(new URL("./clef-transposition-editor-ui.js", import.meta.url), "utf8");
     assert.match(uiSource, /state\.notes\.map\(noteMidi\), 0, 0\.28, 0\.22/);
     assert.match(uiSource, /state\.transposedNotes\.map\(noteMidi\), 0, 0\.28, 0\.22/);
-    assert.match(topicPage, /function sound\(midis,delay=0,spread=0,duration=\.55\)/);
-    assert.match(topicPage, /start\+duration/);
+    assert.match(topicPage, /function sound\(midis,delay=0,spread=0,duration=\.62\)/);
+    assert.match(topicPage, /pianoPlayer\.play\(midis,\{delay,spread,duration\}\)/);
   });
 
   it("supports deleting the selected note from the laptop keyboard", () => {

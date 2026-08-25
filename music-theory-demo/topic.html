@@ -6,7 +6,7 @@
   <title>Listening Desk · Lesson</title>
   <style>html{background:#f3efec}</style>
   <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
-  <link rel="stylesheet" href="src/page-transitions.css?v=20260805-transition1">
+  <link rel="stylesheet" href="src/page-transitions.css?v=20260825-smooth2">
   <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css">
   <style>
@@ -33,11 +33,11 @@
   <link rel="stylesheet" href="src/redesign.css?v=20260802-red5">
   <link rel="stylesheet" href="src/horizontal-flow.css?v=20260822-g4abrsm1">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
-  <link rel="stylesheet" href="src/quaver-guide.css?v=20260824-mobile1">
+  <link rel="stylesheet" href="src/quaver-guide.css?v=20260825-space1">
   <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
 </head>
 <body class="lesson-body">
-  <div class="page-transition-curtain" aria-hidden="true" hidden></div>
+  <div class="page-transition-curtain" aria-hidden="true"></div>
   <div class="lesson-topbar"><strong id="lesson-topbar-title">Lesson</strong><a class="lesson-close" href="grade-5.html" aria-label="Close lesson">×</a></div>
   <main class="lesson-page">
     <div class="lesson-carousel" aria-label="Lesson pages">
@@ -75,27 +75,30 @@
   <footer id="footer" hidden></footer>
   <script src="vendor/vexflow-5.0.0.js"></script>
   <script type="module" src="src/auth-nav.js"></script>
-  <script src="src/notation.js?v=20260824-selection9"></script>
+  <script src="src/notation.js?v=20260825-beams1"></script>
   <script src="src/topic-data.js"></script>
   <script src="src/remaining-topic-data.js?v=20260802-red3"></script>
+  <script src="src/grade-2-topic-data.js?v=20260825-grade2"></script>
+  <script src="src/grade-3-topic-data.js?v=20260825-grade3"></script>
   <script src="src/grade-4-topic-data.js?v=20260823-trill2"></script>
   <script type="module">
     import { startCurrentLesson } from './src/progress-page.js';
     import { INTERVAL_LESSONS, getIntervalLesson } from './src/intervals.js';
     import { mountClefTranspositionEditor } from './src/clef-transposition-editor-ui.js?v=20260822-g4abrsm2';
-    const query=new URLSearchParams(location.search);const grade=query.get('grade')==='4'?4:5;const DATA=grade===4?window.ListeningDeskGrade4Topics:window.ListeningDeskTopics;let topic=query.get('topic');if(!DATA[topic])topic=grade===4?'rhythm-note-values':'intervals';const gradeQuery=grade===4?'grade=4&':'';
+    import { pianoPlayer } from './src/piano-audio.js?v=20260825-timing2';
+    const query=new URLSearchParams(location.search);const requestedGrade=Number(query.get('grade'));const grade=[2,3,4].includes(requestedGrade)?requestedGrade:5;const registries={2:window.ListeningDeskGrade2Topics,3:window.ListeningDeskGrade3Topics,4:window.ListeningDeskGrade4Topics,5:window.ListeningDeskTopics};const DATA=registries[grade];let topic=query.get('topic');const defaultTopics={2:'simple-time',3:'compound-time',4:'rhythm-note-values',5:'intervals'};if(!DATA[topic])topic=defaultTopics[grade];const gradeQuery=grade===5?'':`grade=${grade}&`;
     const lessonId=query.get('lesson');const intervalLesson=grade===5&&topic==='intervals'&&lessonId?getIntervalLesson(lessonId):undefined;
     const $=selector=>document.querySelector(selector);const current=()=>DATA[topic];
     const isIntervalOverview=grade===5&&topic==='intervals'&&!intervalLesson;
     const displayedData=()=>intervalLesson?{name:'Intervals',title:intervalLesson.label,subtitle:'See two correct spellings, hear each note, then hear the interval together.',intro:intervalLesson.intro,examples:intervalLesson.examples}:current();
-    document.body.dataset.topic=topic;document.body.dataset.grade=String(grade);$('.lesson-close').href=grade===4?'grade-4.html':'grade-5.html';
+    document.body.dataset.topic=topic;document.body.dataset.grade=String(grade);$('.lesson-close').href=grade===5?'grade-5.html':`grade-${grade}.html`;
     const selectedVariants={};const revealedGroupingSelectors=new Set();
     function activeExample(index){const base=displayedData().examples[index];if(!base.variants)return base;const id=selectedVariants[index]||base.variants[0].id;return {...base,...base.variants.find(variant=>variant.id===id)}}
     const audioUnavailable='Audio playback is unavailable; you can continue with notation.';
-    function sound(midis,delay=0,spread=0,duration=.55){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio){showAudioFallback();return}const audio=new Audio(),base=audio.currentTime+.03+delay;midis.forEach((midi,index)=>{const start=base+index*spread,oscillator=audio.createOscillator(),gain=audio.createGain();oscillator.type='triangle';oscillator.frequency.value=440*2**((midi-69)/12);oscillator.connect(gain).connect(audio.destination);gain.gain.setValueAtTime(.001,start);gain.gain.exponentialRampToValueAtTime(.16,start+.03);gain.gain.exponentialRampToValueAtTime(.001,start+duration);oscillator.start(start);oscillator.stop(start+duration+.02)})}
+    function sound(midis,delay=0,spread=0,duration=.62){pianoPlayer.play(midis,{delay,spread,duration})}
     function showAudioFallback(){document.querySelectorAll('.play-row').forEach(row=>{if(!row.querySelector('.audio-fallback'))row.insertAdjacentHTML('beforeend',`<p class="audio-fallback">${audioUnavailable}</p>`)});document.querySelectorAll('.play-row button,[data-key-side],[data-key-compare]').forEach(button=>button.disabled=true)}
     let rhythmLoop=null;
-    function stopRhythmLoop(){if(!rhythmLoop)return;clearInterval(rhythmLoop.timer);rhythmLoop.button.textContent='▶ Hear multiple bars';rhythmLoop=null}
+    function stopRhythmLoop(){pianoPlayer.stopAll();if(!rhythmLoop)return;clearInterval(rhythmLoop.timer);rhythmLoop.button.textContent='▶ Hear multiple bars';rhythmLoop=null}
     function toggleRhythmLoop(index,button){if(rhythmLoop?.button===button){stopRhythmLoop();return}stopRhythmLoop();const pattern=activeExample(index).parts[0][1],playBar=()=>sound(pattern,0,.22);playBar();rhythmLoop={button,timer:setInterval(playBar,pattern.length*.22*1000)};button.textContent='⏸ Pause'}
     function playPart(index,part){stopRhythmLoop();const item=activeExample(index),spread=item.audioType==='sequence'?.24:item.audioType==='rhythm'?.22:0;sound(item.parts[part][1],0,spread)}
     function playExample(index){const item=activeExample(index),parts=item.parts;if(topic==='scale-degrees'){sound(parts[0][1].concat(parts[1][1].slice(1)),0,.24)}else if(item.completeMidi){sound(item.completeMidi,0,.24)}else if(topic==='cadences'){sound(parts[0][1]);sound(parts[1][1],.9)}else if(item.audioType==='sequence'){sound(parts.flatMap(part=>part[1]),0,.24)}else if(item.audioType==='rhythm'){sound(parts[0][1],0,.22)}else sound(parts.flatMap(part=>part[1]))}
@@ -143,7 +146,7 @@
     function render(){
       if(isIntervalOverview){renderIntervalOverview();return}
       const data=displayedData(),items=data.examples.map((base,index)=>activeExample(index));
-      const conceptOnly=items.every(item=>item.concept);$('.compare-head').hidden=conceptOnly;$('.continue').hidden=false;$('#lesson-topbar-title').textContent=intervalLesson?intervalLesson.label:data.name;$('#eyebrow').textContent=data.name;$('#title').textContent=data.title;$('#subtitle').textContent=data.subtitle;$('#intro').textContent=data.intro;$('#footer').textContent=data.name;$('#practice').href=`practice.html?${gradeQuery}topic=${topic}`;if(grade===5&&topic==='key-signatures'){renderKeySignatureLesson(data);return}if(topic==='rhythm-note-values'){renderRhythmGuide(items);return}if(grade===4||new Set(['clefs','transposing-instruments','accidentals','musical-terms','ornaments','voices-instruments','musical-observation']).has(topic)){renderLessonGuide(items);return}$('#examples').className='examples'+(conceptOnly?' concept-only':'');
+      const conceptOnly=items.every(item=>item.concept);$('.compare-head').hidden=conceptOnly;$('.continue').hidden=false;$('#lesson-topbar-title').textContent=intervalLesson?intervalLesson.label:data.name;$('#eyebrow').textContent=data.name;$('#title').textContent=data.title;$('#subtitle').textContent=data.subtitle;$('#intro').textContent=data.intro;$('#footer').textContent=data.name;$('#practice').href=`practice.html?${gradeQuery}topic=${topic}`;if(grade===5&&topic==='key-signatures'){renderKeySignatureLesson(data);return}if(topic==='rhythm-note-values'){renderRhythmGuide(items);return}if(grade!==5||new Set(['clefs','transposing-instruments','accidentals','musical-terms','ornaments','voices-instruments','musical-observation']).has(topic)){renderLessonGuide(items);return}$('#examples').className='examples'+(conceptOnly?' concept-only':'');
       $('#examples').innerHTML=items.map((item,index)=>`<article class="example"><header><p>Example ${index+1}</p><h3>${item.label}</h3></header>${groupingControls(data.examples[index],item,index)}${item.concept?conceptMarkup(item.concept):topic==='scale-degrees'?scaleDegreeNotation(item,index):`<div class="notation" id="notation-${index}" aria-label="${item.label} notation"></div>`}<div class="example-body"><p>${item.explanation}</p>${item.parts?.length>=2?`<div class="play-row"><button data-index="${index}" data-part="0">▶ ${item.parts[0][0]}</button><button data-index="${index}" data-part="1">▶ ${item.parts[1][0]}</button><button data-index="${index}" data-part="2">▶ ${topic==='time-signatures'?'Hear multiple bars':'Hear together'}</button></div>`:''}</div></article>`).join('');
       items.forEach((item,index)=>{if(item.concept)return;if(topic==='scale-degrees'){renderScaleDegreeNotation(item,index);return}const target=document.querySelector(`#notation-${index}`);try{ListeningDeskNotation.render(target,item.notation,{width:760})}catch(error){target.textContent='Notation is unavailable in this browser.'}});
       $('#examples').querySelectorAll('[data-reveal-grouping]').forEach(button=>button.onclick=()=>{const index=+button.dataset.revealGrouping;if(revealedGroupingSelectors.has(index))revealedGroupingSelectors.delete(index);else revealedGroupingSelectors.add(index);render()});$('#examples').querySelectorAll('[data-grouping]').forEach(button=>button.onclick=()=>{stopRhythmLoop();const index=+button.dataset.index;selectedVariants[index]=button.dataset.grouping;revealedGroupingSelectors.add(index);render()});$('#examples').querySelectorAll('[data-part]').forEach(button=>button.onclick=()=>{const index=+button.dataset.index,part=+button.dataset.part;if(part===2&&topic==='time-signatures')toggleRhythmLoop(index,button);else if(part===2){stopRhythmLoop();playExample(index)}else playPart(index,part)});$('#examples').querySelectorAll('[data-scale-start]').forEach(button=>button.onclick=()=>document.getElementById(button.dataset.scaleStart)?.scrollTo({left:0,behavior:'smooth'}));requestAnimationFrame(resetScaleDegreeScroll);setTimeout(resetScaleDegreeScroll,120);setTimeout(resetScaleDegreeScroll,500);if(!(window.AudioContext||window.webkitAudioContext))showAudioFallback()
@@ -172,7 +175,7 @@
       if(comparison&&grade4Data?.comparison)renderClefComparison({container:comparison,notes:grade4Data.comparison.notes,notation:window.ListeningDeskNotation,play});
     }
   </script>
-  <script type="module" src="src/motion.js?v=20260819-visible1"></script>
-  <script type="module" src="src/quaver-guide.js?v=20260824-expand1"></script>
+  <script type="module" src="src/motion.js?v=20260825-smooth2"></script>
+  <script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
 </body>
 </html>

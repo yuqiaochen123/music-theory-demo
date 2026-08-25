@@ -91,7 +91,7 @@ describe("daily practice UI", () => {
     assert.doesNotMatch(html, /Mistake Notebook/);
   });
 
-  it("renders an accessible streak slot at the right of the daily dock", () => {
+  it("renders the accessible streak inside the daily practice card after its progress copy", () => {
     const html = summaryMarkup({ challenge, streak: 7 });
     assert.match(html, /data-daily-streak/);
     assert.match(html, /role="img"/);
@@ -99,6 +99,10 @@ describe("daily practice UI", () => {
     assert.match(html, /data-daily-streak-canvas/);
     assert.match(html, /data-daily-streak-fallback/);
     assert.match(html, />7<\/span>/);
+    assert.match(
+      html,
+      /<a class="today-card[^>]*>[\s\S]*?<small>1\/4 complete<\/small><\/span>[\s\S]*?data-daily-streak[\s\S]*?<b>Continue →<\/b><\/a>/,
+    );
   });
 
   it("shows an unsaved starting streak when signed out", () => {
@@ -172,6 +176,17 @@ describe("daily practice UI", () => {
     assert.deepEqual(environment.events, ["mount-1", "cleanup-1", "mount-2", "cleanup-2"]);
   });
 
+  it("renders preparation inside the real Daily Practice card without an active link", () => {
+    const html = summaryMarkup({ loading: true });
+    assert.match(html, /today-panel--compact/);
+    assert.match(html, /today-card--loading/);
+    assert.match(html, /Daily practice/);
+    assert.match(html, /Preparing today's practice/);
+    assert.match(html, /aria-disabled="true"/);
+    assert.doesNotMatch(html, /href=/);
+    assert.doesNotMatch(html, /daily-loading/);
+  });
+
   it("keeps the Grade 5 daily shortcut visually small and mobile-safe", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.daily-practice-summary\{[^}]*max-width:680px[^}]*margin:0 auto/);
@@ -182,6 +197,15 @@ describe("daily practice UI", () => {
   it("prevents the signed-out mobile streak from flex shrinking", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.daily-streak\{[^}]*flex:none/);
+  });
+
+  it("uses the refined Daily Challenge type hierarchy and quieter card styling", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.daily-feature-body \.daily-page-head h1\{[^}]*font-family:'Avenir Next'/);
+    assert.match(css, /\.daily-feature-body \.daily-page-head h1\{[^}]*font-weight:650/);
+    assert.match(css, /\.daily-feature-body \.daily-question strong\{[^}]*font-weight:600/);
+    assert.match(css, /\.daily-feature-body \.daily-question small\{[^}]*font-weight:700/);
+    assert.match(css, /\.daily-feature-body \.daily-question a\{[^}]*font-weight:650/);
   });
 
   it("renders the animated notebook shortcut as a direct notebook link", () => {
@@ -249,11 +273,23 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260825-streak1/);
-    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-streak2/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260825-overlay2/);
+    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-overlay1/);
     assert.doesNotMatch(grade, /<script[^>]+src="src\/daily-practice-ui\.js/);
     assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
-    for (const page of [daily, notebook]) assert.match(page, /src\/daily-practice\.css\?v=20260823-daily1/);
+    assert.match(daily, /src\/daily-practice\.css\?v=20260825-page2/);
+    assert.match(notebook, /src\/daily-practice\.css\?v=20260823-daily1/);
+  });
+
+  it("gives the opened Daily Practice page the shared Grade 5 close interaction", () => {
+    const daily = readFileSync(new URL("../daily-challenge.html", import.meta.url), "utf8");
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(daily, /class="daily-feature-close"[^>]*href="grade-5\.html"[^>]*aria-label="Close Daily Practice"[^>]*>×<\/a>/);
+    assert.doesNotMatch(daily, /class="daily-back"/);
+    assert.match(css, /\.daily-feature-body\{[^}]*font-family:Arial,Helvetica,sans-serif[^}]*background:#ad1c59/);
+    assert.match(css, /\.daily-feature-close\{[^}]*transition:transform \.18s ease,opacity \.18s ease/);
+    assert.match(css, /\.daily-feature-close:hover,.daily-feature-close:focus-visible\{[^}]*transform:rotate\(7deg\) scale\(1\.08\)[^}]*opacity:\.82/);
+    assert.match(css, /@media\(prefers-reduced-motion:reduce\)\{[^}]*\.daily-feature-close\{transition:none/);
   });
 
   it("floats the Grade 5 daily entry at the bottom without covering learning content", () => {
@@ -264,7 +300,8 @@ describe("daily practice UI", () => {
     assert.match(css, /\.grade-five-page \.daily-practice-summary\{[^}]*transform:translateX\(-50%\)/);
     assert.match(css, /\.grade-five-page \.daily-practice-summary \.today-card\{[^}]*padding:6px 10px/);
     assert.match(css, /\.grade-five-page \.curriculum-tabs\{[^}]*height:38px[^}]*margin-bottom:10px/);
-    assert.match(css, /\.daily-practice-summary \.today-panel--compact\{[^}]*grid-template-columns:minmax\(0,1fr\) 52px/);
+    assert.match(css, /\.daily-practice-summary \.today-panel--compact\{[^}]*display:block/);
+    assert.match(css, /\.daily-practice-summary \.today-card\{[^}]*grid-template-columns:34px minmax\(0,1fr\) 52px auto/);
     assert.match(css, /\.daily-streak\{[^}]*width:52px[^}]*height:52px/);
     assert.match(css, /\.daily-streak__fallback\{[^}]*position:absolute/);
     assert.match(css, /@media\(max-width:520px\)\{[^}]*\.daily-streak\{width:46px;height:46px/);

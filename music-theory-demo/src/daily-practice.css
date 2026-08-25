@@ -1,3 +1,4 @@
+@import url("./responsive-safety.css?v=20260824-mobile6");
 .daily-practice-summary{margin:0 0 28px}.daily-loading{padding:20px;border:1px solid #d9cecb;background:#fff;color:#765f68}.today-panel{padding:22px;border:1px solid #d9cecb;border-radius:16px;background:#fff}.today-heading{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-bottom:16px}.today-heading .eyebrow{margin:0}.today-heading h2{margin:0;font-size:23px}.today-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.today-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;min-height:92px;padding:16px;border:1px solid #ddc4ce;border-radius:13px;background:#fbf5f7;color:#391020;text-decoration:none;transition:transform .15s ease,border-color .15s ease}.today-card:hover{transform:translateY(-2px);border-color:#9a2f5a}.today-card--complete{background:#f6f1e9}.today-icon{display:grid;width:44px;height:44px;place-items:center;border-radius:50%;background:#9a2f5a;color:#fff;font-size:18px;font-weight:900}.today-card strong,.today-card small{display:block}.today-card small{margin-top:4px;color:#765f68}.today-card b{font-size:13px}.today-panel--signed-out{display:flex;min-height:64px;align-items:center;justify-content:space-between;gap:24px;padding:12px 14px 12px 18px;border-color:rgba(255,255,255,.34);border-radius:10px;background:rgba(255,255,255,.1);box-shadow:none;color:#fff}.today-signed-out-copy{display:flex;min-width:0;align-items:baseline;gap:14px}.today-signed-out-copy strong{font-size:16px;white-space:nowrap}.today-signed-out-copy span{overflow:hidden;color:rgba(255,255,255,.78);font-size:14px;text-overflow:ellipsis;white-space:nowrap}.today-panel--signed-out .today-action{padding:9px 14px;border:1px solid rgba(255,255,255,.58);border-radius:7px;background:rgba(255,255,255,.12);color:#fff}.today-panel--signed-out .today-action:hover{background:#fff;color:#7e1e48}.today-action{display:inline-block;padding:11px 16px;border-radius:8px;background:#9a2f5a;color:#fff;text-decoration:none;font-weight:800;white-space:nowrap}
 .daily-feature-body{background:#f3efec}.daily-feature-main{width:min(920px,calc(100% - 40px));margin:0 auto;padding:48px 0 72px}.daily-back{display:inline-block;margin-bottom:32px;color:#9a2f5a;text-decoration:none;font-weight:800}.daily-page-head h1{margin:0;font-size:clamp(48px,8vw,80px);letter-spacing:-.055em}.daily-page-head h1 em{color:#9a2f5a}.daily-page-head>p:last-child{color:#765f68;font-size:18px}.daily-question-list{display:grid;gap:12px;margin:34px 0 0;padding:0;list-style:none}.daily-question{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;padding:20px;border:1px solid #d9cecb;border-radius:14px;background:#fff}.daily-question--complete{background:#f6f1e9}.daily-number{display:grid;width:42px;height:42px;place-items:center;border-radius:50%;background:#631838;color:#fff;font-weight:900}.daily-question small,.daily-question strong{display:block}.daily-question small{margin-bottom:5px;color:#9a2f5a;font-weight:850;text-transform:uppercase;letter-spacing:.07em}.daily-question a,.notebook-actions a{padding:10px 14px;border-radius:8px;background:#9a2f5a;color:#fff;text-decoration:none;font-weight:850}.daily-notice,.notebook-empty{margin-top:22px;padding:20px;border:1px solid #d9cecb;border-radius:12px;background:#fff;color:#765f68}
 .notebook-tabs{display:flex;gap:8px;margin:28px 0}.notebook-tabs a{padding:10px 15px;border:1px solid #d9cecb;border-radius:999px;color:#631838;text-decoration:none;font-weight:800}.notebook-tabs a[aria-current="page"]{border-color:#9a2f5a;background:#9a2f5a;color:#fff}.notebook-list{display:grid;gap:16px}.notebook-card{padding:22px;border:1px solid #d9cecb;border-radius:14px;background:#fff}.notebook-card-head{display:flex;justify-content:space-between;gap:16px;color:#9a2f5a;text-transform:capitalize;font-weight:850}.notebook-card h2{margin:14px 0 18px}.notebook-card dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0}.notebook-card dl div{padding:12px;border-radius:9px;background:#f8f3f1}.notebook-card dt{color:#765f68;font-size:12px;font-weight:800;text-transform:uppercase}.notebook-card dd{margin:5px 0 0;font-weight:850}.notebook-actions{display:flex;align-items:center;gap:10px;margin-top:18px}.notebook-actions button{border:0;background:transparent;color:#765f68;text-decoration:underline;cursor:pointer}.notebook-empty strong{display:block;color:#391020;font-size:20px}.notebook-empty p{margin:7px 0 16px}
@@ -22,16 +23,16 @@
 
 /* Compact daily-practice entry: one quiet, obvious route instead of a dashboard. */
 .daily-practice-summary{width:calc(100% - 32px);max-width:680px;margin:0 auto 20px}
-.daily-practice-summary .today-panel--compact{display:grid;grid-template-columns:minmax(0,1fr) 52px;align-items:center;gap:8px;padding:0;border:0;border-radius:0;background:transparent}
-.daily-practice-summary .today-card{grid-template-columns:34px minmax(0,1fr) auto;gap:11px;min-height:0;padding:10px 12px;border-color:rgba(255,255,255,.28);border-radius:10px;background:rgba(255,255,255,.1);color:#fff;box-shadow:none}
+.daily-practice-summary .today-panel--compact{display:block;padding:0;border:0;border-radius:0;background:transparent}
+.daily-practice-summary .today-card{grid-template-columns:34px minmax(0,1fr) 52px auto;gap:11px;min-height:0;padding:10px 12px;border-color:rgba(255,255,255,.28);border-radius:10px;background:rgba(255,255,255,.1);color:#fff;box-shadow:none}
 .daily-practice-summary .today-card:hover,.daily-practice-summary .today-card:focus-visible{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.16);outline:none}
 .daily-practice-summary .today-icon{width:34px;height:34px;background:#fff;color:#9a2f5a;font-size:14px}
 .daily-practice-summary .today-card strong{font-size:15px;line-height:1.15}
 .daily-practice-summary .today-card small{margin-top:2px;color:rgba(255,255,255,.72);font-size:11px}
 .daily-practice-summary .today-card b{font-size:12px}
 .daily-streak{position:relative;display:grid;flex:none;width:52px;height:52px;place-items:center;overflow:visible}.daily-streak canvas,.daily-streak__fallback{position:absolute;inset:0;width:100%;height:100%}.daily-streak__fallback{position:absolute;display:grid;place-items:center;border-radius:50%;background:#f0b55f;color:#631838;font-weight:900}.daily-streak__fallback[hidden]{display:none}
-@media(max-width:520px){.daily-practice-summary{width:calc(100% - 20px);margin-bottom:14px}.daily-practice-summary .today-card{grid-template-columns:30px minmax(0,1fr) auto;padding:9px 10px}.daily-practice-summary .today-icon{width:30px;height:30px}.daily-practice-summary .today-card b{grid-column:auto;font-size:11px}}
-@media(max-width:520px){.daily-streak{width:46px;height:46px}.daily-practice-summary .today-panel--compact{grid-template-columns:minmax(0,1fr) 46px}}
+@media(max-width:520px){.daily-practice-summary{width:calc(100% - 20px);margin-bottom:14px}.daily-practice-summary .today-card{grid-template-columns:30px minmax(0,1fr) 46px auto;padding:9px 10px}.daily-practice-summary .today-icon{width:30px;height:30px}.daily-practice-summary .today-card b{grid-column:auto;font-size:11px}}
+@media(max-width:520px){.daily-streak{width:46px;height:46px}}
 .grade-five-page [data-notebook-shortcut]{top:34px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:26px}.notebook-shortcut__bubble{right:calc(100% + 3px);top:52px;width:145px;border-radius:14px 14px 4px 14px}.notebook-shortcut__bubble::after{display:block;right:-13px;top:50%;border:7px solid transparent;border-left-color:rgba(246,241,233,.13);transform:translateY(-50%)}
 @media(max-width:720px){.grade-five-page [data-notebook-shortcut]{top:66px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:34px}.notebook-shortcut__bubble{right:calc(100% + 3px);top:40px;width:118px}}
 
@@ -95,4 +96,57 @@
 @keyframes notebook-overlay-in{from{opacity:0;transform:translateY(12px) scale(.985)}}
 @media(max-width:620px){.notebook-overlay{padding:10px}.notebook-overlay__panel{width:100%;max-height:calc(100dvh - 20px);min-height:0;border-radius:16px}.notebook-overlay__head{padding:24px 68px 20px 20px}.notebook-overlay__head h2{font-size:clamp(32px,10vw,43px)}.notebook-overlay__head>div>p:last-child{font-size:14px}.notebook-overlay__close{top:16px;right:16px;width:42px;height:42px}.notebook-overlay__content{padding:20px 18px 26px}.notebook-overlay .notebook-tabs{position:static}.notebook-overlay .notebook-card-head{align-items:flex-start;flex-direction:column;gap:5px}.notebook-overlay .notebook-actions{align-items:stretch;flex-direction:column}.notebook-overlay .notebook-actions a,.notebook-overlay .notebook-actions button{width:100%}}
 @media(prefers-reduced-motion:reduce){.notebook-overlay__panel{animation:none}.notebook-overlay.is-closing{transition:none}.notebook-overlay__close{transition:none}}
-@import url("./responsive-safety.css?v=20260824-mobile6");
+/* Daily Challenge refinement: calm typography and a lighter exercise hierarchy. */
+.daily-feature-body .daily-page-head h1{font-family:'Avenir Next',Avenir,'Helvetica Neue',Arial,sans-serif!important;font-size:clamp(42px,5.6vw,64px);font-weight:650;line-height:1.02;letter-spacing:-.045em}
+.daily-feature-body .daily-page-head h1 em{font-style:normal;font-weight:500}
+.daily-feature-body .daily-page-head .eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em}
+.daily-feature-body .daily-page-head>p:last-child{font-size:17px;font-weight:400}
+.daily-feature-body .daily-question-list{gap:10px;margin-top:30px}
+.daily-feature-body .daily-question{gap:17px;padding:19px 20px;border-color:#e0d5d2;border-radius:10px;box-shadow:0 4px 14px rgba(57,16,32,.025)}
+.daily-feature-body .daily-number{width:34px;height:34px;background:#7e1e48;font-size:13px;font-weight:700}
+.daily-feature-body .daily-question small{margin-bottom:6px;font-size:10px;font-weight:700;letter-spacing:.105em}
+.daily-feature-body .daily-question strong{font-size:16px;font-weight:600;line-height:1.42;letter-spacing:-.01em}
+.daily-feature-body .daily-question a{min-width:88px;padding:9px 13px;border:1px solid #b21f5b;border-radius:7px;background:#fff;color:#9a2f5a;font-size:13px;font-weight:650;text-align:center;transition:background .15s ease,color .15s ease}
+.daily-feature-body .daily-question a:hover,.daily-feature-body .daily-question a:focus-visible{background:#9a2f5a;color:#fff;outline:none}
+.daily-feature-body .daily-back{font-size:14px;font-weight:650}
+
+/* Show the real Daily Practice control immediately while its data is prepared. */
+.daily-practice-summary .today-card--loading{cursor:progress;opacity:.82}
+.daily-practice-summary .today-card--loading:hover{transform:none}
+.daily-practice-summary .today-card--loading b{color:rgba(255,255,255,.72);font-weight:600}
+.daily-practice-summary .today-card--loading .today-icon{animation:daily-preparing-pulse 1.4s ease-in-out infinite}
+@keyframes daily-preparing-pulse{0%,100%{opacity:.58;transform:scale(.92)}50%{opacity:1;transform:scale(1)}}
+@media(max-width:720px){.daily-feature-body .daily-question{grid-template-columns:34px minmax(0,1fr)}.daily-feature-body .daily-question a{grid-column:1/-1;width:100%}}
+@media(prefers-reduced-motion:reduce){.daily-practice-summary .today-card--loading .today-icon{animation:none}}
+
+/* Opened Daily Practice: use the same programme frame and close gesture as Grade 5. */
+.daily-feature-body{min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:#ad1c59;color:#191516}
+.daily-feature-body::before{display:none}
+.daily-feature-body .daily-feature-topbar{position:relative;z-index:20;display:grid;height:58px;padding:0;place-items:center;border:0;background:#ad1c59;color:#fff;box-shadow:none;font-size:clamp(18px,2vw,25px);font-weight:500;letter-spacing:.005em}
+.daily-feature-close{position:absolute;top:5px;right:24px;display:grid;width:48px;height:48px;place-items:center;color:#fff;text-decoration:none;font:300 42px/1 Arial,sans-serif;transition:transform .18s ease,opacity .18s ease}
+.daily-feature-close:hover,.daily-feature-close:focus-visible{outline:none;transform:rotate(7deg) scale(1.08);opacity:.82}
+.daily-feature-close:focus-visible{outline:2px solid #fff;outline-offset:-5px;border-radius:50%}
+.daily-feature-body main.daily-feature-main{width:min(920px,calc(100% - 40px));min-height:calc(100vh - 82px);margin:0 auto 24px;padding:clamp(38px,5vw,58px) clamp(24px,5vw,54px) clamp(52px,7vw,76px);border:0;border-radius:3px;background:#fff;color:#191516;box-shadow:none}
+.daily-feature-body .daily-page-head h1,.daily-feature-body .daily-question strong{color:#191516}
+.daily-feature-body .daily-page-head h1 em,.daily-feature-body .daily-page-head .eyebrow,.daily-feature-body .daily-question small{color:#ad1c59}
+.daily-feature-body .daily-page-head>p:last-child{color:#61585a}
+.daily-feature-body .daily-question{border-color:#d8ccca;background:#fff}
+.daily-feature-body .daily-number{background:#ad1c59}
+.daily-feature-body .daily-question a{border-color:#ad1c59;color:#9a184f}
+.daily-feature-body .daily-question a:hover,.daily-feature-body .daily-question a:focus-visible{background:#ad1c59;color:#fff}
+@media(max-width:720px){.daily-feature-body .daily-feature-topbar{height:54px}.daily-feature-close{top:3px;right:8px}.daily-feature-body main.daily-feature-main{width:calc(100% - 24px);min-height:calc(100vh - 66px);margin-bottom:12px;padding:30px 20px 52px}}
+@media(prefers-reduced-motion:reduce){.daily-feature-close{transition:none}.daily-feature-close:hover,.daily-feature-close:focus-visible{transform:none}}
+
+/* Daily Practice stays above Grade 5, keeping the curriculum visible through a soft blur. */
+.daily-practice-overlay{position:fixed;z-index:1250;inset:0;display:grid;place-items:center;padding:clamp(12px,3vw,38px);box-sizing:border-box;isolation:isolate}
+.daily-practice-overlay__backdrop{position:absolute;z-index:-1;inset:0;width:100%;height:100%;padding:0;border:0;background:rgba(57,16,32,.3);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);cursor:pointer}
+.daily-practice-overlay__panel{width:min(920px,100%);max-height:min(92dvh,900px);min-height:0;overflow-y:auto;border:1px solid rgba(255,255,255,.28);border-radius:4px;background:#ad1c59;box-shadow:0 28px 80px rgba(55,6,29,.32);animation:daily-practice-overlay-in .2s cubic-bezier(.22,.7,.3,1)}
+.daily-practice-overlay .daily-feature-topbar{position:sticky;top:0}
+.daily-practice-overlay .daily-feature-close{border:0;background:transparent;cursor:pointer}
+.daily-practice-overlay .daily-feature-close:hover,.daily-practice-overlay .daily-feature-close:focus-visible{transform:rotate(7deg) scale(1.08);opacity:.82}
+.daily-practice-overlay .daily-feature-main{width:calc(100% - 24px);min-height:0;margin:0 auto 12px}
+.daily-practice-overlay-open{overflow:hidden!important}
+.daily-practice-overlay.is-closing{opacity:0;transition:opacity .18s ease}
+@keyframes daily-practice-overlay-in{from{opacity:0;transform:translateY(12px) scale(.985)}}
+@media(max-width:620px){.daily-practice-overlay{padding:8px}.daily-practice-overlay__panel{width:100%;max-height:calc(100dvh - 16px)}.daily-practice-overlay .daily-feature-main{width:calc(100% - 16px);margin-bottom:8px}}
+@media(prefers-reduced-motion:reduce){.daily-practice-overlay__panel{animation:none}.daily-practice-overlay.is-closing{transition:none}}

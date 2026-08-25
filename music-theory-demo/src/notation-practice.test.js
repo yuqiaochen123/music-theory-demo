@@ -31,7 +31,7 @@ describe("writable staff practice", () => {
   it("is integrated as a dedicated practice interaction with labelled controls", () => {
     const page = readFileSync(new URL("../practice.html", import.meta.url), "utf8");
     const source = readFileSync(new URL("./notation-practice.js", import.meta.url), "utf8");
-    assert.match(page, /notation-practice\.js\?v=20260806-hover1/);
+    assert.match(page, /notation-practice\.js\?v=20260825-ledgers1/);
     assert.match(page, /mountNotationPractice/);
     assert.match(page, /question\.interaction==='notation-entry'/);
     assert.match(source, /Play source/);

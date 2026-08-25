@@ -34,7 +34,7 @@ function createGuideRoot() {
   root.className = 'quaver-guide';
   root.dataset.quaverGuide = '';
   root.setAttribute('aria-label', 'Interactive learning guide');
-  root.innerHTML = `<div class="quaver-guide__bubble" data-quaver-message role="status" aria-live="polite" hidden></div><div class="quaver-guide__stage"><img class="quaver-guide__fallback" data-quaver-fallback src="assets/interactive-character-fallback.svg" alt="" aria-hidden="true"><canvas data-quaver-canvas hidden aria-hidden="true"></canvas></div><div class="quaver-guide__controls"><button type="button" data-quaver-minimize aria-expanded="true">Minimize</button></div>`;
+  root.innerHTML = `<div class="quaver-guide__bubble" data-quaver-message role="status" aria-live="polite" hidden></div><div class="quaver-guide__stage"><img class="quaver-guide__fallback" data-quaver-fallback src="assets/interactive-character-fallback.svg" alt="" aria-hidden="true" hidden><canvas data-quaver-canvas hidden aria-hidden="true"></canvas></div><div class="quaver-guide__controls"><button type="button" data-quaver-hide>Hide Quaver</button></div>`;
   document.body.append(root);
   return root;
 }
@@ -42,7 +42,7 @@ function createGuideRoot() {
 function ensureChatUI(root) {
   if (root.querySelector('[data-quaver-chat]')) return;
   const chat = document.createElement('div');
-  chat.innerHTML = `<button type="button" data-quaver-chat-toggle hidden>Ask Quaver a follow-up →</button><form data-quaver-chat hidden><div class="quaver-chat__messages" data-quaver-chat-messages aria-live="polite"></div><div class="quaver-chat__composer"><input type="text" maxlength="500" placeholder="Ask Quaver about this exercise…" aria-label="Ask Quaver a follow-up question"><button type="submit">Send</button></div></form>`;
+  chat.innerHTML = `<button type="button" data-quaver-chat-toggle hidden aria-expanded="false">Ask Quaver a follow-up →</button><form data-quaver-chat hidden><div class="quaver-chat__messages" data-quaver-chat-messages aria-live="polite"></div><input type="text" maxlength="500" placeholder="Ask Quaver about this exercise…" aria-label="Ask Quaver a follow-up question"><button type="submit">Send</button></form>`;
   const controls = root.querySelector('.quaver-guide__controls');
   const chatToggle = chat.querySelector('[data-quaver-chat-toggle]');
   const chatForm = chat.querySelector('[data-quaver-chat]');
@@ -135,6 +135,8 @@ function startTransparentRiveRender(sourceCanvas, displayCanvas) {
 
 export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   if (!root) return { emit() {}, destroy() {} };
+  // Do not reveal the placeholder artwork while the real Rive artboard starts.
+  root.hidden = true;
   const restore = document.createElement('button');
   restore.type = 'button';
   restore.className = 'quaver-restore';
@@ -150,8 +152,9 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   displayCanvas.hidden = true;
   canvas.parentNode.insertBefore(displayCanvas, canvas.nextSibling);
   const fallback = root.querySelector('[data-quaver-fallback]');
+  if (fallback) fallback.hidden = true;
   const message = root.querySelector('[data-quaver-message]');
-  const minimize = root.querySelector('[data-quaver-minimize]');
+  const hideQuaver = root.querySelector('[data-quaver-hide]');
   ensureChatUI(root);
   const chatToggle = root.querySelector('[data-quaver-chat-toggle]');
   const chatForm = root.querySelector('[data-quaver-chat]');
@@ -183,10 +186,20 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   };
 
   const reflectPreferences = () => {
-    root.dataset.minimized = String(preferences.minimized);
-    root.dataset.chatOpen = String(!preferences.minimized && chatForm?.hidden === false);
-    minimize?.setAttribute('aria-expanded', String(!preferences.minimized));
-    if (minimize) minimize.textContent = preferences.minimized ? 'Show chat' : 'Minimize';
+    root.dataset.chatOpen = String(chatForm?.hidden === false);
+  };
+
+  const setChatOpen = (open, { focus = true } = {}) => {
+    if (!chatForm || !chatToggle) return;
+    chatForm.hidden = !open;
+    root.dataset.chatOpen = String(open);
+    chatToggle.textContent = open ? 'Minimize chat' : 'Ask Quaver a follow-up →';
+    chatToggle.setAttribute('aria-expanded', String(open));
+    if (open) {
+      if (message) message.hidden = true;
+      if (focus) chatInput?.focus();
+    }
+    schedulePosition();
   };
 
   const showMessage = (text, duration = 4500, force = false) => {
@@ -232,7 +245,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
     schedulePosition();
   };
 
-  minimize?.addEventListener('click', () => {
+  hideQuaver?.addEventListener('click', () => {
     root.hidden = true;
     restore.hidden = false;
     restore.focus();
@@ -243,17 +256,11 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
     root.dataset.mood = 'welcome';
     showMessage('I’m back—let’s keep going!', 4200, true);
     schedulePosition();
-    minimize?.focus();
+    hideQuaver?.focus();
   });
   chatToggle?.addEventListener('click', () => {
     if (!chatForm) return;
-    chatForm.hidden = !chatForm.hidden;
-    root.dataset.chatOpen = String(!chatForm.hidden);
-    chatToggle.textContent = chatForm.hidden ? 'Ask Quaver a follow-up →' : 'Close follow-up chat';
-    if (!chatForm.hidden) {
-      message.hidden = true;
-      chatInput?.focus();
-    }
+    setChatOpen(chatForm.hidden);
   });
   chatForm?.addEventListener('submit', async event => {
     event.preventDefault();
@@ -292,7 +299,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   try {
     riveInstance = createRive(canvas, loaded => {
       if (!loaded) {
-        root.dataset.quaverMode = 'fallback';
+        root.hidden = true;
         return;
       }
       canvas.hidden = false;
@@ -300,9 +307,10 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
       root.dataset.quaverMode = 'rive';
       fallback.hidden = true;
       displayCanvas.hidden = false;
+      root.hidden = false;
     });
   } catch {
-    root.dataset.quaverMode = 'fallback';
+    root.hidden = true;
   }
 
   const onGuideEvent = event => {
@@ -310,8 +318,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
     if (detail.type === 'exercise:reset') {
       clearTimeout(messageTimer);
       chatMessages?.replaceChildren();
-      if (chatForm) chatForm.hidden = true;
-      root.dataset.chatOpen = 'false';
+      setChatOpen(false, { focus: false });
       delete root.dataset.chatReady;
       root.dataset.mood = 'idle';
       if (message) message.hidden = true;
@@ -326,8 +333,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
     }
     if (detail.type === 'tutor:pending') {
       chatMessages?.replaceChildren();
-      if (chatForm) chatForm.hidden = true;
-      root.dataset.chatOpen = 'false';
+      setChatOpen(false, { focus: false });
       preferences.minimized = false;
       reflectPreferences();
       root.dataset.mood = 'think';
@@ -409,7 +415,6 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   void ensureRiveRuntime().then(() => {
     const root = document.querySelector('[data-quaver-guide]') || createGuideRoot();
-    root.hidden = false;
     const guide = mountQuaverGuide({ root });
     window.addEventListener('pagehide', () => guide.destroy(), { once: true });
   });

@@ -134,8 +134,9 @@
       grouped.get(group).push({ note: notes[index], event });
     });
     const beams = [];
+    const BEAMABLE_DURATIONS = new Set(["8", "16", "32"]);
     grouped.forEach((items) => {
-      if (items.length > 1 && items.every(({ event }) => event.duration === "8" && !event.rest)) {
+      if (items.length > 1 && items.every(({ event }) => BEAMABLE_DURATIONS.has(event.duration) && !event.rest)) {
         beams.push(new VF.Beam(items.map(({ note }) => note)));
       }
     });
@@ -412,6 +413,7 @@
     voice.draw(context, stave);
     beams.forEach((beam) => beam.setContext(context).draw());
     const svg = element.querySelector("svg");
+    svg.dataset.staffLineYs = JSON.stringify([0, 1, 2, 3, 4].map(line => stave.getYForLine(line)));
     svg.dataset.slotCenters = JSON.stringify(gridTickables.map((tickable) => tickable.getAbsoluteX()));
     const engravedNotes = tickables.filter(tickable => tickable instanceof VF.StaveNote && !tickable.isRest());
     [...svg.querySelectorAll(".vf-notehead")].slice(0, engravedNotes.length).forEach((notehead, index) => {

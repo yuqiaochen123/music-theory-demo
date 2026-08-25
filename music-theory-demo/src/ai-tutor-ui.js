@@ -13,6 +13,16 @@ function list(value) {
   return Array.isArray(value) ? value.flat(2).map(item => String(item)).join(', ') : '';
 }
 
+export function cleanTutorExplanation(value) {
+  const original = String(value ?? '').trim();
+  const cleaned = original
+    .replace(/^Your choice\b[\s\S]*?\bis different from the correct answer\b[\s\S]*?[.!?][”"']?\s*/i, '')
+    .replace(/^Your (?:answer|choice)\b[\s\S]*?\b(?:is|was) (?:incorrect|wrong)[.!?][”"']?\s*/i, '')
+    .replace(/^(?:That|This) (?:answer|choice) (?:is|was) (?:incorrect|wrong)[.!?][”"']?\s*/i, '')
+    .trim();
+  return cleaned || original;
+}
+
 export function buildIncorrectFeedback(input) {
   const detail = input.facts?.find(fact => fact.startsWith('Musical detail: '))?.slice(16);
   return `The correct answer is “${input.correctAnswer}”.${detail ? ` ${detail}` : ''}`;
@@ -61,7 +71,7 @@ export function createTutorController({ requestExplanation, feedbackElement, use
   let chatElements = null;
 
   function combinedReply(result) {
-    return `${result.explanation} Try this: ${result.tip}`;
+    return `${cleanTutorExplanation(result.explanation)} Try this: ${result.tip}`;
   }
 
   function appendChatMessage(role, text) {
@@ -208,7 +218,7 @@ export function createTutorController({ requestExplanation, feedbackElement, use
     region.textContent = '';
     region.append(
       createTextElement(document, 'strong', 'tutor-feedback__label', 'AI tutor'),
-      createTextElement(document, 'p', 'tutor-feedback__explanation', result.explanation),
+      createTextElement(document, 'p', 'tutor-feedback__explanation', cleanTutorExplanation(result.explanation)),
       createTextElement(document, 'p', 'tutor-feedback__tip', `Try this: ${result.tip}`),
     );
     currentRequest = { ...input };

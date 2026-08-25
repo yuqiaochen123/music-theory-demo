@@ -45,7 +45,9 @@ test('builds a non-persistent structured Responses API request grounded in trust
   assert.match(result.input, /Correct answer: Major third/);
   assert.match(result.input, /Student selected: Minor third/);
   assert.match(result.input, /Do not change or question the correct answer/);
-  assert.match(result.input, /Explicitly name both the student's choice and the correct answer/);
+  assert.match(result.input, /Start immediately with the useful musical reason/);
+  assert.match(result.input, /Do not begin by saying the learner is wrong/i);
+  assert.doesNotMatch(result.input, /Explicitly name both the student's choice and the correct answer/);
 });
 
 test('extracts and validates the structured explanation from a Responses API message', () => {

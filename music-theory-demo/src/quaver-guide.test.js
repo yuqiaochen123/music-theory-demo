@@ -68,6 +68,14 @@ test('shows the original animated Quaver artwork when its Rive artboard loads', 
   assert.match(source, /root\.dataset\.quaverMode\s*=\s*['"]rive['"];\s*fallback\.hidden\s*=\s*true;\s*displayCanvas\.hidden\s*=\s*false;/s);
 });
 
+test('never flashes the fallback illustration before Quaver is ready', async () => {
+  const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
+  assert.match(source, /data-quaver-fallback[^>]*hidden/);
+  assert.doesNotMatch(source, /quaverMode\s*=\s*['"]fallback['"]/);
+  assert.match(source, /root\.hidden\s*=\s*true;/);
+  assert.match(source, /displayCanvas\.hidden\s*=\s*false;\s*root\.hidden\s*=\s*false;/s);
+});
+
 test('turns the Rive artboard white into real alpha while preserving its dark linework', async () => {
   const { removeWhiteBackdrop } = await import('./quaver-guide.js');
   const pixels = new Uint8ClampedArray([
@@ -127,8 +135,8 @@ test('keeps Quaver transparent while placing tutor text on a readable solid bubb
 test('loads the transparent Quaver styling without a stale cached artboard', async () => {
   for (const file of ['index.html', 'grade.html', 'grade-4.html', 'grade-5.html', 'topic.html', 'practice.html', 'login.html']) {
     const html = await readFile(resolve(root, file), 'utf8');
-    assert.match(html, /src\/quaver-guide\.css\?v=20260824-mobile1/, file);
-    assert.match(html, /src\/quaver-guide\.js\?v=20260824-expand1/, file);
+    assert.match(html, /src\/quaver-guide\.css\?v=20260825-space1/, file);
+    assert.match(html, /src\/quaver-guide\.js\?v=20260825-chat2/, file);
   }
 });
 
@@ -183,16 +191,16 @@ test('keeps follow-up questions visible on the left of Quaver chat', async () =>
   assert.match(css, /\.quaver-chat__message--user\s*\{[^}]*justify-self:\s*start/s);
   assert.match(css, /\.quaver-chat__message--assistant\s*\{[^}]*justify-self:\s*end/s);
   assert.match(css, /\.quaver-guide__controls\s*\{[^}]*flex-wrap:\s*wrap/s);
-  assert.match(css, /\[data-quaver-chat\]\s*\{[^}]*flex-basis:\s*100%/s);
+  assert.match(css, /\[data-quaver-chat\]\s*\{[^}]*width:\s*100%/s);
 });
 
-test('hides Quaver when minimized and leaves an expandable restore button', async () => {
+test('hides Quaver independently and leaves an expandable restore button', async () => {
   const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
   const practice = await readFile(resolve(root, 'practice.html'), 'utf8');
   const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
   assert.doesNotMatch(source, /data-quaver-mute|Hide tips|Show tips/);
   assert.doesNotMatch(practice, /data-quaver-mute|Hide tips/);
-  assert.match(source, /data-quaver-minimize[\s\S]*addEventListener\(['"]click['"][\s\S]*root\.hidden\s*=\s*true/);
+  assert.match(source, /data-quaver-hide[\s\S]*addEventListener\(['"]click['"][\s\S]*root\.hidden\s*=\s*true/);
   assert.match(source, /data-quaver-restore/);
   assert.match(source, /restore[\s\S]*addEventListener\(['"]click['"][\s\S]*root\.hidden\s*=\s*false/);
   assert.doesNotMatch(source, /preferences\.minimized\s*=\s*!preferences\.minimized/);
@@ -202,7 +210,7 @@ test('hides Quaver when minimized and leaves an expandable restore button', asyn
 
 test('does not repeat follow-up replies in the top explanation bubble', async () => {
   const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
-  assert.match(source, /if\s*\(!chatForm\.hidden\)\s*\{\s*message\.hidden\s*=\s*true/s);
+  assert.match(source, /if\s*\(open\)\s*\{[\s\S]*message\.hidden\s*=\s*true/s);
   assert.match(source, /detail\.type\s*===\s*['"]tutor:explanation['"][\s\S]*chatForm\?\.hidden\s*===\s*false[\s\S]*message\.hidden\s*=\s*true/);
   assert.doesNotMatch(source, /appendChatMessage\(['"]assistant['"],\s*reply\);\s*showMessage\(reply/s);
 });
@@ -211,7 +219,7 @@ test('opens a borderless locally blurred conversation with Quaver beneath his re
   const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
   const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
   assert.match(source, /root\.insertBefore\(chatForm,\s*controls\)/);
-  assert.match(source, /root\.dataset\.chatOpen\s*=\s*String\(!chatForm\.hidden\)/);
+  assert.match(source, /root\.dataset\.chatOpen\s*=\s*String\(open\)/);
   const backdropRule = css.match(/\.quaver-guide::before\s*\{([^}]*)\}/s)?.[1] || '';
   const openBackdropRule = css.match(/\.quaver-guide\[data-chat-open="true"\]::before\s*\{([^}]*)\}/s)?.[1] || '';
   assert.match(backdropRule, /position:\s*absolute/);
@@ -219,21 +227,62 @@ test('opens a borderless locally blurred conversation with Quaver beneath his re
   assert.doesNotMatch(backdropRule, /position:\s*fixed|inset:\s*0/);
   assert.match(openBackdropRule, /backdrop-filter:\s*blur\((?:[1-6])px\)/);
   assert.match(openBackdropRule, /border-radius:\s*24px/);
-  assert.match(css, /\.quaver-guide\[data-chat-open="true"\]\s*\{[^}]*width:\s*min\((?:3[0-8]0)px[^}]*grid-template-areas:\s*"chat"\s*"input"\s*"stage"\s*"send"\s*"controls"/s);
+  assert.match(css, /\.quaver-guide\[data-chat-open="true"\]\s*\{[^}]*width:\s*min\(430px[^}]*grid-template-areas:\s*"chat"\s*"stage"\s*"controls"/s);
   assert.match(css, /\[data-quaver-chat\]\s*\{[^}]*grid-area:\s*chat[^}]*border:\s*0[^}]*background:\s*transparent[^}]*box-shadow:\s*none/s);
-  assert.match(css, /\.quaver-chat__composer\s*\{[^}]*display:\s*contents/s);
   assert.match(css, /\[data-quaver-chat\]\s+input\s*\{[^}]*grid-area:\s*input/s);
-  assert.match(css, /\.quaver-chat__composer\s+button\s*\{[^}]*grid-area:\s*send[^}]*width:\s*100%/s);
+  assert.match(css, /\[data-quaver-chat\]\s*>\s*button\[type="submit"\]\s*\{[^}]*grid-area:\s*send[^}]*width:\s*100%/s);
   assert.match(css, /\.quaver-guide\[data-chat-open="true"\]\s+\.quaver-guide__stage\s*\{[^}]*justify-self:\s*center/s);
   assert.match(css, /\.quaver-chat__message--user\s*\{[^}]*justify-self:\s*start/s);
   assert.match(css, /\.quaver-chat__message--assistant\s*\{[^}]*justify-self:\s*end/s);
 });
 
-test('uses the full close label and restores Quaver for the next exercise', async () => {
+test('uses the minimize-chat label and restores Quaver for the next exercise', async () => {
   const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
   const practice = await readFile(resolve(root, 'practice.html'), 'utf8');
-  assert.match(source, /chatToggle\.textContent\s*=\s*chatForm\.hidden\s*\?\s*['"]Ask Quaver a follow-up →['"]\s*:\s*['"]Close follow-up chat['"]/);
+  assert.match(source, /chatToggle\.textContent\s*=\s*open\s*\?\s*['"]Minimize chat['"]\s*:\s*['"]Ask Quaver a follow-up →['"]/);
   assert.match(practice, /ListeningDeskTutor\?\.reset\(\);\s*notifyQuaver\(['"]exercise:reset['"]\)/);
-  assert.match(source, /detail\.type\s*===\s*['"]exercise:reset['"][\s\S]*chatMessages\?\.replaceChildren\(\)[\s\S]*chatForm\.hidden\s*=\s*true[\s\S]*root\.dataset\.chatOpen\s*=\s*['"]false['"]/);
+  assert.match(source, /detail\.type\s*===\s*['"]exercise:reset['"][\s\S]*chatMessages\?\.replaceChildren\(\)[\s\S]*setChatOpen\(false/);
   assert.match(source, /detail\.type\s*===\s*['"]exercise:reset['"][\s\S]*delete root\.dataset\.chatReady[\s\S]*root\.dataset\.mood\s*=\s*['"]idle['"]/);
+});
+
+test('keeps chat minimization separate from hiding Quaver', async () => {
+  const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
+  const practice = await readFile(resolve(root, 'practice.html'), 'utf8');
+  assert.match(practice, /data-quaver-hide[^>]*>Hide Quaver</);
+  assert.match(source, /data-quaver-hide/);
+  assert.match(source, /chatToggle\.textContent\s*=\s*open\s*\?\s*['"]Minimize chat['"]\s*:\s*['"]Ask Quaver a follow-up →['"]/);
+  assert.match(source, /chatForm\.hidden\s*=\s*!open[\s\S]*root\.dataset\.chatOpen\s*=\s*String\(open\)/);
+  assert.match(source, /hideQuaver[\s\S]*root\.hidden\s*=\s*true/);
+  assert.match(source, /restore[\s\S]*root\.hidden\s*=\s*false/);
+});
+
+test('uses a stable real grid for follow-up chat instead of display contents', async () => {
+  const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
+  const chatRule = css.match(/\[data-quaver-chat\]\s*\{([^}]*)\}/s)?.[1] || '';
+  const openRule = css.match(/\.quaver-guide\[data-chat-open="true"\]\s*\{([^}]*)\}/s)?.[1] || '';
+  assert.match(chatRule, /display:\s*grid/);
+  assert.match(chatRule, /grid-template-areas:\s*"messages"\s*"input"\s*"send"/);
+  assert.match(chatRule, /min-width:\s*0/);
+  assert.doesNotMatch(chatRule, /display:\s*contents/);
+  assert.match(openRule, /width:\s*min\(430px/);
+  assert.match(openRule, /grid-template-areas:\s*"chat"\s*"stage"\s*"controls"/);
+  assert.match(css, /\.quaver-chat__messages\s*\{[^}]*grid-area:\s*messages[^}]*min-width:\s*0/s);
+  assert.match(css, /\.quaver-chat__message\s*\{[^}]*overflow-wrap:\s*anywhere/s);
+});
+
+test('uses one restrained focus ring on the Quaver input instead of stacked borders', async () => {
+  const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
+  const focusRule = css.match(/\[data-quaver-chat\]\s+input:focus\s*\{([^}]*)\}/s)?.[1] || '';
+  assert.match(focusRule, /outline:\s*0/);
+  assert.match(focusRule, /border-color:\s*#9a2f5a/);
+  assert.match(focusRule, /box-shadow:\s*0 0 0 3px rgba\(154,\s*47,\s*90,\s*\.18\)/);
+  assert.doesNotMatch(focusRule, /outline-offset/);
+});
+
+test('gives the open Quaver conversation a wider padded safe area', async () => {
+  const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
+  const openRule = css.match(/\.quaver-guide\[data-chat-open="true"\]\s*\{([^}]*)\}/s)?.[1] || '';
+  assert.match(openRule, /box-sizing:\s*border-box/);
+  assert.match(openRule, /width:\s*min\(430px/);
+  assert.match(openRule, /padding:\s*18px/);
 });

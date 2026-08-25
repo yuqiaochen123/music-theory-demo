@@ -49,7 +49,7 @@ describe("learning journey pages", () => {
 
   it("uses one restrained motion system across every app page", () => {
     for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html", "vexflow-cadence-proof.html"]) {
-      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260819-visible1"/);
+      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260825-smooth2"/);
     }
     const motion = page("src/motion.js");
     assert.match(motion, /from '.\/page-navigation\.js\?v=20260806-prism3'/);
@@ -65,9 +65,9 @@ describe("learning journey pages", () => {
     assert.match(motion, /document\.body\.classList\.add\('is-ready'\)/);
     assert.match(motion, /classList\.remove\('is-transition-arriving'\)/);
     assert.match(motion, /'transitionend'/);
-    assert.match(motion, /NAVIGATION_FALLBACK_MS = 180/);
+    assert.match(motion, /NAVIGATION_FALLBACK_MS = 260/);
     assert.match(motion, /window\.location\.assign/);
-    assert.match(motion, /'startViewTransition' in document/);
+    assert.doesNotMatch(motion, /'startViewTransition' in document/);
     assert.match(motion, /pageshow/);
     assert.doesNotMatch(motion, /NAVIGATION_DELAY|is-exiting/);
     assert.doesNotMatch(page("src/redesign.css"), /body\s*\{\s*opacity:\s*0|body\.is-exiting|translateX\(-14px\)/);

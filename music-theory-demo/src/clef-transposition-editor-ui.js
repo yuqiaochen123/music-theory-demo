@@ -10,6 +10,24 @@ export function yForPitch(pitch, pitchYs = null) {
   return pitchIndex < 0 ? null : 122 - (pitchIndex * 60) / 11;
 }
 
+export function ledgerLineYsForPitch(noteY, staffLineYs = null) {
+  const lines = Array.isArray(staffLineYs)
+    ? staffLineYs.map(Number).filter(Number.isFinite).sort((left, right) => left - right)
+    : [];
+  if (!Number.isFinite(Number(noteY)) || lines.length < 2) return [];
+  const top = lines[0];
+  const bottom = lines.at(-1);
+  const spacing = (bottom - top) / (lines.length - 1);
+  if (!(spacing > 0)) return [];
+  const ledgers = [];
+  if (noteY < top) {
+    for (let y = top - spacing; y >= noteY - 0.01; y -= spacing) ledgers.push(y);
+  } else if (noteY > bottom) {
+    for (let y = bottom + spacing; y <= noteY + 0.01; y += spacing) ledgers.push(y);
+  }
+  return ledgers;
+}
+
 export function pitchFromStaffPoint(clientY, rect, pitchYs = null) {
   const engravingY = ((clientY - rect.top) / rect.height) * 190;
   if (pitchYs) {
@@ -161,6 +179,8 @@ export function mountClefTranspositionEditor({ container, notation, play, mode =
     const rect = svg.getBoundingClientRect();
     let pitchYs = null;
     try { pitchYs = JSON.parse(svg.dataset.pitchYs || "null"); } catch {}
+    let staffLineYs = null;
+    try { staffLineYs = JSON.parse(svg.dataset.staffLineYs || "null"); } catch {}
     const pitch = pitchFromStaffPoint(event.clientY, rect, pitchYs);
     if (!pitch || !canPlaceNote(state, state.cursorSlot, selectedDuration)) {
       existing?.remove();
@@ -177,6 +197,18 @@ export function mountClefTranspositionEditor({ container, notation, play, mode =
     preview.setAttribute("data-editor-pointer-preview", "");
     preview.setAttribute("pointer-events", "none");
     preview.replaceChildren();
+    ledgerLineYsForPitch(y, staffLineYs).forEach((ledgerY) => {
+      const ledger = document.createElementNS(namespace, "line");
+      ledger.setAttribute("x1", String(x - 11));
+      ledger.setAttribute("x2", String(x + 11));
+      ledger.setAttribute("y1", String(ledgerY));
+      ledger.setAttribute("y2", String(ledgerY));
+      ledger.setAttribute("stroke", "#1687d9");
+      ledger.setAttribute("stroke-width", "2");
+      ledger.setAttribute("stroke-linecap", "round");
+      ledger.setAttribute("data-hover-ledger-line", "");
+      preview.append(ledger);
+    });
     const head = document.createElementNS(namespace, "ellipse");
     head.setAttribute("cx", String(x));
     head.setAttribute("cy", String(y));
