@@ -124,6 +124,7 @@ describe("learning journey pages", () => {
     assert.match(styles, /\.lesson-body \.lesson-slide\.hero \.eyebrow\{[^}]*color:#ad1c59!important/);
     assert.match(styles, /\.lesson-body \.lesson-slide\.hero h1\{[^}]*color:#191516!important/);
     assert.match(styles, /\.lesson-body \.lesson-slide\.hero \.lead\{[^}]*color:#61585a!important/);
+    assert.match(styles, /\.lesson-body \.lesson-slide\.hero \.intro\{[^}]*margin-inline:auto!important/);
   });
 
   it("ships a centred meaningful first frame while the production lesson bundle loads", () => {
@@ -186,7 +187,7 @@ describe("learning journey pages", () => {
     assert.match(styles, /\.lesson-dots\{position:\s*static!important;[^}]*align-self:\s*center!important/);
     assert.match(styles, /\.lesson-carousel,\.lesson-dots\{grid-area:\s*1\/1!important/);
     assert.match(styles, /\.lesson-dots\{[^}]*width:\s*min\(88vw,1180px\)!important;[^}]*height:\s*min\(72vh,780px\)!important;[^}]*align-items:\s*flex-end!important/);
-    assert.match(styles, /\.lesson-dots button\{[^}]*background:\s*var\(--brand-paper,#F6F1E9\)/);
+    assert.match(styles, /\.lesson-body \.lesson-dots button\{[^}]*background:\s*#8f888a!important/);
     assert.match(styles, /\.lesson-dots button\[aria-current="page"\]\{[^}]*background:\s*var\(--brand-accent,#D2A36B\)!important/);
     assert.match(styles, /\.lesson-dots\{[^}]*padding-bottom:\s*0!important;[^}]*transform:\s*translateY\(20px\)!important/);
     assert.match(styles, /\.lesson-dots button\[aria-current="page"\]\{[^}]*box-shadow:\s*none/);

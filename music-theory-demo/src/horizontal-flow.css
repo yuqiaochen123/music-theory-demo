@@ -72,5 +72,8 @@ body[data-topic='clef-transposition'] .lesson-slide.clef-editor{overflow-x:hidde
 .lesson-body .lesson-slide.hero .eyebrow{color:#ad1c59!important}
 .lesson-body .lesson-slide.hero h1{color:#191516!important}
 .lesson-body .lesson-slide.hero .lead{color:#61585a!important}
-.lesson-body .lesson-slide.hero .intro,.lesson-body .lesson-slide.hero .intro p{color:#61585a!important}
+.lesson-body .lesson-slide.hero .intro{margin-inline:auto!important;color:#61585a!important}
+.lesson-body .lesson-slide.hero .intro p{color:#61585a!important}
 .lesson-body .lesson-slide.hero .progress-sync{color:#9a2f5a!important}
+.lesson-body .lesson-dots button{background:#8f888a!important}
+.lesson-body .lesson-dots button[aria-current="page"]{background:var(--brand-accent,#D2A36B)!important}
