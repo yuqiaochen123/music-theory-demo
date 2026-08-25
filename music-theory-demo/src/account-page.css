@@ -174,8 +174,77 @@
 }
 
 .account-page .auth-card {
+  position: relative;
   background: #f8f2eb;
 }
+
+.account-page .account-settings-trigger {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  display: flex;
+  width: 52px;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #74103e;
+  cursor: pointer;
+  transition: color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.account-page .account-settings-trigger svg { width: 34px; height: 34px; }
+.account-page .account-settings-trigger:hover { background: #fae6ee; color: #b22160; transform: rotate(12deg); }
+.account-page .account-settings-trigger:focus-visible { outline: 3px solid #d2a36b; outline-offset: 3px; background: #fae6ee; }
+
+.account-settings-dialog {
+  width: min(620px, calc(100vw - 32px));
+  max-height: min(760px, calc(100vh - 32px));
+  padding: 0;
+  overflow: visible;
+  border: 1px solid rgba(255, 217, 229, .82);
+  border-radius: 24px;
+  background: rgba(248, 242, 235, .88);
+  color: #391020;
+  box-shadow: 0 32px 90px rgba(57, 16, 32, .34);
+  backdrop-filter: blur(20px) saturate(1.12);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12);
+}
+
+.account-settings-dialog::backdrop {
+  background: rgba(116, 16, 62, .30);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.account-settings-dialog .settings-glass { overflow: auto; max-height: min(760px, calc(100vh - 32px)); padding: 30px; border-radius: inherit; }
+.settings-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.settings-dialog-head .eyebrow { margin: 0 0 7px; color: #b22160; }
+.settings-dialog-head h2 { margin: 0; color: #391020; font-size: clamp(34px, 5vw, 48px); letter-spacing: -.045em; }
+.settings-close { width: 42px; height: 42px; border: 1px solid #d7bac7; border-radius: 50%; background: #fffaf6; color: #70123d; font: 400 30px/1 Arial, sans-serif; cursor: pointer; }
+.settings-close:hover { border-color: #b22160; background: #fae6ee; }
+.account-settings-dialog .settings-intro { max-width: 475px; margin: 14px 0 24px; color: #74666b; font-size: 15px; line-height: 1.5; }
+.account-settings-dialog form { overflow: hidden; border: 1px solid #dfccd3; border-radius: 16px; background: rgba(255, 250, 246, .78); }
+.account-settings-dialog .setting-row { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; min-height: 102px; padding: 20px 22px; cursor: pointer; }
+.account-settings-dialog .setting-row+.setting-row { border-top: 1px solid #dfccd3; }
+.account-settings-dialog .setting-row span { display: grid; gap: 6px; }
+.account-settings-dialog .setting-row strong { color: #391020; font-size: 17px; }
+.account-settings-dialog .setting-row small { color: #74666b; font-size: 13px; line-height: 1.4; }
+.account-settings-dialog .setting-row input { position: absolute; opacity: 0; pointer-events: none; }
+.account-settings-dialog .setting-row i { position: relative; width: 52px; height: 29px; border-radius: 999px; background: #d7bac7; transition: background .18s ease; }
+.account-settings-dialog .setting-row i::after { content: ''; position: absolute; top: 4px; left: 4px; width: 21px; height: 21px; border-radius: 50%; background: #fffaf6; box-shadow: 0 2px 6px rgba(57, 16, 32, .22); transition: transform .18s ease; }
+.account-settings-dialog .setting-row input:checked+i { background: #b22160; }
+.account-settings-dialog .setting-row input:checked+i::after { transform: translateX(23px); }
+.account-settings-dialog .setting-row input:focus-visible+i { outline: 3px solid #d2a36b; outline-offset: 3px; }
+.settings-dialog-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 20px; }
+.settings-dialog-footer p { margin: 0; color: #74666b; font-size: 13px; }
+.settings-dialog-footer button { border: 1px solid #b22160; border-radius: 999px; background: #fffaf6; color: #70123d; padding: 10px 14px; font: 800 13px/1 Arial, sans-serif; cursor: pointer; }
+.settings-dialog-footer button:hover { background: #fae6ee; }
+html[data-motion="off"] *, html[data-motion="off"] *::before, html[data-motion="off"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+html[data-progress-animation="off"] .category-progress { transition: none !important; }
 
 .account-page .auth-primary {
   background: #b22160;
@@ -227,4 +296,8 @@
 
 @media (max-width: 520px) {
   .account-page .auth-main { padding: 0; }
+  .account-page .account-settings-trigger { top: 16px; right: 18px; }
+  .account-settings-dialog .settings-glass { padding: 22px 18px; }
+  .account-settings-dialog .setting-row { min-height: 96px; padding: 18px 16px; }
+  .settings-dialog-footer { align-items: flex-start; flex-direction: column; }
 }

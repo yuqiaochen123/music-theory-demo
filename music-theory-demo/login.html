@@ -9,7 +9,7 @@
   <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css?v=20260801-auth9"><link rel="stylesheet" href="src/redesign.css?v=20260802-red4"><link rel="stylesheet" href="src/palette.css?v=20260803-palette1"><link rel="stylesheet" href="src/quaver-guide.css?v=20260825-space1">
   <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
-  <link rel="stylesheet" href="src/account-page.css?v=20260825-account5">
+  <link rel="stylesheet" href="src/account-page.css?v=20260825-account7">
 </head>
 <body class="account-page">
   <div class="page-transition-curtain" aria-hidden="true"></div>
@@ -44,6 +44,7 @@
           </div>
         </div>
         <div class="auth-card">
+          <button class="account-settings-trigger" id="open-settings" aria-label="Open settings" type="button" aria-haspopup="dialog" aria-controls="settings-dialog"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="7.25"/><circle cx="12" cy="12" r="2.8"/><line x1="12" y1="1.8" x2="12" y2="4.6"/><line x1="12" y1="19.4" x2="12" y2="22.2"/><line x1="1.8" y1="12" x2="4.6" y2="12"/><line x1="19.4" y1="12" x2="22.2" y2="12"/><line x1="4.8" y1="4.8" x2="6.8" y2="6.8"/><line x1="17.2" y1="17.2" x2="19.2" y2="19.2"/><line x1="19.2" y1="4.8" x2="17.2" y2="6.8"/><line x1="6.8" y1="17.2" x2="4.8" y2="19.2"/></svg></button>
           <p id="auth-status" class="progress-sync" aria-live="polite"></p>
           <form id="auth-form" class="auth-form" method="post" onsubmit="return false">
             <label>Email<input name="email" type="email" autocomplete="email" required></label>
@@ -63,5 +64,17 @@
         </div>
     </section>
   </main>
-  <script type="module" src="src/login.js?v=20260801-auth9"></script><script type="module" src="src/motion.js?v=20260825-parity1"></script><script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
+  <dialog id="settings-dialog" class="account-settings-dialog" aria-labelledby="settings-heading">
+    <div class="settings-glass">
+      <div class="settings-dialog-head"><div><p class="eyebrow">Your preferences</p><h2 id="settings-heading">Settings</h2></div><button id="close-settings" class="settings-close" type="button" aria-label="Close settings">×</button></div>
+      <p class="settings-intro">Choose how Listening Desk sounds and moves. Changes save automatically on this device.</p>
+      <form id="settings-form">
+        <label class="setting-row"><span><strong>Lesson sound</strong><small>Play notation, examples, and feedback sounds.</small></span><input type="checkbox" name="sound"><i aria-hidden="true"></i></label>
+        <label class="setting-row"><span><strong>Interface motion</strong><small>Use page transitions and decorative movement.</small></span><input type="checkbox" name="motion"><i aria-hidden="true"></i></label>
+        <label class="setting-row"><span><strong>Progress animations</strong><small>Animate progress rings as they reach your score.</small></span><input type="checkbox" name="progressAnimation"><i aria-hidden="true"></i></label>
+      </form>
+      <div class="settings-dialog-footer"><p id="settings-status" aria-live="polite">Changes save automatically.</p><button id="reset-settings" type="button">Restore defaults</button></div>
+    </div>
+  </dialog>
+  <script type="module" src="src/login.js?v=20260801-auth9"></script><script type="module" src="src/settings.js?v=20260825-settings2"></script><script type="module" src="src/motion.js?v=20260825-parity1"></script><script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
 </body></html>
