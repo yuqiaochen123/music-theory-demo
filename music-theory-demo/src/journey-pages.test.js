@@ -49,10 +49,10 @@ describe("learning journey pages", () => {
 
   it("uses one restrained motion system across every app page", () => {
     for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html", "vexflow-cadence-proof.html"]) {
-      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260825-smooth2"/);
+      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260825-parity1"/);
     }
     const motion = page("src/motion.js");
-    assert.match(motion, /from '.\/page-navigation\.js\?v=20260806-prism3'/);
+    assert.match(motion, /from '.\/page-navigation\.js\?v=20260825-parity1'/);
     assert.match(motion, /document\.addEventListener\('pointerdown',[\s\S]*playPrismClick\(\)/);
     assert.match(motion, /clickAudioContext\.state !== 'running'[\s\S]*void clickAudioContext\.resume\(\)/);
     assert.match(motion, /document\.addEventListener\('click'/);
@@ -61,11 +61,10 @@ describe("learning journey pages", () => {
     assert.match(motion, /'focusin'/);
     assert.match(motion, /'touchstart'/);
     assert.match(motion, /fetch\(destination\.href/);
-    assert.match(motion, /consumeArrivalMarker/);
     assert.match(motion, /document\.body\.classList\.add\('is-ready'\)/);
-    assert.match(motion, /classList\.remove\('is-transition-arriving'\)/);
-    assert.match(motion, /'transitionend'/);
-    assert.match(motion, /NAVIGATION_FALLBACK_MS = 260/);
+    assert.match(motion, /'is-transition-arriving'/);
+    assert.doesNotMatch(motion, /'transitionend'/);
+    assert.doesNotMatch(motion, /NAVIGATION_FALLBACK_MS/);
     assert.match(motion, /window\.location\.assign/);
     assert.doesNotMatch(motion, /'startViewTransition' in document/);
     assert.match(motion, /pageshow/);
@@ -112,9 +111,22 @@ describe("learning journey pages", () => {
     assert.match(styles, /\.grade-five-page \.curriculum\s*\{[^}]*overflow-x:\s*auto[^}]*scroll-snap-type:\s*x mandatory/);
   });
 
+  it("centres the first lesson at every desktop width and keeps unready slides out of layout", () => {
+    assert.match(styles, /--lesson-slide-width:min\(88vw,1180px\)/);
+    assert.match(styles, /padding-inline:max\(16px,calc\(\(100vw - var\(--lesson-slide-width\)\)\/2\)\)/);
+    assert.match(styles, /\.lesson-slide\[hidden\]\{display:none!important\}/);
+  });
+
+  it("ships a centred meaningful first frame while the production lesson bundle loads", () => {
+    assert.match(topic, /<body class="lesson-body is-lesson-loading">/);
+    assert.match(topic, /<h1 id="title">Loading lesson…<\/h1>/);
+    assert.match(topic, /<p class="lead" id="subtitle">Preparing notation and playback\.<\/p>/);
+    assert.match(topic, /document\.body\.classList\.remove\('is-lesson-loading'\)/);
+  });
+
   it("provides a classic-script lesson fallback when opened directly from disk", () => {
     const topic = page("topic.html");
-    assert.match(topic, /src="src\/topic-file-runtime\.bundle\.js\?v=20260822-g4abrsm1"/);
+    assert.match(topic, /src="src\/topic-file-runtime\.bundle\.js\?v=20260825-parity1"/);
     assert.match(page("src/topic-file-runtime.bundle.js"), /file:/);
   });
 

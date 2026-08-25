@@ -17,8 +17,10 @@ describe("daily practice overlay", () => {
 
   it("wires Grade 5's existing Daily Practice link to the overlay controller", () => {
     const entry = readFileSync(new URL("./daily-practice-entry.js", import.meta.url), "utf8");
+    const ui = readFileSync(new URL("./daily-practice-ui.js", import.meta.url), "utf8");
     assert.match(entry, /daily-practice-overlay\.js/);
     assert.match(entry, /installDailyPracticeOverlay/);
+    assert.match(ui, /data-local-overlay="daily-practice" href="daily-challenge\.html"/);
   });
 
   it("blurs the Grade 5 page beneath the floating Daily Practice sheet", () => {

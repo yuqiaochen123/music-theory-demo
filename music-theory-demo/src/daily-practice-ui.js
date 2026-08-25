@@ -47,7 +47,7 @@ export function summaryMarkup({ challenge, reviewCount = 0, signedOut = false, l
   if (loading) return `<section class="today-panel today-panel--compact" aria-label="Today's practice" aria-busy="true"><div class="today-card today-card--loading" aria-disabled="true"><span class="today-icon" aria-hidden="true">4</span><span><strong>Daily practice</strong><small>Preparing today's practice…</small></span><b>Preparing…</b></div></section>`;
   const completed = challenge?.completed_exercise_ids?.length ?? 0;
   const finished = completed === 4;
-  return `<section class="today-panel today-panel--compact" aria-label="Today's practice"><a class="today-card${finished ? " today-card--complete" : ""}" href="daily-challenge.html"><span class="today-icon" aria-hidden="true">${finished ? "✓" : "4"}</span><span><strong>Daily practice</strong><small>${finished ? "Completed today" : `${completed}/4 complete`}</small></span>${streakMarkup(streak)}<b>${finished ? "View" : "Continue"} →</b></a></section>`;
+  return `<section class="today-panel today-panel--compact" aria-label="Today's practice"><a class="today-card${finished ? " today-card--complete" : ""}" data-local-overlay="daily-practice" href="daily-challenge.html"><span class="today-icon" aria-hidden="true">${finished ? "✓" : "4"}</span><span><strong>Daily practice</strong><small>${finished ? "Completed today" : `${completed}/4 complete`}</small></span>${streakMarkup(streak)}<b>${finished ? "View" : "Continue"} →</b></a></section>`;
 }
 
 export function notebookShortcutMarkup({ reviewCount } = {}) {

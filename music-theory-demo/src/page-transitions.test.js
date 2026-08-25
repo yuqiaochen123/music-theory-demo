@@ -23,7 +23,7 @@ describe("seamless cross-page navigation", () => {
 
       assert.notEqual(criticalBackground, -1, `${filename} is missing its first-paint background`);
       assert.ok(criticalBackground < firstStylesheet, `${filename} loads external CSS before its first-paint background`);
-      assert.match(html, /href="src\/page-transitions\.css\?v=20260825-smooth2"/);
+      assert.match(html, /href="src\/page-transitions\.css\?v=20260825-parity1"/);
     }
   });
 
@@ -45,19 +45,18 @@ describe("seamless cross-page navigation", () => {
     }
   });
 
-  it("covers hard navigations with bounded opacity-only motion", () => {
+  it("keeps the transition curtain inert so navigation never exposes a blank brand-colour frame", () => {
     const styles = page("src/page-transitions.css");
+    const motion = page("src/motion.js");
 
-    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*position:\s*fixed[^}]*inset:\s*0[^}]*z-index:\s*2147483647/);
-    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*background:\s*var\(--brand-primary,\s*#9a2f5a\)/i);
-    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*pointer-events:\s*none[^}]*opacity:\s*0[^}]*220ms/);
-    assert.match(styles, /html\.is-transitioning \.page-transition-curtain\s*\{[^}]*pointer-events:\s*auto[^}]*opacity:\s*1[^}]*180ms/);
-    assert.match(styles, /html\.is-transition-arriving \.page-transition-curtain\s*\{[^}]*opacity:\s*1/);
-    assert.doesNotMatch(styles, /\.page-transition-curtain\s*\{[^}]*translate|\.page-transition-curtain\s*\{[^}]*scale/);
-    assert.match(styles, /prefers-reduced-motion:\s*reduce[\s\S]*\.page-transition-curtain\s*\{[^}]*transition-duration:\s*0\.01ms\s*!important/);
+    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*display:\s*none/);
+    assert.doesNotMatch(styles, /html\.is-transitioning \.page-transition-curtain\s*\{[^}]*opacity:\s*1/);
+    assert.doesNotMatch(styles, /html\.is-transition-arriving \.page-transition-curtain\s*\{[^}]*opacity:\s*1/);
+    assert.doesNotMatch(motion, /root\.classList\.add\('is-transitioning'\)/);
+    assert.doesNotMatch(motion, /NAVIGATION_FALLBACK_MS/);
   });
 
-  it("uses a directional reveal for entering and leaving Grade 5", () => {
+  it("never inserts a synthetic grade chooser between Grade 5 and the real destination", () => {
     const index = page("index.html");
     const gradeFive = page("grade-5.html");
     const motion = page("src/motion.js");
@@ -65,15 +64,14 @@ describe("seamless cross-page navigation", () => {
 
     assert.match(index, /data-grade="5"[^>]*data-page-transition="grade-rise"/);
     assert.match(gradeFive, /class="grade-five-close"[^>]*data-page-transition="grade-drop"/);
-    assert.match(motion, /page-transition-underlay/);
-    assert.match(motion, /page-transition-arrival/);
-    assert.match(motion, /page-transition-grade-preview/);
+    assert.doesNotMatch(motion, /page-transition-underlay/);
+    assert.doesNotMatch(motion, /page-transition-arrival/);
+    assert.doesNotMatch(motion, /page-transition-grade-preview/);
     assert.doesNotMatch(motion, /createElement\('iframe'\)/);
-    assert.match(motion, /if \(!isDrop\) writeArrivalMarker/);
-    assert.match(motion, /DIRECTIONAL_FALLBACK_MS = 440/);
-    assert.match(styles, /\.page-transition-grade-preview/);
-    assert.match(styles, /html\.is-grade-dropping/);
-    assert.match(styles, /html\.is-grade-rising/);
-    assert.match(styles, /translateY\(100vh\)/);
+    assert.doesNotMatch(motion, /writeArrivalMarker/);
+    assert.doesNotMatch(motion, /DIRECTIONAL_FALLBACK_MS/);
+    assert.doesNotMatch(styles, /\.page-transition-grade-preview/);
+    assert.doesNotMatch(styles, /page-transition-underlay|page-transition-arrival/);
+    assert.match(motion, /window\.location\.assign\(destination\.href\)/);
   });
 });

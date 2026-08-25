@@ -12121,8 +12121,8 @@ Suggested solution: ${env.workaround}`;
   async function sha256(randomString) {
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(randomString);
-    const hash = await crypto.subtle.digest("SHA-256", encodedData);
-    const bytes = new Uint8Array(hash);
+    const hash2 = await crypto.subtle.digest("SHA-256", encodedData);
+    const bytes = new Uint8Array(hash2);
     return Array.from(bytes).map((c) => String.fromCharCode(c)).join("");
   }
   async function generatePKCEChallenge(verifier) {
@@ -20860,6 +20860,236 @@ ${suffix}`;
   }
   var progressStore = createProgressStore();
 
+  // src/daily-practice.js
+  function hash(text) {
+    let value = 2166136261;
+    for (const character of String(text)) {
+      value ^= character.charCodeAt(0);
+      value = Math.imul(value, 16777619);
+    }
+    return value >>> 0;
+  }
+  function ranked(items, seed) {
+    return [...items].sort((left, right) => hash(`${seed}:${left.id ?? left.exercise_id}`) - hash(`${seed}:${right.id ?? right.exercise_id}`));
+  }
+  function dailyDate(date = /* @__PURE__ */ new Date()) {
+    const value = date instanceof Date ? date : new Date(date);
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  function flattenExerciseBank(registry = {}) {
+    return Object.entries(registry).flatMap(([topicId, topic]) => (topic.exercises ?? []).filter((exercise) => exercise?.id).map((exercise) => ({
+      ...exercise,
+      topicId,
+      topicName: topic.name ?? topicId
+    })));
+  }
+  function topicWeakness(attempts = []) {
+    const scores = /* @__PURE__ */ new Map();
+    for (const attempt of attempts) {
+      const topicId = attempt.topic_id ?? attempt.topicId;
+      if (!topicId) continue;
+      const score = scores.get(topicId) ?? { correct: 0, total: 0 };
+      score.total += 1;
+      score.correct += attempt.is_correct ?? attempt.isCorrect ? 1 : 0;
+      scores.set(topicId, score);
+    }
+    return [...scores].sort((left, right) => {
+      const leftAccuracy = left[1].correct / left[1].total;
+      const rightAccuracy = right[1].correct / right[1].total;
+      return leftAccuracy - rightAccuracy || right[1].total - left[1].total || left[0].localeCompare(right[0]);
+    }).map(([topicId]) => topicId);
+  }
+  function selectDailyChallenge({ exercises = [], attempts = [], notebook = [], date = dailyDate(), studentSeed = "guest" } = {}) {
+    const usable = exercises.filter((exercise) => exercise?.id && exercise?.topicId);
+    if (usable.length < 4) throw new RangeError("Daily Challenge needs at least four exercises.");
+    const seed = `${studentSeed}:${date}`;
+    const selected = [];
+    const usedIds = /* @__PURE__ */ new Set();
+    const usedTopics = /* @__PURE__ */ new Set();
+    const add = (exercise, role) => {
+      if (!exercise || usedIds.has(exercise.id)) return false;
+      selected.push({ exerciseId: exercise.id, topicId: exercise.topicId, role });
+      usedIds.add(exercise.id);
+      usedTopics.add(exercise.topicId);
+      return true;
+    };
+    const chooseFromTopic = (topicId, role) => add(ranked(usable.filter((item) => item.topicId === topicId && !usedIds.has(item.id)), `${seed}:${role}:${topicId}`)[0], role);
+    const weakTopics = topicWeakness(attempts).filter((topicId) => usable.some((item) => item.topicId === topicId));
+    for (const topicId of weakTopics) {
+      if (selected.length >= 2) break;
+      if (!usedTopics.has(topicId)) chooseFromTopic(topicId, "weak");
+    }
+    for (const topicId of ranked([...new Set(usable.map((item) => item.topicId))].map((id) => ({ id })), `${seed}:starter`).map((item) => item.id)) {
+      if (selected.length >= 2) break;
+      if (!usedTopics.has(topicId)) chooseFromTopic(topicId, "weak");
+    }
+    const reviewRecords = [...notebook].filter((item) => item.status === "to_review" && !usedIds.has(item.exercise_id ?? item.exerciseId)).sort((left, right) => String(left.latest_mistake_date ?? "").localeCompare(String(right.latest_mistake_date ?? "")));
+    const review = reviewRecords.map((record) => usable.find((item) => item.id === (record.exercise_id ?? record.exerciseId))).find(Boolean);
+    if (!add(review, "review")) {
+      const differentTopic = ranked(usable.filter((item) => !usedIds.has(item.id) && !usedTopics.has(item.topicId)), `${seed}:review`)[0];
+      add(differentTopic ?? ranked(usable.filter((item) => !usedIds.has(item.id)), `${seed}:review-any`)[0], "review");
+    }
+    const wildcard = ranked(usable.filter((item) => !usedIds.has(item.id) && !usedTopics.has(item.topicId)), `${seed}:wildcard`)[0] ?? ranked(usable.filter((item) => !usedIds.has(item.id)), `${seed}:wildcard-any`)[0];
+    add(wildcard, "wildcard");
+    return selected;
+  }
+  function applyNotebookAnswer(record, { date = dailyDate(), isCorrect } = {}) {
+    const current = record ? {
+      status: record.status ?? "to_review",
+      firstMistakeDate: record.firstMistakeDate ?? record.first_mistake_date,
+      latestMistakeDate: record.latestMistakeDate ?? record.latest_mistake_date,
+      mistakeCount: Number(record.mistakeCount ?? record.mistake_count ?? 0),
+      successfulReviewDates: [...record.successfulReviewDates ?? record.successful_review_dates ?? []],
+      resolvedDate: record.resolvedDate ?? record.resolved_date ?? null
+    } : {
+      status: "to_review",
+      firstMistakeDate: null,
+      latestMistakeDate: null,
+      mistakeCount: 0,
+      successfulReviewDates: [],
+      resolvedDate: null
+    };
+    if (!isCorrect) return {
+      ...current,
+      status: "to_review",
+      firstMistakeDate: current.firstMistakeDate ?? date,
+      latestMistakeDate: date,
+      mistakeCount: current.mistakeCount + 1,
+      successfulReviewDates: [],
+      resolvedDate: null
+    };
+    if (!current.latestMistakeDate || date <= current.latestMistakeDate || current.status === "hidden") return current;
+    const successfulReviewDates = [.../* @__PURE__ */ new Set([...current.successfulReviewDates, date])].sort();
+    const resolved = successfulReviewDates.length >= 2;
+    return {
+      ...current,
+      status: resolved ? "resolved" : "to_review",
+      successfulReviewDates,
+      resolvedDate: resolved ? date : null
+    };
+  }
+
+  // src/daily-practice-store.js
+  function throwIfError2(error, context) {
+    if (error) throw new Error(`${context}: ${error.message ?? error}`);
+  }
+  function createDailyPracticeStore({ client = null, progressStore: progressStore2 = progressStore } = {}) {
+    let activeClient = client;
+    const getClient = async () => activeClient ?? (activeClient = await getSupabaseClient());
+    async function challengeRow(studentId, grade, date) {
+      const db = await getClient();
+      const { data, error } = await db.from("daily_challenges").select("*").eq("student_id", studentId).eq("grade", Number(grade)).eq("challenge_date", date).maybeSingle();
+      throwIfError2(error, "Unable to load today's challenge");
+      return data;
+    }
+    async function notebookRow(studentId, { grade, topicId, exerciseId }) {
+      const db = await getClient();
+      const { data, error } = await db.from("mistake_notebook").select("*").eq("student_id", studentId).eq("grade", Number(grade)).eq("topic_id", topicId).eq("exercise_id", String(exerciseId)).maybeSingle();
+      throwIfError2(error, "Unable to load the notebook item");
+      return data;
+    }
+    async function loadNotebook({ grade = 5, status } = {}) {
+      const studentId = await progressStore2.initializeStudent();
+      const db = await getClient();
+      let query = db.from("mistake_notebook").select("*").eq("student_id", studentId).eq("grade", Number(grade));
+      if (status) query = query.eq("status", status);
+      const { data, error } = await query.order("latest_mistake_date", { ascending: false });
+      throwIfError2(error, "Unable to load the Mistake Notebook");
+      return data ?? [];
+    }
+    async function loadCompletedChallengeDates({ grade = 5 } = {}) {
+      const studentId = await progressStore2.initializeStudent();
+      const db = await getClient();
+      const { data, error } = await db.from("daily_challenges").select("challenge_date").eq("student_id", studentId).eq("grade", Number(grade)).not("completed_at", "is", null).order("challenge_date", { ascending: false });
+      throwIfError2(error, "Unable to load the practice streak");
+      return [...new Set((data ?? []).map((row) => row.challenge_date).filter(Boolean))];
+    }
+    async function getOrCreateChallenge({ grade = 5, date = dailyDate(), registry } = {}) {
+      const studentId = await progressStore2.initializeStudent();
+      const existing = await challengeRow(studentId, grade, date);
+      if (existing) return existing;
+      const [studentData, notebook] = await Promise.all([progressStore2.loadStudentData(studentId), loadNotebook({ grade })]);
+      const items = selectDailyChallenge({
+        exercises: flattenExerciseBank(registry),
+        attempts: studentData.attempts,
+        notebook,
+        date,
+        studentSeed: studentId
+      });
+      const db = await getClient();
+      const { error } = await db.from("daily_challenges").insert({
+        student_id: studentId,
+        grade: Number(grade),
+        challenge_date: date,
+        items,
+        first_attempt_results: {},
+        completed_exercise_ids: []
+      });
+      throwIfError2(error, "Unable to create today's challenge");
+      return challengeRow(studentId, grade, date);
+    }
+    async function recordDailyAnswer({ grade = 5, date = dailyDate(), exerciseId, isCorrect } = {}) {
+      const studentId = await progressStore2.initializeStudent();
+      const current = await challengeRow(studentId, grade, date);
+      if (!current || !current.items.some((item) => item.exerciseId === String(exerciseId))) return current;
+      const firstAttemptResults = { ...current.first_attempt_results ?? {} };
+      if (!(exerciseId in firstAttemptResults)) firstAttemptResults[exerciseId] = Boolean(isCorrect);
+      const completed = new Set(current.completed_exercise_ids ?? []);
+      if (isCorrect) completed.add(String(exerciseId));
+      const completedExerciseIds = [...completed];
+      const payload = {
+        first_attempt_results: firstAttemptResults,
+        completed_exercise_ids: completedExerciseIds,
+        completed_at: completedExerciseIds.length === current.items.length ? (/* @__PURE__ */ new Date()).toISOString() : null
+      };
+      const db = await getClient();
+      const { error } = await db.from("daily_challenges").update(payload).eq("id", current.id).eq("student_id", studentId);
+      throwIfError2(error, "Unable to update today's challenge");
+      return challengeRow(studentId, grade, date);
+    }
+    async function recordNotebookAnswer({ grade = 5, topicId, exerciseId, exerciseType = "choice", prompt = "", answerGiven = "", correctAnswer = "", date = dailyDate(), isCorrect } = {}) {
+      const studentId = await progressStore2.initializeStudent();
+      const current = await notebookRow(studentId, { grade, topicId, exerciseId });
+      if (!current && isCorrect) return null;
+      const next = applyNotebookAnswer(current, { date, isCorrect });
+      const payload = {
+        student_id: studentId,
+        grade: Number(grade),
+        topic_id: topicId,
+        exercise_id: String(exerciseId),
+        exercise_type: exerciseType,
+        prompt,
+        latest_wrong_answer: isCorrect ? current?.latest_wrong_answer ?? null : String(answerGiven),
+        correct_answer: String(correctAnswer),
+        first_mistake_date: next.firstMistakeDate,
+        latest_mistake_date: next.latestMistakeDate,
+        mistake_count: next.mistakeCount,
+        successful_review_dates: next.successfulReviewDates,
+        status: next.status,
+        resolved_date: next.resolvedDate
+      };
+      const db = await getClient();
+      const operation = current ? db.from("mistake_notebook").update(payload).eq("id", current.id).eq("student_id", studentId) : db.from("mistake_notebook").insert(payload);
+      const { error } = await operation;
+      throwIfError2(error, "Unable to update the Mistake Notebook");
+      return notebookRow(studentId, { grade, topicId, exerciseId });
+    }
+    async function hideNotebookItem({ grade = 5, topicId, exerciseId } = {}) {
+      const studentId = await progressStore2.initializeStudent();
+      const current = await notebookRow(studentId, { grade, topicId, exerciseId });
+      if (!current) return null;
+      const db = await getClient();
+      const { error } = await db.from("mistake_notebook").update({ status: "hidden" }).eq("id", current.id).eq("student_id", studentId);
+      throwIfError2(error, "Unable to hide the notebook item");
+      return notebookRow(studentId, { grade, topicId, exerciseId });
+    }
+    return { getOrCreateChallenge, loadCompletedChallengeDates, loadNotebook, recordDailyAnswer, recordNotebookAnswer, hideNotebookItem };
+  }
+  var dailyPracticeStore = createDailyPracticeStore();
+
   // src/progress-page.js
   var statusLabels = {
     not_started: "Not started",
@@ -21229,6 +21459,21 @@ ${suffix}`;
     const pitchIndex = NATURAL_PITCHES.indexOf(pitch);
     return pitchIndex < 0 ? null : 122 - pitchIndex * 60 / 11;
   }
+  function ledgerLineYsForPitch(noteY, staffLineYs = null) {
+    const lines = Array.isArray(staffLineYs) ? staffLineYs.map(Number).filter(Number.isFinite).sort((left, right) => left - right) : [];
+    if (!Number.isFinite(Number(noteY)) || lines.length < 2) return [];
+    const top = lines[0];
+    const bottom = lines.at(-1);
+    const spacing = (bottom - top) / (lines.length - 1);
+    if (!(spacing > 0)) return [];
+    const ledgers = [];
+    if (noteY < top) {
+      for (let y = top - spacing; y >= noteY - 0.01; y -= spacing) ledgers.push(y);
+    } else if (noteY > bottom) {
+      for (let y = bottom + spacing; y <= noteY + 0.01; y += spacing) ledgers.push(y);
+    }
+    return ledgers;
+  }
   function pitchFromStaffPoint(clientY, rect, pitchYs = null) {
     const engravingY = (clientY - rect.top) / rect.height * 190;
     if (pitchYs) {
@@ -21345,6 +21590,11 @@ ${suffix}`;
         pitchYs = JSON.parse(svg.dataset.pitchYs || "null");
       } catch {
       }
+      let staffLineYs = null;
+      try {
+        staffLineYs = JSON.parse(svg.dataset.staffLineYs || "null");
+      } catch {
+      }
       const pitch = pitchFromStaffPoint(event.clientY, rect, pitchYs);
       if (!pitch || !canPlaceNote(state, state.cursorSlot, selectedDuration)) {
         existing?.remove();
@@ -21361,6 +21611,18 @@ ${suffix}`;
       preview.setAttribute("data-editor-pointer-preview", "");
       preview.setAttribute("pointer-events", "none");
       preview.replaceChildren();
+      ledgerLineYsForPitch(y, staffLineYs).forEach((ledgerY) => {
+        const ledger = document.createElementNS(namespace, "line");
+        ledger.setAttribute("x1", String(x - 11));
+        ledger.setAttribute("x2", String(x + 11));
+        ledger.setAttribute("y1", String(ledgerY));
+        ledger.setAttribute("y2", String(ledgerY));
+        ledger.setAttribute("stroke", "#1687d9");
+        ledger.setAttribute("stroke-width", "2");
+        ledger.setAttribute("stroke-linecap", "round");
+        ledger.setAttribute("data-hover-ledger-line", "");
+        preview.append(ledger);
+      });
       const head2 = document.createElementNS(namespace, "ellipse");
       head2.setAttribute("cx", String(x));
       head2.setAttribute("cy", String(y));
@@ -21465,6 +21727,176 @@ ${suffix}`;
     return { getState: () => state };
   }
 
+  // src/piano-audio.js?v=20260825-timing2
+  var import_meta = {};
+  var SAMPLE_ANCHORS = [
+    { midi: 36, file: "Piano.pp.C2.m4a" },
+    { midi: 48, file: "Piano.pp.C3.m4a" },
+    { midi: 60, file: "Piano.pp.C4.m4a" },
+    { midi: 72, file: "Piano.pp.C5.m4a" },
+    { midi: 84, file: "Piano.pp.C6.m4a" }
+  ];
+  var SAMPLE_ATTACK_OFFSETS = Object.freeze({
+    "Piano.pp.C2.m4a": 0.469,
+    "Piano.pp.C3.m4a": 0.479,
+    "Piano.pp.C4.m4a": 0.479,
+    "Piano.pp.C5.m4a": 0.459,
+    "Piano.pp.C6.m4a": 0.115
+  });
+  function nearestPianoSample(midi) {
+    const pitch = Number(midi);
+    return SAMPLE_ANCHORS.reduce(
+      (nearest, sample) => Math.abs(sample.midi - pitch) < Math.abs(nearest.midi - pitch) ? sample : nearest
+    );
+  }
+  function pianoPlaybackRate(midi, sampleMidi) {
+    return 2 ** ((Number(midi) - Number(sampleMidi)) / 12);
+  }
+  var isMidi = (value) => value !== null && value !== "" && Number.isFinite(Number(value));
+  function createPianoPlayer({
+    AudioElement = globalThis.Audio,
+    AudioContextFactory = globalThis.AudioContext || globalThis.webkitAudioContext,
+    fetchArrayBuffer = async (url) => (await fetch(url)).arrayBuffer(),
+    setTimer = globalThis.setTimeout?.bind(globalThis),
+    clearTimer = globalThis.clearTimeout?.bind(globalThis),
+    assetBase = new URL("../assets/audio/felt-piano/", import_meta.url).href,
+    volume = 0.58
+  } = {}) {
+    const timers = /* @__PURE__ */ new Set();
+    const voices = /* @__PURE__ */ new Set();
+    const buffers = /* @__PURE__ */ new Map();
+    let context = null;
+    const later = (callback, seconds) => {
+      const timer = setTimer?.(() => {
+        timers.delete(timer);
+        callback();
+      }, Math.max(0, seconds * 1e3));
+      if (timer !== void 0) timers.add(timer);
+      return timer;
+    };
+    const startVoice = (midi, duration) => {
+      if (!AudioElement || !isMidi(midi)) return null;
+      const sample = nearestPianoSample(midi);
+      const audio = new AudioElement(`${assetBase}${sample.file}`);
+      audio.preload = "auto";
+      audio.volume = volume;
+      audio.playbackRate = pianoPlaybackRate(midi, sample.midi);
+      audio.preservesPitch = false;
+      audio.currentTime = 0;
+      voices.add(audio);
+      const result = audio.play();
+      result?.catch?.(() => voices.delete(audio));
+      later(() => {
+        audio.pause();
+        voices.delete(audio);
+      }, Math.max(0.06, duration));
+      return audio;
+    };
+    const ensureContext = async () => {
+      if (!AudioContextFactory) return null;
+      context || (context = new AudioContextFactory());
+      if (context.state === "suspended") await context.resume();
+      return context;
+    };
+    const loadBuffer = async (sample) => {
+      if (!buffers.has(sample.file)) {
+        buffers.set(sample.file, (async () => {
+          const audioContext = await ensureContext();
+          const bytes = await fetchArrayBuffer(`${assetBase}${sample.file}`);
+          return audioContext.decodeAudioData(bytes);
+        })());
+      }
+      return buffers.get(sample.file);
+    };
+    const prepare = async (midis) => {
+      const audioContext = await ensureContext();
+      if (!audioContext) return null;
+      const samples = [...new Map((midis || []).filter(isMidi).map((midi) => {
+        const sample = nearestPianoSample(midi);
+        return [sample.file, sample];
+      })).values()];
+      await Promise.all(samples.map(loadBuffer));
+      return audioContext;
+    };
+    const scheduleBufferedVoice = async (midi, startAt, duration) => {
+      const sample = nearestPianoSample(midi);
+      const buffer = await loadBuffer(sample);
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      const end = startAt + Math.max(0.06, duration);
+      source.buffer = buffer;
+      source.playbackRate.value = pianoPlaybackRate(midi, sample.midi);
+      source.connect(gain).connect(context.destination);
+      gain.gain.setValueAtTime(1e-4, startAt);
+      gain.gain.linearRampToValueAtTime(volume, startAt + 8e-3);
+      gain.gain.setValueAtTime(volume, Math.max(startAt + 9e-3, end - 0.015));
+      gain.gain.linearRampToValueAtTime(1e-4, end);
+      source.start(startAt, SAMPLE_ATTACK_OFFSETS[sample.file] || 0);
+      source.stop(end);
+      voices.add(source);
+      source.onended = () => voices.delete(source);
+      return source;
+    };
+    const play = async (midis, { delay = 0, spread = 0, duration = 0.62, startAt } = {}) => {
+      const audioContext = await prepare(midis);
+      if (audioContext) {
+        const base = startAt ?? audioContext.currentTime + 0.06 + delay;
+        await Promise.all((midis || []).map((midi, index) => isMidi(midi) ? scheduleBufferedVoice(Number(midi), base + index * spread, duration) : null));
+        return base;
+      }
+      (midis || []).forEach((midi, index) => {
+        if (!isMidi(midi)) return;
+        later(() => startVoice(Number(midi), duration), delay + index * spread);
+      });
+    };
+    const playTimed = async (midis, durations = [], { delay = 0, startAt } = {}) => {
+      const audioContext = await prepare(midis);
+      let cursor = delay;
+      const scheduled = [];
+      (midis || []).forEach((midi, index) => {
+        const duration = Math.max(0.05, Number(durations[index]) || 0.24);
+        if (isMidi(midi)) {
+          if (audioContext) scheduled.push(scheduleBufferedVoice(Number(midi), (startAt ?? audioContext.currentTime + 0.06) + cursor, duration));
+          else later(() => startVoice(Number(midi), duration), cursor);
+        }
+        cursor += duration;
+      });
+      await Promise.all(scheduled);
+      return cursor;
+    };
+    const playEvents = async (events, { delay = 0, startAt } = {}) => {
+      const midis = (events || []).filter((event) => !event.rest).map((event) => event.midi);
+      const audioContext = await prepare(midis);
+      const base = startAt ?? (audioContext ? audioContext.currentTime + 0.06 + delay : delay);
+      const scheduled = [];
+      (events || []).forEach((event) => {
+        if (event.rest || !isMidi(event.midi)) return;
+        const duration = Math.max(0.06, event.duration || 0.24);
+        if (audioContext) scheduled.push(scheduleBufferedVoice(Number(event.midi), base + (event.time || 0), duration));
+        else later(() => startVoice(Number(event.midi), duration), delay + (event.time || 0));
+      });
+      await Promise.all(scheduled);
+      return base;
+    };
+    const stopAll = () => {
+      timers.forEach((timer) => clearTimer?.(timer));
+      timers.clear();
+      voices.forEach((voice) => {
+        try {
+          voice.pause?.();
+          voice.stop?.();
+        } catch {
+        }
+      });
+      voices.clear();
+    };
+    return { play, playTimed, playEvents, prepare, stopAll, get context() {
+      return context;
+    } };
+  }
+  var pianoPlayer = createPianoPlayer();
+  if (typeof window !== "undefined") window.ListeningDeskPiano = pianoPlayer;
+
   // topic-file-runtime-entry.js
   if (window.location.protocol === "file:") {
     let activeExample = function(index) {
@@ -21472,30 +21904,15 @@ ${suffix}`;
       if (!base.variants) return base;
       const id = selectedVariants[index] || base.variants[0].id;
       return { ...base, ...base.variants.find((variant) => variant.id === id) };
-    }, sound = function(midis, delay = 0, spread = 0, duration = 0.55) {
-      const Audio = window.AudioContext || window.webkitAudioContext;
-      if (!Audio) {
-        showAudioFallback();
-        return;
-      }
-      const audio = new Audio(), base = audio.currentTime + 0.03 + delay;
-      midis.forEach((midi, index) => {
-        const start = base + index * spread, oscillator = audio.createOscillator(), gain = audio.createGain();
-        oscillator.type = "triangle";
-        oscillator.frequency.value = 440 * 2 ** ((midi - 69) / 12);
-        oscillator.connect(gain).connect(audio.destination);
-        gain.gain.setValueAtTime(1e-3, start);
-        gain.gain.exponentialRampToValueAtTime(0.16, start + 0.03);
-        gain.gain.exponentialRampToValueAtTime(1e-3, start + duration);
-        oscillator.start(start);
-        oscillator.stop(start + duration + 0.02);
-      });
+    }, sound = function(midis, delay = 0, spread = 0, duration = 0.62) {
+      pianoPlayer.play(midis, { delay, spread, duration });
     }, showAudioFallback = function() {
       document.querySelectorAll(".play-row").forEach((row) => {
         if (!row.querySelector(".audio-fallback")) row.insertAdjacentHTML("beforeend", `<p class="audio-fallback">${audioUnavailable}</p>`);
       });
       document.querySelectorAll(".play-row button,[data-key-side],[data-key-compare]").forEach((button) => button.disabled = true);
     }, stopRhythmLoop = function() {
+      pianoPlayer.stopAll();
       if (!rhythmLoop) return;
       clearInterval(rhythmLoop.timer);
       rhythmLoop.button.textContent = "\u25B6 Hear multiple bars";
@@ -21677,7 +22094,7 @@ ${suffix}`;
         renderRhythmGuide(items);
         return;
       }
-      if (grade === 4 || (/* @__PURE__ */ new Set(["clefs", "transposing-instruments", "accidentals", "musical-terms", "ornaments", "voices-instruments", "musical-observation"])).has(topic)) {
+      if (grade !== 5 || (/* @__PURE__ */ new Set(["clefs", "transposing-instruments", "accidentals", "musical-terms", "ornaments", "voices-instruments", "musical-observation"])).has(topic)) {
         renderLessonGuide(items);
         return;
       }
@@ -21765,11 +22182,14 @@ ${suffix}`;
       });
     };
     const query = new URLSearchParams(location.search);
-    const grade = query.get("grade") === "4" ? 4 : 5;
-    const DATA = grade === 4 ? window.ListeningDeskGrade4Topics : window.ListeningDeskTopics;
+    const requestedGrade = Number(query.get("grade"));
+    const grade = [2, 3, 4].includes(requestedGrade) ? requestedGrade : 5;
+    const registries = { 2: window.ListeningDeskGrade2Topics, 3: window.ListeningDeskGrade3Topics, 4: window.ListeningDeskGrade4Topics, 5: window.ListeningDeskTopics };
+    const DATA = registries[grade];
     let topic = query.get("topic");
-    if (!DATA[topic]) topic = grade === 4 ? "rhythm-note-values" : "intervals";
-    const gradeQuery = grade === 4 ? "grade=4&" : "";
+    const defaultTopics = { 2: "simple-time", 3: "compound-time", 4: "rhythm-note-values", 5: "intervals" };
+    if (!DATA[topic]) topic = defaultTopics[grade];
+    const gradeQuery = grade === 5 ? "" : `grade=${grade}&`;
     const lessonId = query.get("lesson");
     const intervalLesson2 = grade === 5 && topic === "intervals" && lessonId ? getIntervalLesson(lessonId) : void 0;
     const $ = (selector) => document.querySelector(selector);
@@ -21778,7 +22198,7 @@ ${suffix}`;
     const displayedData = () => intervalLesson2 ? { name: "Intervals", title: intervalLesson2.label, subtitle: "See two correct spellings, hear each note, then hear the interval together.", intro: intervalLesson2.intro, examples: intervalLesson2.examples } : current();
     document.body.dataset.topic = topic;
     document.body.dataset.grade = String(grade);
-    $(".lesson-close").href = grade === 4 ? "grade-4.html" : "grade-5.html";
+    $(".lesson-close").href = grade === 5 ? "grade-5.html" : `grade-${grade}.html`;
     const selectedVariants = {};
     const revealedGroupingSelectors = /* @__PURE__ */ new Set();
     const audioUnavailable = "Audio playback is unavailable; you can continue with notation.";
@@ -21794,6 +22214,8 @@ ${suffix}`;
     render();
     if (topic === "clef-transposition") mountClefTranspositionEditor({ container: $("#clef-editor"), notation: window.ListeningDeskNotation, play: sound, mode: grade === 4 ? "grade4-clef" : void 0 });
     setupLessonCarousel();
+    document.body.classList.remove("is-lesson-loading");
+    $(".hero").removeAttribute("aria-busy");
     startCurrentLesson({ grade, topicId: topic, lessonId: lessonId || null, statusElement: null, syncElement: document.querySelector("[data-progress-sync]") });
   }
 })();

@@ -73,6 +73,14 @@ describe("curtain navigation helpers", () => {
     }
   });
 
+  it("never treats an in-page overlay trigger as a document navigation", () => {
+    const overlayAnchor = anchor("daily-challenge.html", {
+      hasAttribute: name => name === "data-local-overlay",
+    });
+
+    assert.equal(eligibleNavigation(overlayAnchor, click(), "https://example.com/grade-5"), null);
+  });
+
   it("supports local file pages while rejecting mixed-protocol and malformed destinations", () => {
     assert.equal(
       eligibleNavigation(anchor("topic.html"), click(), "file:///tmp/index.html")?.href,

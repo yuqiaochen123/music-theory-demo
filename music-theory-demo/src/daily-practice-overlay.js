@@ -69,7 +69,7 @@ export function installDailyPracticeOverlay(documentObject = globalThis.document
   if (!documentObject || documentObject.documentElement.dataset.dailyPracticeOverlayInstalled === "true") return;
   documentObject.documentElement.dataset.dailyPracticeOverlayInstalled = "true";
   documentObject.addEventListener("click", event => {
-    const shortcut = event.target.closest('a.today-card[href="daily-challenge.html"]');
+    const shortcut = event.target.closest('a.today-card[data-local-overlay="daily-practice"]');
     if (!shortcut || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     void openDailyPracticeOverlay({ documentObject, windowObject: documentObject.defaultView });

@@ -24,6 +24,7 @@ export function eligibleNavigation(anchor, event, currentUrl) {
   if (!anchor || !event || event.defaultPrevented || event.button !== 0) return null;
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
   if (anchor.target || anchor.download || anchor.hasAttribute?.("download")) return null;
+  if (anchor.hasAttribute?.("data-local-overlay")) return null;
 
   try {
     const current = new URL(currentUrl);

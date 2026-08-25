@@ -6,7 +6,7 @@
   <title>Listening Desk · Lesson</title>
   <style>html{background:#f3efec}</style>
   <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
-  <link rel="stylesheet" href="src/page-transitions.css?v=20260825-smooth2">
+  <link rel="stylesheet" href="src/page-transitions.css?v=20260825-parity1">
   <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css">
   <style>
@@ -31,17 +31,17 @@
     @media(max-width:720px){.examples{display:block;border:0;background:transparent}.example{border:1px solid var(--line);margin-bottom:16px}.example+.example{border-left:1px solid var(--line)}body[data-topic="scale-degrees"] .example+.example{border-left:1px solid var(--line);border-top:0}body[data-topic="scale-degrees"] .scale-direction{padding-inline:8px}body[data-topic="scale-degrees"] .scale-direction .notation{height:190px}.interval-overview{display:grid;border:1px solid var(--line);grid-template-columns:1fr}.interval-link,.interval-link:nth-child(odd){border-right:0}.compare-head{align-items:start;flex-direction:column}.compare-btn{width:100%}.notation{height:175px}.grouping-control{padding-inline:18px}.grouping-toggle{width:100%}.grouping-option{flex:1 1 auto}body[data-topic="time-signatures"] .example-body>p{min-height:0}body[data-topic="key-signatures"] .key-pair-grid{grid-template-columns:1fr}body[data-topic="key-signatures"] .key-side+.key-side{border-left:0;border-top:1px solid var(--line)}body[data-topic="key-signatures"] .key-side{padding:20px 18px 22px}body[data-topic="key-signatures"] .key-compare{width:calc(100% - 36px);margin-inline:18px}body[data-topic="key-signatures"] .key-explanation{margin-inline:18px}.continue{grid-template-columns:1fr}.practice{text-align:center}.hero h1{font-size:51px}.clef-editor-head{display:block;padding:22px 18px}.note-count{display:inline-block;margin-top:16px}.editor-toolbar,.editor-staff{padding-inline:18px}.editor-field{flex:1 1 130px}.editor-field select{width:100%}.editor-toolbar button{flex:1 1 auto}.editor-staff-label{display:block}.editor-note-list,.editor-status{padding-inline:18px}}
   </style>
   <link rel="stylesheet" href="src/redesign.css?v=20260802-red5">
-  <link rel="stylesheet" href="src/horizontal-flow.css?v=20260822-g4abrsm1">
+  <link rel="stylesheet" href="src/horizontal-flow.css?v=20260825-parity1">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
   <link rel="stylesheet" href="src/quaver-guide.css?v=20260825-space1">
   <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
 </head>
-<body class="lesson-body">
+<body class="lesson-body is-lesson-loading">
   <div class="page-transition-curtain" aria-hidden="true"></div>
   <div class="lesson-topbar"><strong id="lesson-topbar-title">Lesson</strong><a class="lesson-close" href="grade-5.html" aria-label="Close lesson">×</a></div>
   <main class="lesson-page">
     <div class="lesson-carousel" aria-label="Lesson pages">
-    <section class="hero lesson-slide"><div class="lesson-progress-line"><p class="eyebrow" id="eyebrow"></p></div><h1 id="title"></h1><p class="lead" id="subtitle"></p><section class="intro"><p id="intro"></p></section><p class="progress-sync" data-progress-sync aria-live="polite" hidden></p></section>
+    <section class="hero lesson-slide" aria-busy="true"><div class="lesson-progress-line"><p class="eyebrow" id="eyebrow">Music theory</p></div><h1 id="title">Loading lesson…</h1><p class="lead" id="subtitle">Preparing notation and playback.</p><section class="intro"><p id="intro"></p></section><p class="progress-sync" data-progress-sync aria-live="polite" hidden></p></section>
     <section class="clef-editor lesson-slide" id="clef-editor" hidden aria-labelledby="clef-editor-title">
       <div class="clef-editor-head"><div><p class="eyebrow">Transposition desk</p><h2 id="clef-editor-title">Write, then transpose.</h2><p>Choose a note value and accidental, place it on the source staff, then transpose the phrase.</p></div><span class="note-count" data-note-count>4 notes · 2 bars</span></div>
       <div class="editor-toolbar">
@@ -152,10 +152,10 @@
       $('#examples').querySelectorAll('[data-reveal-grouping]').forEach(button=>button.onclick=()=>{const index=+button.dataset.revealGrouping;if(revealedGroupingSelectors.has(index))revealedGroupingSelectors.delete(index);else revealedGroupingSelectors.add(index);render()});$('#examples').querySelectorAll('[data-grouping]').forEach(button=>button.onclick=()=>{stopRhythmLoop();const index=+button.dataset.index;selectedVariants[index]=button.dataset.grouping;revealedGroupingSelectors.add(index);render()});$('#examples').querySelectorAll('[data-part]').forEach(button=>button.onclick=()=>{const index=+button.dataset.index,part=+button.dataset.part;if(part===2&&topic==='time-signatures')toggleRhythmLoop(index,button);else if(part===2){stopRhythmLoop();playExample(index)}else playPart(index,part)});$('#examples').querySelectorAll('[data-scale-start]').forEach(button=>button.onclick=()=>document.getElementById(button.dataset.scaleStart)?.scrollTo({left:0,behavior:'smooth'}));requestAnimationFrame(resetScaleDegreeScroll);setTimeout(resetScaleDegreeScroll,120);setTimeout(resetScaleDegreeScroll,500);if(!(window.AudioContext||window.webkitAudioContext))showAudioFallback()
     }
     function setupLessonCarousel(){requestAnimationFrame(()=>{const carousel=$('.lesson-carousel'),dots=$('.lesson-dots'),slides=[...carousel.children].filter(slide=>!slide.hidden);dots.replaceChildren(...slides.map((slide,index)=>{const button=document.createElement('button');button.type='button';button.setAttribute('aria-label',`Go to page ${index+1}`);button.onclick=()=>slide.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});return button}));let frame=0,lastSelected=-1,demoTimer=0;const update=()=>{frame=0;const center=carousel.scrollLeft+carousel.clientWidth/2;let selected=0,distance=Infinity;slides.forEach((slide,index)=>{const next=Math.abs(slide.offsetLeft+slide.offsetWidth/2-center);const proximity=Math.max(0,1-next/carousel.clientWidth);const dot=dots.children[index];slide.style.setProperty('--slide-lift',`${(proximity*14).toFixed(2)}px`);dot.style.setProperty('--dot-wave',proximity.toFixed(3));dot.style.setProperty('--dot-lift',`${(proximity*4).toFixed(2)}px`);if(next<distance){distance=next;selected=index}});[...dots.children].forEach((dot,index)=>dot.setAttribute('aria-current',index===selected?'page':'false'));if(selected!==lastSelected){lastSelected=selected;clearTimeout(demoTimer);demoTimer=setTimeout(()=>slides[selected]?.querySelector('.rhythm-notation')?.rhythmInteractionDemo?.play(),380)}};const schedule=()=>{if(!frame)frame=requestAnimationFrame(update)};carousel.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule,{passive:true});update()})}
-    if(!isIntervalOverview)$('#compare').onclick=()=>{stopRhythmLoop();playExample(0);setTimeout(()=>playExample(1),topic==='cadences'?2100:['scales','time-signatures'].includes(topic)?2500:1100)};window.addEventListener('pageshow',resetScaleDegreeScroll);window.addEventListener('load',resetScaleDegreeScroll);window.ListeningDeskPlayMidis=sound;render();if(topic === 'clef-transposition')mountClefTranspositionEditor({container:$('#clef-editor'),notation:window.ListeningDeskNotation,play:sound,mode:grade===4?'grade4-clef':undefined});setupLessonCarousel();
+    if(!isIntervalOverview)$('#compare').onclick=()=>{stopRhythmLoop();playExample(0);setTimeout(()=>playExample(1),topic==='cadences'?2100:['scales','time-signatures'].includes(topic)?2500:1100)};window.addEventListener('pageshow',resetScaleDegreeScroll);window.addEventListener('load',resetScaleDegreeScroll);window.ListeningDeskPlayMidis=sound;render();if(topic === 'clef-transposition')mountClefTranspositionEditor({container:$('#clef-editor'),notation:window.ListeningDeskNotation,play:sound,mode:grade===4?'grade4-clef':undefined});setupLessonCarousel();document.body.classList.remove('is-lesson-loading');$('.hero').removeAttribute('aria-busy');
     startCurrentLesson({grade,topicId:topic,lessonId:lessonId||null,statusElement:null,syncElement:document.querySelector('[data-progress-sync]')});
   </script>
-  <script src="src/topic-file-runtime.bundle.js?v=20260822-g4abrsm1"></script>
+  <script src="src/topic-file-runtime.bundle.js?v=20260825-parity1"></script>
   <script type="module">
     import { mountGrade4NotationInteractions, renderClefComparison } from './src/grade-4-notation-interactions.js?v=20260822-g4abrsm1';
     import { writtenPitchToMidi } from './src/grade-4-music.js?v=20260822-g4abrsm1';
@@ -175,7 +175,7 @@
       if(comparison&&grade4Data?.comparison)renderClefComparison({container:comparison,notes:grade4Data.comparison.notes,notation:window.ListeningDeskNotation,play});
     }
   </script>
-  <script type="module" src="src/motion.js?v=20260825-smooth2"></script>
+  <script type="module" src="src/motion.js?v=20260825-parity1"></script>
   <script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
 </body>
 </html>
