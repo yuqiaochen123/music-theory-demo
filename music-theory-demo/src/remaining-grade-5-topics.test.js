@@ -80,6 +80,23 @@ describe("remaining Grade 5 modules",()=>{
     }
   });
 
+  it("provides pitch-accurate comparison audio for every accidental guide",()=>{
+    const examples=topics.accidentals.examples;
+    assert.equal(examples.every(item=>item.audioType==="sequence"),true);
+    assert.deepEqual(Array.from(examples[0].parts[0][1]),[65,66],"F to F-sharp must rise one semitone");
+    assert.deepEqual(Array.from(examples[0].parts[1][1]),[67,66],"G to G-flat must fall one semitone");
+    assert.deepEqual(Array.from(examples[1].parts[0][1]),[66,65],"F-natural must cancel F-sharp");
+    assert.deepEqual(Array.from(examples[1].parts[1][1]),[70,71],"B-natural must cancel B-flat");
+    assert.deepEqual(Array.from(examples[2].parts[0][1]),[65,67],"F-double-sharp must rise two semitones");
+    assert.deepEqual(Array.from(examples[2].parts[1][1]),[67,65],"G-double-flat must fall two semitones");
+    assert.deepEqual(Array.from(examples[3].parts[0][1]),[61],"C-sharp must sound as MIDI 61");
+    assert.deepEqual(Array.from(examples[3].parts[1][1]),[61],"D-flat must sound as the same pitch");
+    for(const item of examples){
+      assert.equal(item.parts.length,2,`${item.label} needs two labelled audio examples`);
+      assert.equal(item.parts.every(([label,midis])=>label.startsWith("Hear ")&&midis.length>0),true);
+    }
+  });
+
   it("provides eleven stable practice questions for every new module",()=>{
     for(const slug of slugs){
       const bank=practice[slug];

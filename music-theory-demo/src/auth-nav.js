@@ -1,8 +1,10 @@
-import { getCurrentUser } from './auth.js';
+import { getCurrentUser, redirectFileAppToLocalServer } from './auth.js';
 import { setTutorAvailability } from './tutor-availability.js';
 import { applyPreferences, loadPreferences } from './settings-preferences.js';
 
-applyPreferences(loadPreferences());
+const isRedirecting = redirectFileAppToLocalServer();
+
+if (!isRedirecting) applyPreferences(loadPreferences());
 
 export async function installAccountLinks() {
   const links = document.querySelectorAll('[data-account-link]');
@@ -29,4 +31,4 @@ export async function installAccountLinks() {
   }
 }
 
-installAccountLinks();
+if (!isRedirecting) installAccountLinks();

@@ -79,6 +79,9 @@ describe("daily practice UI", () => {
     assert.match(html, /<strong>Daily practice<\/strong>/);
     assert.match(html, /Sign in to get a challenge shaped around your weak topics\./);
     assert.doesNotMatch(html, /<h2>/);
+
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.today-panel--signed-out \.today-action\{[^}]*padding:9px 14px/);
   });
 
   it("renders a compact Grade 5 Today summary with challenge and notebook actions", () => {
@@ -124,6 +127,46 @@ describe("daily practice UI", () => {
     });
 
     assert.deepEqual(result, { challenge, reviewCount: 2, streak: 1 });
+  });
+
+  it("shows a loading error instead of asking a signed-in student to sign in", async () => {
+    const environment = summaryEnvironment();
+    const errors = [];
+    environment.store.getOrCreateChallenge = async () => {
+      throw new Error("database schema unavailable");
+    };
+
+    await dailyUi.mountSummary(environment.summary, {
+      documentObject: environment.documentObject,
+      store: environment.store,
+      registry,
+      mountStreak: environment.mountStreak,
+      logError(error) { errors.push(error); },
+    });
+
+    assert.match(environment.summary.innerHTML, /Daily practice is temporarily unavailable/);
+    assert.doesNotMatch(environment.summary.innerHTML, /Sign in/);
+    assert.equal(errors.length, 1);
+  });
+
+  it("loads the challenge, notebook, and streak history for the active grade", async () => {
+    const requestedGrades = [];
+    await dailyUi.loadSummaryData({
+      grade: 4,
+      registry,
+      store: {
+        async getOrCreateChallenge({ grade }) { requestedGrades.push(["challenge", grade]); return challenge; },
+        async loadNotebook({ grade }) { requestedGrades.push(["notebook", grade]); return []; },
+        async loadCompletedChallengeDates({ grade }) { requestedGrades.push(["streak", grade]); return []; },
+      },
+    });
+
+    assert.deepEqual(requestedGrades, [["challenge", 4], ["notebook", undefined], ["streak", 4]]);
+  });
+
+  it("keeps lower-grade practice routes inside their own grade", () => {
+    const html = challengeMarkup({ challenge, registry, grade: 3 });
+    assert.match(html, /practice\.html\?grade=3&amp;topic=rhythm-note-values/);
   });
 
   it("bootstraps once when the module is evaluated under different query URLs", async () => {
@@ -238,9 +281,14 @@ describe("daily practice UI", () => {
     assert.match(html, /aria-live="polite"/);
   });
 
-  it("keeps the notebook dialogue close to the book", () => {
+  it("keeps the notebook dialogue visibly connected to the book", () => {
+    const html = dailyUi.notebookShortcutMarkup({ reviewCount: 1 });
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
-    assert.match(css, /\.notebook-shortcut__bubble\{right:calc\(100% \+ 3px\);top:52px/);
+    assert.match(html, /class="notebook-shortcut__bubble-shape"/);
+    assert.match(html, /<path d="M2 2 H142 Q154 2 154 14 V18 C164 20 172 25 178 32 C172 39 164 44 154 46 V50 Q154 62 142 62 H14 Q2 62 2 50 V14 Q2 2 14 2 Z"/);
+    assert.match(css, /\.notebook-shortcut__bubble-shape\{position:absolute;inset:0;width:100%;height:100%;overflow:hidden/);
+    assert.match(css, /\.notebook-shortcut__bubble-shape path\{[^}]*stroke:none/);
+    assert.doesNotMatch(css, /\.notebook-shortcut__bubble::after\{/);
   });
 
   it("renders four labelled challenge exercises with stable one-question routes", () => {
@@ -249,24 +297,63 @@ describe("daily practice UI", () => {
     assert.match(html, /Weak topic/);
     assert.match(html, /Spaced review/);
     assert.match(html, /Wildcard/);
-    assert.match(html, /practice\.html\?topic=clefs&amp;exercise=c1&amp;daily=2026-08-23&amp;slot=1/);
+    assert.match(html, /practice\.html\?grade=5&amp;topic=clefs&amp;exercise=c1&amp;dailyExercise=c1&amp;daily=2026-08-23&amp;slot=1/);
     assert.match(html, /daily-question--complete/);
+  });
+
+  it("places a large accessible streak animation in the challenge hero", () => {
+    const html = challengeMarkup({ challenge, registry, streak: 7 });
+    assert.match(html, /class="daily-challenge-hero"/);
+    assert.match(html, /class="daily-challenge-streak"[\s\S]*class="daily-streak daily-streak--hero"/);
+    assert.match(html, /aria-label="7 days practice streak"/);
+    assert.match(html, /data-daily-streak-canvas/);
+    assert.match(html, /Complete your Daily Challenge each day to grow your streak\./);
+
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.daily-practice-overlay \.daily-challenge-hero\{[^}]*grid-template-columns:minmax\(0,1fr\) clamp\(150px,18vw,190px\)/);
+    assert.match(css, /\.daily-practice-overlay \.daily-streak--hero\{[^}]*width:clamp\(150px,18vw,190px\)[^}]*height:clamp\(150px,18vw,190px\)/);
+    assert.match(css, /\.daily-practice-overlay \.daily-challenge-streak p\{[^}]*color:#74666b[^}]*text-align:center/);
+  });
+
+  it("loads the real streak beside the challenge and mounts its animation", async () => {
+    const streakSlot = { kind: "challenge-streak" };
+    const root = {
+      innerHTML: "",
+      querySelector(selector) {
+        assert.equal(selector, "[data-daily-streak]");
+        return streakSlot;
+      },
+    };
+    const calls = [];
+    await dailyUi.mountChallenge(root, {
+      registry,
+      store: {
+        async getOrCreateChallenge() { return challenge; },
+        async loadCompletedChallengeDates() { return [dailyUi.dailyDate?.() ?? "2026-08-26"]; },
+      },
+      mountStreak: async (element, value) => calls.push({ element, value }),
+    });
+
+    assert.match(root.innerHTML, /daily-streak--hero/);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].element, streakSlot);
+    assert.ok(calls[0].value >= 1);
   });
 
   it("keeps notebook cards focused on the exercise and review action", () => {
     const html = notebookMarkup({ status: "resolved", items: [{
-      topic_id: "scales", exercise_id: "s1", prompt: "Name the scale", latest_wrong_answer: "D major",
+      grade: 5, topic_id: "scales", exercise_id: "s1", prompt: "Name the scale", latest_wrong_answer: "D major",
       correct_answer: "G major", mistake_count: 2, resolved_date: "2026-08-23", status: "resolved",
     }] });
     assert.match(html, /Resolved/);
     assert.match(html, /Name the scale/);
     assert.doesNotMatch(html, /Your last answer|Correct answer|D major|G major|<dl>/);
-    assert.match(html, /practice\.html\?topic=scales&amp;exercise=s1&amp;review=1/);
+    assert.match(html, /practice\.html\?grade=5&amp;topic=scales&amp;exercise=s1&amp;review=1/);
   });
 
   it("offers a working discard action instead of the old Hide control", () => {
-    const html = notebookMarkup({ status: "to_review", items: [{
-      topic_id: "scales", exercise_id: "s1", prompt: "Name the scale", mistake_count: 2,
+    const html = notebookMarkup({ status: "to_review", today: "2026-08-26", items: [{
+      grade: 5, topic_id: "scales", exercise_id: "s1", prompt: "Name the scale", mistake_count: 2, latest_mistake_date: "2026-08-26",
     }] });
     assert.match(html, /data-discard-mistake="s1"/);
     assert.match(html, />Discard<\/button>/);
@@ -308,8 +395,8 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260826-notebook-tabs1/);
-    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-overlay2/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260826-(?:grade-parity[12]|global2)/);
+    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12])/);
     assert.doesNotMatch(grade, /<script[^>]+src="src\/daily-practice-ui\.js/);
     assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
     assert.match(daily, /src\/daily-practice\.css\?v=20260825-page2/);
@@ -346,6 +433,16 @@ describe("daily practice UI", () => {
     assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:124px!important\}/);
   });
 
+  it("hangs the Grade 5 subject tabs from a darker plum hairline", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    const controls = readFileSync(new URL("./interface.js", import.meta.url), "utf8");
+    assert.match(controls, /rail\.className = 'curriculum-tabs-rail'/);
+    assert.match(controls, /rail\.append\(navigation\)/);
+    assert.match(controls, /curriculum\.before\(rail\)/);
+    assert.match(css, /\.grade-five-page \.curriculum-tabs-rail\{[^}]*width:100%[^}]*border-top:1px solid #7f1742/);
+    assert.match(css, /\.grade-five-page \.curriculum-tabs\{[^}]*margin-top:-1px/);
+  });
+
   it("keeps the mistake notebook inside a padded, responsive reading column", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.daily-feature-body main\.daily-feature-main\{/);
@@ -358,9 +455,19 @@ describe("daily practice UI", () => {
 
   it("mounts the animated mistake notebook on Grade 4", () => {
     const grade = readFileSync(new URL("../grade-4.html", import.meta.url), "utf8");
-    assert.match(grade, /src\/daily-practice\.css\?v=20260826-notebook-tabs1/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260826-(?:grade-parity[12]|global2)/);
     assert.match(grade, /data-notebook-shortcut/);
-    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-streak2/);
+    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12])/);
     assert.match(grade, /src\/notebook-shortcut\.js\?v=20260825-book2/);
+  });
+
+  it("mounts the same floating Daily Practice entry on every implemented grade page", () => {
+    for (const grade of [2, 3, 4, 5]) {
+      const page = readFileSync(new URL(`../grade-${grade}.html`, import.meta.url), "utf8");
+      assert.match(page, new RegExp(`data-daily-practice-summary[^>]*data-grade="${grade}"`));
+      assert.match(page, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12])/);
+    }
+    const grade4 = readFileSync(new URL("../grade-4.html", import.meta.url), "utf8");
+    assert.doesNotMatch(grade4, /class="mastery-callout"/);
   });
 });

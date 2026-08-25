@@ -18,6 +18,15 @@ const SAMPLE_ATTACK_OFFSETS = Object.freeze({
   'Piano.pp.C6.m4a': 0.115
 });
 
+const SAMPLE_OUTPUT_BOOST = 2.8;
+const SAMPLE_LIMITER = Object.freeze({
+  threshold: -1,
+  knee: 0,
+  ratio: 20,
+  attack: 0.003,
+  release: 0.1
+});
+
 export function nearestPianoSample(midi) {
   const pitch = Number(midi);
   return SAMPLE_ANCHORS.reduce((nearest, sample) =>
@@ -38,13 +47,14 @@ export function createPianoPlayer({
   setTimer = globalThis.setTimeout?.bind(globalThis),
   clearTimer = globalThis.clearTimeout?.bind(globalThis),
   assetBase = new URL('../assets/audio/felt-piano/', import.meta.url).href,
-  volume = 0.58,
+  volume = 0.85,
   getPreferences = () => loadPreferences()
 } = {}) {
   const timers = new Set();
   const voices = new Set();
   const buffers = new Map();
   let context = null;
+  let sampledOutput = null;
 
   const playbackSettings = () => {
     const preferences = getPreferences?.() || {};
@@ -69,7 +79,7 @@ export function createPianoPlayer({
     const sample = nearestPianoSample(midi);
     const audio = new AudioElement(`${assetBase}${sample.file}`);
     audio.preload = 'auto';
-    audio.volume = playbackSettings().volume;
+    audio.volume = Math.min(1, playbackSettings().volume * SAMPLE_OUTPUT_BOOST);
     audio.playbackRate = pianoPlaybackRate(midi, sample.midi);
     audio.preservesPitch = false;
     audio.currentTime = 0;
@@ -101,6 +111,25 @@ export function createPianoPlayer({
     return buffers.get(sample.file);
   };
 
+  const sampledOutputNode = () => {
+    if (sampledOutput) return sampledOutput;
+    const boost = context.createGain();
+    boost.gain.value = SAMPLE_OUTPUT_BOOST;
+    const limiter = context.createDynamicsCompressor?.();
+    if (limiter) {
+      limiter.threshold.value = SAMPLE_LIMITER.threshold;
+      limiter.knee.value = SAMPLE_LIMITER.knee;
+      limiter.ratio.value = SAMPLE_LIMITER.ratio;
+      limiter.attack.value = SAMPLE_LIMITER.attack;
+      limiter.release.value = SAMPLE_LIMITER.release;
+      boost.connect(limiter).connect(context.destination);
+    } else {
+      boost.connect(context.destination);
+    }
+    sampledOutput = boost;
+    return sampledOutput;
+  };
+
   const prepare = async midis => {
     const audioContext = await ensureContext();
     if (!audioContext) return null;
@@ -121,7 +150,7 @@ export function createPianoPlayer({
     const end = startAt + Math.max(0.06, duration);
     source.buffer = buffer;
     source.playbackRate.value = pianoPlaybackRate(midi, sample.midi);
-    source.connect(gain).connect(context.destination);
+    source.connect(gain).connect(sampledOutputNode());
     gain.gain.setValueAtTime(0.0001, startAt);
     const outputVolume = playbackSettings().volume;
     gain.gain.linearRampToValueAtTime(outputVolume, startAt + 0.008);

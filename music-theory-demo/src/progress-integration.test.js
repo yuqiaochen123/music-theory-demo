@@ -38,9 +38,10 @@ test('practice page requests AI help only as a non-blocking incorrect-answer enh
   assert.doesNotMatch(practicePage, /Replay it and follow the movement between the notes/);
 });
 
-test('practice page tells signed-out learners how to enable the AI tutor', () => {
+test('practice page explains that Quaver uses AI to help after mistakes', () => {
   assert.match(practicePage, /class="tutor-availability"/);
-  assert.match(practicePage, /AI tutor explains incorrect answers/);
+  assert.match(practicePage, /Quaver uses AI to explain your mistakes/);
+  assert.doesNotMatch(practicePage, />AI tutor</);
   assert.match(practicePage, /href="login\.html\?v=20260731-auth6"/);
   assert.match(practicePage, /data-tutor-signed-out/);
   assert.match(practicePage, /data-tutor-signed-in hidden/);

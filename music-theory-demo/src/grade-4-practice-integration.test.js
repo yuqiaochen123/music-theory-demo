@@ -72,3 +72,8 @@ test('rhythm and metronome share the sampled-piano audio clock and exact start t
   assert.match(page,/pianoPlayer\.playEvents\(combined\.rhythm,\{startAt:base\}\)/);
   assert.match(page,/start:base\+click\.time/);
 });
+
+test('standalone and accompanied metronomes use the quieter shared click balance',()=>{
+  const balancedClicks=page.match(/volume:click\.accent \? \.16 : \.08/g)||[];
+  assert.equal(balancedClicks.length,2);
+});

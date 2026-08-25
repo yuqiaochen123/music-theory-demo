@@ -11,18 +11,19 @@
 .notebook-shortcut{grid-template-rows:132px}
 .notebook-shortcut__art{min-height:132px}
 @media(max-width:720px){.grade-five-page [data-notebook-shortcut]{width:128px}.notebook-shortcut{grid-template-rows:104px}.notebook-shortcut__art{min-height:104px}}
-.notebook-shortcut{position:relative}.notebook-shortcut__bubble{position:absolute;right:70%;top:-44px;width:170px;padding:10px 12px;border:1px solid rgba(99,24,56,.15);border-radius:14px;background:var(--brand-paper,#f6f1e9);color:var(--brand-deep,#631838);font-size:12px;font-weight:800;line-height:1.3;text-align:left;box-shadow:0 8px 20px rgba(55,6,29,.13);pointer-events:none}.notebook-shortcut__bubble::after{content:"";position:absolute;right:19px;top:100%;border:8px solid transparent;border-top-color:var(--brand-paper,#f6f1e9);transform:translateY(-1px)}.notebook-shortcut__bubble.is-switching{animation:notebook-dialogue-in .3s cubic-bezier(.22,.7,.3,1)}@keyframes notebook-dialogue-in{from{opacity:0;transform:translateY(5px) scale(.97)}}
+.notebook-shortcut{position:relative}.notebook-shortcut__bubble{position:absolute;right:70%;top:-44px;width:180px;min-height:64px;box-sizing:border-box;padding:10px 34px 10px 14px;color:var(--brand-deep,#631838);font-size:12px;font-weight:800;line-height:1.3;text-align:left;pointer-events:none}.notebook-shortcut__bubble-shape{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}.notebook-shortcut__bubble-shape path{fill:var(--brand-paper,#f6f1e9);stroke:none}.notebook-shortcut__bubble>[data-notebook-dialogue-text]{position:relative;z-index:1;display:block}.notebook-shortcut__bubble.is-switching{animation:notebook-dialogue-in .3s cubic-bezier(.22,.7,.3,1)}@keyframes notebook-dialogue-in{from{opacity:0;transform:translateY(5px) scale(.97)}}
 @media(max-width:720px){.notebook-shortcut__bubble{right:72%;top:-38px;width:138px;padding:8px 10px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){.notebook-shortcut__bubble.is-switching{animation:none}}
-.notebook-shortcut__bubble{top:68px}.notebook-shortcut__bubble::after{right:-15px;top:50%;border-top-color:transparent;border-left-color:var(--brand-paper,#f6f1e9);transform:translateY(-50%)}
+.notebook-shortcut__bubble{top:68px}
 @media(max-width:720px){.notebook-shortcut__bubble{top:58px}}
-.notebook-shortcut__bubble{width:150px;padding:7px 9px;border-color:rgba(255,255,255,.22);border-radius:9px;background:rgba(246,241,233,.13);color:#fff;font-size:11px;font-weight:700;box-shadow:none;backdrop-filter:blur(3px)}.notebook-shortcut__bubble::after{display:none}
+.notebook-shortcut__bubble{width:180px;padding:10px 34px 10px 14px;color:#fff;font-size:11px;font-weight:700}.notebook-shortcut__bubble-shape path{fill:rgba(246,241,233,.13);stroke:none}
 @media(max-width:720px){.notebook-shortcut__bubble{width:124px;padding:6px 8px;font-size:9px}}
 .notebook-shortcut__bubble{animation:notebook-bubble-float 3.2s ease-in-out infinite}.notebook-shortcut__bubble.is-switching{animation:notebook-dialogue-in .3s cubic-bezier(.22,.7,.3,1),notebook-bubble-float 3.2s ease-in-out .3s infinite}@keyframes notebook-bubble-float{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
 @media(prefers-reduced-motion:reduce){.notebook-shortcut__bubble,.notebook-shortcut__bubble.is-switching{animation:none}}
 
 /* Compact daily-practice entry: one quiet, obvious route instead of a dashboard. */
 .daily-practice-summary{width:calc(100% - 32px);max-width:680px;margin:0 auto 20px}
+.daily-practice-summary .today-panel--signed-out .today-action{padding:7px 12px;border-radius:7px;font-size:14px;line-height:1}
 .daily-practice-summary .today-panel--compact{display:block;padding:0;border:0;border-radius:0;background:transparent}
 .daily-practice-summary .today-card{grid-template-columns:34px minmax(0,1fr) 52px auto;gap:11px;min-height:0;padding:10px 12px;border-color:rgba(255,255,255,.28);border-radius:10px;background:rgba(255,255,255,.1);color:#fff;box-shadow:none}
 .daily-practice-summary .today-card:hover,.daily-practice-summary .today-card:focus-visible{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.16);outline:none}
@@ -33,8 +34,8 @@
 .daily-streak{position:relative;display:grid;flex:none;width:52px;height:52px;place-items:center;overflow:visible}.daily-streak canvas,.daily-streak__fallback{position:absolute;inset:0;width:100%;height:100%}.daily-streak__fallback{position:absolute;display:grid;place-items:center;border-radius:50%;background:#f0b55f;color:#631838;font-weight:900}.daily-streak__fallback[hidden]{display:none}
 @media(max-width:520px){.daily-practice-summary{width:calc(100% - 20px);margin-bottom:14px}.daily-practice-summary .today-card{grid-template-columns:30px minmax(0,1fr) 46px auto;padding:9px 10px}.daily-practice-summary .today-icon{width:30px;height:30px}.daily-practice-summary .today-card b{grid-column:auto;font-size:11px}}
 @media(max-width:520px){.daily-streak{width:46px;height:46px}}
-.grade-five-page [data-notebook-shortcut]{top:34px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:26px}.notebook-shortcut__bubble{right:calc(100% + 3px);top:52px;width:145px;border-radius:14px 14px 4px 14px}.notebook-shortcut__bubble::after{display:block;right:-13px;top:50%;border:7px solid transparent;border-left-color:rgba(246,241,233,.13);transform:translateY(-50%)}
-@media(max-width:720px){.grade-five-page [data-notebook-shortcut]{top:66px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:34px}.notebook-shortcut__bubble{right:calc(100% + 3px);top:40px;width:118px}}
+.grade-five-page [data-notebook-shortcut]{top:34px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:26px}.notebook-shortcut__bubble{right:calc(100% - 26px);top:52px;width:180px}
+@media(max-width:720px){.grade-five-page [data-notebook-shortcut]{top:66px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:34px}.notebook-shortcut__bubble{right:calc(100% - 18px);top:40px;width:150px;min-height:56px;padding:8px 29px 8px 12px}}
 
 /* Grade 5 compact control strip: keep navigation secondary to the lesson grid. */
 .grade-five-body .grade-five-topbar{height:58px;font-size:clamp(18px,2vw,25px)}
@@ -44,7 +45,8 @@
 .grade-five-page .daily-practice-summary .today-card{padding:6px 10px;border-color:rgba(255,255,255,.38);background:rgba(99,24,56,.94);backdrop-filter:blur(10px)}
 .grade-five-page .daily-practice-summary .today-icon{width:30px;height:30px;font-size:13px}
 .grade-five-page .daily-practice-summary .today-card strong{font-size:14px}
-.grade-five-page .curriculum-tabs{height:38px;margin-bottom:10px;gap:6px}
+.grade-five-page .curriculum-tabs-rail{width:100%;border-top:1px solid #7f1742}
+.grade-five-page .curriculum-tabs{height:38px;margin-top:-1px;margin-bottom:10px;gap:6px;background:none}
 .grade-five-page .curriculum-tabs button{padding:7px 12px;font-size:13px}
 .grade-five-page .curriculum{height:calc(100% - 48px)}
 .grade-five-page .curriculum-section{box-sizing:border-box;padding-bottom:108px}
@@ -153,8 +155,9 @@
 .notebook-overlay.is-open .notebook-overlay__backdrop{animation:daily-practice-backdrop-in .6s ease-out both}
 .notebook-overlay__panel{position:relative;display:flex;box-sizing:border-box;width:min(820px,calc(100% - 48px));height:min(82dvh,860px);max-height:calc(100dvh - 56px);min-height:0;flex-direction:column;padding:14px;border:1px solid rgba(246,241,233,.38);border-radius:28px;overflow:hidden;background:rgba(99,24,56,.88);box-shadow:inset 0 1px 0 rgba(246,241,233,.42),0 30px 80px rgba(42,11,28,.38)}
 .notebook-overlay.is-open .notebook-overlay__panel{animation:daily-practice-overlay-in .6s cubic-bezier(.22,.7,.3,1) both}
-.notebook-overlay__close{position:absolute;z-index:3;top:24px;right:24px;display:grid;width:44px;height:44px;padding:0;place-items:center;border:1px solid rgba(246,241,233,.66);border-radius:50%;background:#631838;color:#fff;font:300 36px/1 Arial,sans-serif;cursor:pointer;transition:transform .18s ease,background .18s ease}
-.notebook-overlay__close:hover,.notebook-overlay__close:focus-visible{background:#9a2f5a;outline:2px solid #fff;outline-offset:2px;transform:rotate(7deg) scale(1.05)}
+.notebook-overlay__close{position:absolute;z-index:3;top:24px;right:24px;display:grid;width:44px;height:44px;padding:0;place-items:center;border:0;border-radius:0;background:transparent;color:#74666b;font:300 36px/1 Arial,sans-serif;cursor:pointer;transition:transform .18s ease,opacity .18s ease}
+.notebook-overlay__close:hover,.notebook-overlay__close:focus-visible,.notebook-overlay__close:active{background:transparent;color:#74666b;transform:rotate(7deg) scale(1.08);opacity:.82}
+.notebook-overlay__close:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 .daily-practice-overlay .daily-feature-body main.daily-feature-main{width:calc(100% - 28px);min-height:0;margin:0 auto 14px;padding:32px 38px 36px;border-radius:20px;background:#f6f1e9}
 .notebook-overlay__sheet{display:flex;box-sizing:border-box;width:100%;height:100%;min-height:0;flex-direction:column;padding:32px 38px 36px;border-radius:20px;overflow:hidden;background:#f6f1e9}
 .notebook-overlay__head{position:static;flex:none;width:auto;margin:0;padding:0 64px 24px 0;border:0;background:transparent;color:#2a0b1c}
@@ -162,7 +165,9 @@
 .notebook-overlay__head h2{margin:0;color:#2a0b1c;font-size:clamp(38px,4.8vw,52px);font-weight:620;line-height:1.03;letter-spacing:-.045em}
 .notebook-overlay__head h2 em{color:#9a2f5a;font-style:normal}
 .notebook-overlay__head>p:last-child{max-width:590px;margin:12px 0 0;color:#74666b;font-size:15px;line-height:1.5}
-.notebook-overlay__content{min-width:0;min-height:0;flex:1;padding:0 6px 0 0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.notebook-overlay__content{display:flex;min-width:0;min-height:0;flex:1;flex-direction:column;padding:0;overflow:hidden}
+.notebook-overlay .notebook-tabs{position:static;flex:none;margin:0 0 16px}
+.notebook-overlay .notebook-list{min-height:0;flex:1;padding:0 6px 12px 0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
 .notebook-overlay .notebook-tabs a{font-weight:650}
 .notebook-overlay .notebook-card-head{font-weight:650}
 .notebook-overlay .notebook-card h2{font-weight:620}
@@ -175,6 +180,10 @@
 .notebook-overlay .notebook-discard-status:not(:empty){flex-basis:100%;color:#9a2f5a;font-size:12px}
 .daily-practice-overlay .daily-page-head h1{font-size:clamp(38px,4.8vw,52px)}
 .daily-practice-overlay .daily-page-head>p:last-child{margin-top:12px;font-size:15px;color:#74666b}
+.daily-practice-overlay .daily-challenge-hero{display:grid;grid-template-columns:minmax(0,1fr) clamp(150px,18vw,190px);gap:24px;align-items:center}
+.daily-practice-overlay .daily-challenge-streak{display:grid;justify-items:center;align-self:center}
+.daily-practice-overlay .daily-streak--hero{width:clamp(150px,18vw,190px);height:clamp(150px,18vw,190px);justify-self:end}
+.daily-practice-overlay .daily-challenge-streak p{max-width:180px;margin:-8px 0 0;color:#74666b;font-size:11px;font-weight:600;line-height:1.35;text-align:center}
 .daily-practice-overlay .daily-question-list{gap:8px;margin-top:24px}
 .daily-practice-overlay .daily-question{gap:14px;padding:14px 16px;border-color:#dfd0d5;border-radius:16px;background:#f6f1e9;box-shadow:0 5px 16px rgba(42,11,28,.045)}
 .daily-practice-overlay .daily-number{background:#9a2f5a}
@@ -186,5 +195,25 @@
 .daily-practice-overlay.is-closing,.notebook-overlay.is-closing{opacity:0;transition:opacity .18s ease}
 @keyframes daily-practice-overlay-in{from{opacity:0;transform:translateY(12px) scale(.985)}}
 @keyframes daily-practice-backdrop-in{from{opacity:0}}
-@media(max-width:620px){.daily-practice-overlay,.notebook-overlay{padding:16px 8px}.daily-practice-overlay__panel{width:calc(100% - 16px);max-height:calc(100dvh - 32px);border-radius:22px}.notebook-overlay__panel{width:calc(100% - 16px);height:calc(100dvh - 32px);max-height:calc(100dvh - 32px);padding:8px;border-radius:22px}.daily-practice-overlay .daily-feature-topbar{border-radius:22px 22px 0 0}.daily-practice-overlay .daily-feature-body main.daily-feature-main{width:calc(100% - 16px);margin-bottom:8px;padding:26px 20px 30px;border-radius:16px}.notebook-overlay__sheet{padding:26px 20px 30px;border-radius:16px}.notebook-overlay__close{top:18px;right:18px;width:40px;height:40px;font-size:32px}.daily-practice-overlay .daily-question{border-radius:14px}.daily-practice-overlay .daily-question a{border-radius:999px}.notebook-overlay__head{padding:0 48px 20px 0}.notebook-overlay__head h2{font-size:clamp(34px,10vw,44px)}}
+@media(max-width:620px){.daily-practice-overlay,.notebook-overlay{padding:16px 8px}.daily-practice-overlay__panel{width:calc(100% - 16px);max-height:calc(100dvh - 32px);border-radius:22px}.notebook-overlay__panel{width:calc(100% - 16px);height:calc(100dvh - 32px);max-height:calc(100dvh - 32px);padding:8px;border-radius:22px}.daily-practice-overlay .daily-feature-topbar{border-radius:22px 22px 0 0}.daily-practice-overlay .daily-feature-body main.daily-feature-main{width:calc(100% - 16px);margin-bottom:8px;padding:26px 20px 30px;border-radius:16px}.notebook-overlay__sheet{padding:26px 20px 30px;border-radius:16px}.notebook-overlay__close{top:18px;right:18px;width:40px;height:40px;font-size:32px}.daily-practice-overlay .daily-challenge-hero{grid-template-columns:minmax(0,1fr) 104px;gap:12px}.daily-practice-overlay .daily-streak--hero{width:96px;height:96px}.daily-practice-overlay .daily-challenge-streak p{margin:-2px 0 0;font-size:9px}.daily-practice-overlay .daily-question{border-radius:14px}.daily-practice-overlay .daily-question a{border-radius:999px}.notebook-overlay__head{padding:0 48px 20px 0}.notebook-overlay__head h2{font-size:clamp(34px,10vw,44px)}}
 @media(prefers-reduced-motion:reduce){.daily-practice-overlay.is-open .daily-practice-overlay__backdrop,.daily-practice-overlay.is-open .daily-practice-overlay__panel,.notebook-overlay.is-open .notebook-overlay__backdrop,.notebook-overlay.is-open .notebook-overlay__panel{animation:none}.daily-practice-overlay.is-closing,.notebook-overlay.is-closing{transition:none}}
+
+/* Keep the notebook beside the grade content; only Daily Practice floats at the bottom. */
+.grade-five-body>.grade-five-page{position:relative}
+.global-learning-tools{position:static;z-index:4}
+.global-learning-tools>[data-notebook-shortcut]{position:absolute;right:clamp(18px,3vw,42px);top:clamp(72px,9vh,104px);bottom:auto;left:auto;width:clamp(142px,14vw,184px);transform:none}
+.global-learning-tools .notebook-shortcut__bubble{right:calc(100% - 26px);top:52px}
+.global-learning-tools .daily-practice-summary{position:fixed;bottom:18px;left:50%;z-index:32;width:calc(100% - 32px);max-width:690px;margin:0;transform:translateX(-50%);filter:drop-shadow(0 12px 24px rgba(42,11,28,.24))}
+
+.notebook-day{min-width:0}
+.notebook-day>h2{margin:8px 0 14px;color:#631838;font-size:clamp(20px,2.5vw,27px);font-weight:650;letter-spacing:-.02em}
+.notebook-day-empty{padding:24px;border:1px solid #dfd0d5;border-radius:16px;background:#fff}
+.notebook-day-empty strong{display:block;color:#2a0b1c;font-size:18px}
+.notebook-day-empty p{margin:7px 0 0;color:#74666b;line-height:1.5}
+.notebook-older-toggle{display:flex;width:100%;align-items:center;justify-content:center;margin:22px 0 0;padding:13px 18px;border:1px solid #9a2f5a;border-radius:999px;background:transparent;color:#631838;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.notebook-older-toggle:hover,.notebook-older-toggle:focus-visible{background:#9a2f5a;color:#fff;outline:none}
+.notebook-older-toggle[aria-expanded="true"]{margin-bottom:22px}
+.notebook-older{display:grid;gap:26px}
+.notebook-older[hidden]{display:none}
+
+@media(max-width:720px){.global-learning-tools>[data-notebook-shortcut]{right:8px;top:72px;bottom:auto;width:112px}.global-learning-tools .notebook-shortcut__bubble{right:calc(100% - 18px);top:40px;width:138px}.global-learning-tools .daily-practice-summary{bottom:10px;width:calc(100% - 24px)}}

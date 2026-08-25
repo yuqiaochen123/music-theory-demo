@@ -74,10 +74,20 @@ export async function recordAnswer({
   exerciseType,
   prompt,
   challengeDate,
-}, { store = progressStore, dailyStore = dailyPracticeStore } = {}) {
+  challengeExerciseId,
+}, { store = progressStore, dailyStore = dailyPracticeStore, onNavigationReady } = {}) {
+  let navigationReady = false;
+  const releaseNavigation = () => {
+    if (navigationReady) return;
+    navigationReady = true;
+    onNavigationReady?.();
+  };
   try {
     displaySync(syncElement, 'Saving answer…');
-    const enhanced = await recordDailyPracticeEnhancements({ grade, topicId: sourceTopicId ?? topicId, exerciseId, exerciseType, prompt, answerGiven, correctAnswer, isCorrect, challengeDate }, { store: dailyStore, syncElement });
+    const enhanced = await recordDailyPracticeEnhancements(
+      { grade, topicId: sourceTopicId ?? topicId, exerciseId, challengeExerciseId, exerciseType, prompt, answerGiven, correctAnswer, isCorrect, challengeDate },
+      { store: dailyStore, syncElement, onDailySaved: releaseNavigation },
+    );
     await store.recordExerciseAttempt({
       grade,
       topicId: sourceTopicId ?? topicId,
@@ -88,33 +98,40 @@ export async function recordAnswer({
       isCorrect,
       score: Math.round((Number(correctCount) / Number(exerciseNumber)) * 100),
     });
-    const completed = Number(exerciseNumber) >= Number(totalExercises);
+    releaseNavigation();
+    const completed = Boolean(isCorrect) && Number(exerciseNumber) >= Number(totalExercises);
+    const progressPercent = completed
+      ? 100
+      : Math.min(99, Math.round((Number(exerciseNumber) / Number(totalExercises)) * 100));
     const refreshed = await store.saveProgress({
       grade,
       topicId,
       lessonId,
       status: completed ? 'completed' : 'in_progress',
-      progressPercent: Math.round((Number(exerciseNumber) / Number(totalExercises)) * 100),
+      progressPercent,
     });
     if (enhanced) displaySync(syncElement, 'Answer and progress saved');
     return refreshed;
   } catch (error) {
+    releaseNavigation();
     displaySync(syncElement, error?.code === 'AUTH_REQUIRED' ? 'Sign in to save answers and progress.' : 'This answer could not be saved. You can continue practising.', true);
     console.error(error);
     return null;
   }
 }
 
-export async function recordDailyPracticeEnhancements(input, { store = dailyPracticeStore, syncElement } = {}) {
+export async function recordDailyPracticeEnhancements(input, { store = dailyPracticeStore, syncElement, onDailySaved } = {}) {
   let saved = true;
   if (input.challengeDate) {
     try {
       await store.recordDailyAnswer({
         grade: input.grade,
         date: input.challengeDate,
-        exerciseId: input.exerciseId,
+        exerciseId: input.challengeExerciseId ?? input.exerciseId,
         isCorrect: input.isCorrect,
+        scope: "global",
       });
+      onDailySaved?.();
     } catch (error) {
       saved = false;
       console.error(error);

@@ -43,7 +43,6 @@ export function buildTutorRequest({ topicId, exerciseId, question, selectedAnswe
 
   add('Available choices', question.choices);
   add('Written notes', question.notes);
-  add('Playback MIDI pitches', question.midis);
   add('Key', question.key ? [question.key] : []);
   add('Written chords', question.chords);
   add('Metre', question.meter);
@@ -90,7 +89,7 @@ export function createTutorController({ requestExplanation, feedbackElement, use
     chatElements.input.disabled = value || followUpCount >= 8;
     chatElements.submit.disabled = value || followUpCount >= 8;
     chatElements.status.textContent = value
-      ? 'AI tutor is replying…'
+      ? 'Quaver is replying…'
       : followUpCount >= 8
         ? 'You have reached the eight-question limit for this exercise.'
         : '';
@@ -112,7 +111,7 @@ export function createTutorController({ requestExplanation, feedbackElement, use
     input.maxLength = 500;
     input.required = true;
     input.placeholder = 'Ask about this exercise…';
-    input.setAttribute?.('aria-label', 'Ask the AI tutor a follow-up question');
+    input.setAttribute?.('aria-label', 'Ask Quaver a follow-up question');
     const submit = createTextElement(document, 'button', 'tutor-chat__submit', 'Send');
     submit.type = 'submit';
     const status = createTextElement(document, 'span', 'tutor-chat__status', '');
@@ -198,7 +197,7 @@ export function createTutorController({ requestExplanation, feedbackElement, use
       onExplanation?.(response);
       return result;
     }
-    const region = createTextElement(document, 'div', 'tutor-feedback', 'AI tutor is preparing a short explanation…');
+    const region = createTextElement(document, 'div', 'tutor-feedback', 'Quaver is preparing a short explanation…');
     region.setAttribute?.('aria-live', 'polite');
     feedbackElement.append(region);
 
@@ -217,7 +216,7 @@ export function createTutorController({ requestExplanation, feedbackElement, use
 
     region.textContent = '';
     region.append(
-      createTextElement(document, 'strong', 'tutor-feedback__label', 'AI tutor'),
+      createTextElement(document, 'strong', 'tutor-feedback__label', 'Quaver'),
       createTextElement(document, 'p', 'tutor-feedback__explanation', cleanTutorExplanation(result.explanation)),
       createTextElement(document, 'p', 'tutor-feedback__tip', `Try this: ${result.tip}`),
     );

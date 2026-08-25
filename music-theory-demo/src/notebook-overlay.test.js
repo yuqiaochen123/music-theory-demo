@@ -1,9 +1,26 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { notebookOverlayMarkup, notebookStatusFromHref } from "./notebook-overlay.js";
+import * as notebookOverlay from "./notebook-overlay.js";
+
+const { notebookOverlayMarkup, notebookStatusFromHref } = notebookOverlay;
 
 describe("mistake notebook overlay", () => {
+  it("asks for sign-in only when authentication is actually required", () => {
+    assert.equal(typeof notebookOverlay.notebookErrorMarkup, "function");
+    const html = notebookOverlay.notebookErrorMarkup({ code: "AUTH_REQUIRED" });
+    assert.match(html, /Sign in to open your Mistake Notebook/);
+    assert.match(html, /href="login\.html"/);
+  });
+
+  it("offers a retry for notebook loading failures without claiming the user is signed out", () => {
+    assert.equal(typeof notebookOverlay.notebookErrorMarkup, "function");
+    const html = notebookOverlay.notebookErrorMarkup(new Error("Unable to load student progress"));
+    assert.match(html, /couldn.t load your Mistake Notebook/i);
+    assert.match(html, /data-notebook-retry/);
+    assert.doesNotMatch(html, /Sign in to open/);
+  });
+
   it("renders an accessible in-page dialog with a clear close control", () => {
     const html = notebookOverlayMarkup();
     assert.match(html, /data-notebook-overlay/);
@@ -38,7 +55,7 @@ describe("mistake notebook overlay", () => {
     for (const pageName of ["grade-4.html", "grade-5.html"]) {
       const html = readFileSync(new URL(`../${pageName}`, import.meta.url), "utf8");
       assert.match(html, /src\/notebook-overlay\.js/);
-      assert.match(html, /src\/notebook-overlay\.js\?v=20260825-layout3/);
+      assert.match(html, /src\/notebook-overlay\.js\?v=2026082[56]-(?:layout3|global[12])/);
       assert.match(html, /src\/notebook-shortcut\.js\?v=20260825-book2/);
     }
   });
@@ -58,6 +75,19 @@ describe("mistake notebook overlay", () => {
     assert.match(css, /\.notebook-overlay \.notebook-card[^}]*overflow-wrap:anywhere/);
     assert.match(css, /\.notebook-overlay \.notebook-tabs a\[aria-current="page"\]\{[^}]*background:#a62c5d[^}]*color:#fff/);
     assert.match(css, /@media\(max-width:620px\)\{\.notebook-overlay\{[^}]*\}\.notebook-overlay__panel/);
+  });
+
+  it("keeps the status tabs above a separately scrolling exercise list", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.notebook-overlay__content\{[^}]*display:flex[^}]*flex-direction:column[^}]*overflow:hidden/);
+    assert.match(css, /\.notebook-overlay \.notebook-tabs\{[^}]*position:static[^}]*flex:none/);
+    assert.match(css, /\.notebook-overlay \.notebook-list\{[^}]*min-height:0[^}]*flex:1[^}]*overflow-y:auto/);
+  });
+
+  it("uses a plain grey Grade 5-style tilting close control", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.notebook-overlay__close\{[^}]*border:0[^}]*border-radius:0[^}]*background:transparent[^}]*color:#74666b[^}]*transition:transform \.18s ease,opacity \.18s ease/);
+    assert.match(css, /\.notebook-overlay__close:hover,\.notebook-overlay__close:focus-visible,\.notebook-overlay__close:active\{[^}]*background:transparent[^}]*color:#74666b[^}]*transform:rotate\(7deg\) scale\(1\.08\)[^}]*opacity:\.82/);
   });
 
   it("uses a restrained type hierarchy inside the notebook", () => {

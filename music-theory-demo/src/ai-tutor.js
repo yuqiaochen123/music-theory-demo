@@ -15,6 +15,7 @@ const limits = Object.freeze({
   tip: 240,
 });
 const requestKeys = new Set(['topicId', 'exerciseId', 'prompt', 'selectedAnswer', 'correctAnswer', 'facts', 'followUpQuestion', 'history']);
+const technicalPitchDetail = /\b(?:midi(?:\s+(?:note|pitch|number))?|(?:piano\s+)?pitch(?:\s+number)?(?:\s+(?:is|was))?\s*[:#]?\s*\d+|\d+(?:\.\d+)?\s*(?:hz|hertz)|frequenc(?:y|ies))\b/i;
 
 function boundedString(value, maximum) {
   return typeof value === 'string' && value.trim().length > 0 && value.length <= maximum;
@@ -46,7 +47,9 @@ function validRequest(value) {
 export function isTutorExplanation(value) {
   return Boolean(value)
     && boundedString(value.explanation, limits.explanation)
-    && boundedString(value.tip, limits.tip);
+    && boundedString(value.tip, limits.tip)
+    && !technicalPitchDetail.test(value.explanation)
+    && !technicalPitchDetail.test(value.tip);
 }
 
 export async function requestTutorExplanation(input, { client } = {}) {

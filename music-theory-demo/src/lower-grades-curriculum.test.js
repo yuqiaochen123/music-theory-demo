@@ -55,6 +55,33 @@ test('lower grades stop before Grade 4 and Grade 5 topics begin',()=>{
   assert.doesNotMatch(JSON.stringify(grade2),/compound time|demisemiquaver|octave transposition|melodic minor|alto clef|double accidental|enharmonic|chromatic scale|primary triad|ornament|orchestral|irregular time|tenor clef|cadence/i);
 });
 
+test('Grade 2 practice asks explicit musical questions without syllabus language',()=>{
+  const practice=load(['src/grade-2-topic-data.js','src/grade-2-practice-data.js'],'ListeningDeskGrade2Practice');
+  const exercises=Object.values(practice).flatMap(topic=>topic.exercises);
+  for(const exercise of exercises){
+    const learnerText=[exercise.prompt,...(exercise.facts||[])].join(' ');
+    assert.doesNotMatch(learnerText,/musical feature|which statement|best matches|Grade 2 requirement|syllabus/i,exercise.id);
+  }
+  assert.match(practice['simple-time'].exercises[0].prompt,/time signature|minim beats/i);
+  assert.match(practice['ledger-lines'].exercises[0].prompt,/which written note/i);
+  assert.match(practice['intervals-above-tonic'].exercises[0].prompt,/what interval/i);
+  assert.match(practice['relative-keys'].exercises[0].prompt,/relative major and minor keys/i);
+  assert.ok(practice['musical-terms'].exercises.every(exercise=>exercise.concept?.symbol));
+  assert.ok(practice['musical-terms'].exercises.every(exercise=>exercise.disablePlayback===true));
+});
+
+test('Grade 2 questions never print a requested time-signature answer on the stave',()=>{
+  const practice=load(['src/grade-2-topic-data.js','src/grade-2-practice-data.js'],'ListeningDeskGrade2Practice');
+  for(const topic of Object.values(practice))for(const exercise of topic.exercises){
+    if(exercise.notation?.type!=='rhythm'||!exercise.notation.meter)continue;
+    const printedMeter=exercise.notation.meter.join('/');
+    if(exercise.answer===printedMeter){
+      assert.equal(exercise.notation.showTimeSignature,false,`${exercise.id} prints its own answer`);
+      assert.match(exercise.prompt,/missing time signature|completes this bar/i,exercise.id);
+    }
+  }
+});
+
 test('topic and practice routes recognise Grade 2 and Grade 3',()=>{
   const topic=read('topic.html'),practice=read('practice.html');
   for(const grade of [2,3]){

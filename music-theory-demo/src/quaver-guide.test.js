@@ -41,6 +41,49 @@ test('maps learning events to concise local mascot reactions', async () => {
   assert.equal(reactionForEvent('unknown'), null);
 });
 
+test('keeps a Quaver phrase visible and alternates after contextual messages', async () => {
+  const { createQuaverMessageCycle } = await import('./quaver-guide.js');
+  const messages = [];
+  let pending = null;
+  const cycle = createQuaverMessageCycle({
+    phrases: ['First phrase.', 'Second phrase.', 'Third phrase.'],
+    onMessage: message => messages.push(message),
+    setTimer: callback => { pending = callback; return callback; },
+    clearTimer: timer => { if (pending === timer) pending = null; },
+  });
+
+  cycle.show('That’s it!', 4500);
+  assert.equal(messages.at(-1), 'That’s it!');
+  pending();
+  assert.equal(messages.at(-1), 'First phrase.');
+  pending();
+  assert.equal(messages.at(-1), 'Second phrase.');
+  pending();
+  assert.equal(messages.at(-1), 'Third phrase.');
+  pending();
+  assert.equal(messages.at(-1), 'First phrase.');
+  assert.ok(messages.every((message, index) => index === 0 || message !== messages[index - 1]));
+});
+
+test('pauses Quaver phrases for chat and resumes with the next phrase', async () => {
+  const { createQuaverMessageCycle } = await import('./quaver-guide.js');
+  const messages = [];
+  let pending = null;
+  const cycle = createQuaverMessageCycle({
+    phrases: ['One step at a time.', 'Trust what you hear.'],
+    onMessage: message => messages.push(message),
+    setTimer: callback => { pending = callback; return callback; },
+    clearTimer: timer => { if (pending === timer) pending = null; },
+  });
+
+  cycle.resume();
+  assert.equal(messages.at(-1), 'One step at a time.');
+  cycle.pause();
+  assert.equal(pending, null);
+  cycle.resume();
+  assert.equal(messages.at(-1), 'Trust what you hear.');
+});
+
 test('introduces Quaver on the first page and makes it the visible tutor chat', async () => {
   const source = await readFile(resolve(root, 'src/quaver-guide.js'), 'utf8');
   const tutorPage = await readFile(resolve(root, 'src/ai-tutor-page.js'), 'utf8');
@@ -119,24 +162,44 @@ test('keeps Quaver transparent while placing tutor text on a readable solid bubb
   const bubbleRule = css.match(/(?:^|\})\s*\.quaver-guide__bubble\s*\{([^}]*)\}/s)?.[1] || '';
   const riveCanvasRule = css.match(/\.quaver-guide\[data-quaver-mode="rive"\]\s+\.quaver-guide__stage canvas\s*\{([^}]*)\}/s)?.[1] || '';
   assert.doesNotMatch(guideRule, /mix-blend-mode:\s*multiply/);
+  assert.match(guideRule, /grid-template-areas:\s*"bubble stage"\s*"controls controls"/);
+  assert.match(guideRule, /column-gap:\s*6px/);
   assert.match(stageRule, /background:\s*transparent/);
   assert.match(stageRule, /border:\s*0/);
   assert.match(stageRule, /box-shadow:\s*none/);
   assert.match(stageRule, /mix-blend-mode:\s*normal/);
-  assert.match(bubbleRule, /background:\s*#f1dce4/);
-  assert.match(bubbleRule, /box-shadow:\s*0 8px 24px/);
+  assert.match(bubbleRule, /background:\s*linear-gradient\(135deg,\s*rgba\(241,\s*220,\s*228,\s*\.58\),\s*rgba\(154,\s*47,\s*90,\s*\.18\)\)/);
+  assert.match(bubbleRule, /border:\s*1px solid rgba\(246,\s*241,\s*233,\s*\.52\)/);
+  assert.match(bubbleRule, /backdrop-filter:\s*blur\(14px\) saturate\(135%\)/);
+  assert.match(bubbleRule, /box-shadow:[^;]*inset 0 1px 0 rgba\(246,\s*241,\s*233,\s*\.52\)[^;]*0 10px 28px rgba\(42,\s*11,\s*28,\s*\.18\)/s);
   assert.match(bubbleRule, /color:\s*#2a0b1c/);
+  assert.match(bubbleRule, /font-weight:\s*650/);
+  assert.match(bubbleRule, /align-self:\s*start/);
   assert.match(bubbleRule, /mix-blend-mode:\s*normal/);
   assert.match(riveCanvasRule, /background:\s*transparent/);
   assert.match(riveCanvasRule, /mix-blend-mode:\s*normal/);
   assert.match(riveCanvasRule, /transform:\s*scale\((?:2(?:\.\d+)?|[3-9](?:\.\d+)?)\)/);
 });
 
+test('uses gradient-free frosted glass for the Quaver bubble on the Grade 5 page', async () => {
+  const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
+  const gradeFiveBubbleRule = css.match(/\.grade-five-body\s+\.quaver-guide__bubble\s*\{([^}]*)\}/s)?.[1] || '';
+  assert.match(gradeFiveBubbleRule, /background:\s*rgba\(241,\s*220,\s*228,\s*\.72\)/);
+  assert.match(gradeFiveBubbleRule, /backdrop-filter:\s*blur\(14px\)/);
+  assert.doesNotMatch(gradeFiveBubbleRule, /gradient/);
+});
+
+test('uses a readable medium weight for Quaver follow-up messages', async () => {
+  const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
+  const messageRule = css.match(/\.quaver-chat__message\s*\{([^}]*)\}/s)?.[1] || '';
+  assert.match(messageRule, /font-weight:\s*600/);
+});
+
 test('loads the transparent Quaver styling without a stale cached artboard', async () => {
   for (const file of ['index.html', 'grade.html', 'grade-4.html', 'grade-5.html', 'topic.html', 'practice.html', 'login.html']) {
     const html = await readFile(resolve(root, file), 'utf8');
-    assert.match(html, /src\/quaver-guide\.css\?v=20260825-space1/, file);
-    assert.match(html, /src\/quaver-guide\.js\?v=20260825-chat2/, file);
+    assert.match(html, /src\/quaver-guide\.css\?v=20260826-glass2/, file);
+    assert.match(html, /src\/quaver-guide\.js\?v=20260826-phrases1/, file);
   }
 });
 

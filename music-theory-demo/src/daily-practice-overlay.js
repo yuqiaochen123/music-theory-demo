@@ -1,4 +1,4 @@
-import { mountChallenge } from "./daily-practice-ui.js";
+import { mountChallenge, normalizePracticeGrade, registryForGrade } from "./daily-practice-ui.js?v=20260826-grade-parity1";
 
 const FOCUSABLE = 'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -10,11 +10,18 @@ function focusableElements(root) {
   return [...root.querySelectorAll(FOCUSABLE)].filter(element => !element.hidden && element.getAttribute("aria-hidden") !== "true");
 }
 
+export function dailyPracticeOverlayRequested(locationObject = globalThis.location) {
+  return new URLSearchParams(locationObject?.search ?? "").get("overlay") === "daily-practice";
+}
+
 export async function openDailyPracticeOverlay({
   documentObject = globalThis.document,
   windowObject = globalThis.window,
-  registry = windowObject?.ListeningDeskPractice,
+  registry,
+  grade = documentObject?.body?.dataset?.grade,
 } = {}) {
+  const activeGrade = normalizePracticeGrade(grade);
+  const activeRegistry = registry ?? registryForGrade(windowObject, activeGrade);
   const existing = documentObject?.querySelector("[data-daily-practice-overlay]");
   if (existing) return { overlay: existing, close() {} };
 
@@ -57,7 +64,7 @@ export async function openDailyPracticeOverlay({
     if (event.target.closest("[data-daily-practice-overlay-close]")) close();
   });
   documentObject.body.append(overlay);
-  await mountChallenge(challenge, { registry });
+  await mountChallenge(challenge, { registry: activeRegistry, grade: activeGrade });
   documentObject.body.classList.add("daily-practice-overlay-open");
   documentObject.addEventListener("keydown", onKeydown);
   overlay.classList.add("is-open");
@@ -72,6 +79,10 @@ export function installDailyPracticeOverlay(documentObject = globalThis.document
     const shortcut = event.target.closest('a.today-card[data-local-overlay="daily-practice"]');
     if (!shortcut || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    void openDailyPracticeOverlay({ documentObject, windowObject: documentObject.defaultView });
+    const grade = shortcut.closest("[data-grade]")?.dataset?.grade ?? documentObject.body?.dataset?.grade;
+    void openDailyPracticeOverlay({ documentObject, windowObject: documentObject.defaultView, grade });
   });
+  if (dailyPracticeOverlayRequested(documentObject.defaultView?.location)) {
+    void openDailyPracticeOverlay({ documentObject, windowObject: documentObject.defaultView, grade: documentObject.body?.dataset?.grade });
+  }
 }

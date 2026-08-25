@@ -13,6 +13,7 @@ const requestLimits = Object.freeze({
 
 const responseLimits = Object.freeze({ explanation: 700, tip: 240 });
 const requestKeys = Object.freeze(['topicId', 'exerciseId', 'prompt', 'selectedAnswer', 'correctAnswer', 'facts', 'followUpQuestion', 'history']);
+const technicalPitchDetail = /\b(?:midi(?:\s+(?:note|pitch|number))?|(?:piano\s+)?pitch(?:\s+number)?(?:\s+(?:is|was))?\s*[:#]?\s*\d+|\d+(?:\.\d+)?\s*(?:hz|hertz)|frequenc(?:y|ies))\b/i;
 
 function normalizeString(value, key, maximum) {
   if (typeof value !== 'string' || !value.trim() || value.length > maximum) {
@@ -63,7 +64,7 @@ export function buildOpenAIRequest(input, { model = 'gpt-5.6-terra', safetyIdent
       'Previous exercise conversation:',
       ...request.history.map(item => `${item.role === 'user' ? 'Learner' : 'Assistant'}: ${item.content}`),
       `Latest follow-up: ${request.followUpQuestion}`,
-      'Answer the latest follow-up directly while staying grounded in the original exercise.',
+      'Answer only the learner’s latest question and do not add unrelated technical detail. Stay grounded in the original exercise.',
     ]
     : [];
 
@@ -76,10 +77,12 @@ export function buildOpenAIRequest(input, { model = 'gpt-5.6-terra', safetyIdent
     input: [
       'You are a concise Grade 5 music-theory tutor.',
       'Explain the musical idea that resolves the learner’s mistake.',
+      'Explain only the specific musical misunderstanding shown by this answer.',
       'Start immediately with the useful musical reason, distinction, or rule.',
       'Do not begin by saying the learner is wrong, that their choice differs from the correct answer, or by mechanically restating both answers.',
       'Mention an answer label only when it is necessary to explain the musical distinction.',
       'Use only the trusted facts below. Do not change or question the correct answer.',
+      'Never mention MIDI numbers, pitch numbers, Hz, hertz, frequencies, or audio implementation details.',
       'Do not mention being an AI. Use supportive, direct language suitable for a young learner.',
       '',
       `Topic: ${request.topicId}`,
@@ -131,6 +134,9 @@ export function extractTutorResult(response) {
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid tutor output');
   const explanation = normalizeString(parsed.explanation, 'explanation', responseLimits.explanation);
   const tip = normalizeString(parsed.tip, 'tip', responseLimits.tip);
+  if (technicalPitchDetail.test(explanation) || technicalPitchDetail.test(tip)) {
+    throw new Error('Tutor output included technical pitch details');
+  }
   return { explanation, tip };
 }
 

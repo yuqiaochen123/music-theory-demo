@@ -46,21 +46,32 @@ test('the player schedules every finite note, preserves rests, and stops notes a
 test('buffered rhythm playback uses one audio clock and sustains each note to its written boundary', async () => {
   const sources = [];
   const gainEvents = [];
+  const connections = [];
+  const limiter = {
+    threshold: { value: 0 },
+    knee: { value: 0 },
+    ratio: { value: 0 },
+    attack: { value: 0 },
+    release: { value: 0 },
+    connect(node) { connections.push(['limiter', node]); return node; }
+  };
   const context = {
     currentTime: 4,
     state: 'running',
     destination: {},
     createBufferSource() {
-      const source = { playbackRate: { value: 1 }, connect() { return this; }, start(time, offset) { this.startedAt = time; this.offset = offset; }, stop(time) { this.stoppedAt = time; } };
+      const source = { playbackRate: { value: 1 }, connect(node) { connections.push(['source', node]); return node; }, start(time, offset) { this.startedAt = time; this.offset = offset; }, stop(time) { this.stoppedAt = time; } };
       sources.push(source);
       return source;
     },
     createGain() {
-      return { gain: {
+      const node = { gain: {
         setValueAtTime(value, time) { gainEvents.push(['set', value, time]); },
         linearRampToValueAtTime(value, time) { gainEvents.push(['ramp', value, time]); }
-      }, connect() { return this; } };
+      }, connect(target) { connections.push(['gain', target]); return target; } };
+      return node;
     },
+    createDynamicsCompressor() { return limiter; },
     decodeAudioData: async () => ({ duration: 30 })
   };
   const player = createPianoPlayer({
@@ -79,10 +90,21 @@ test('buffered rhythm playback uses one audio clock and sustains each note to it
   assert.ok(Math.abs(sources[0].stoppedAt - 10.72) < 0.000001);
   assert.ok(Math.abs(sources[1].stoppedAt - 11.44) < 0.000001);
   assert.ok(gainEvents.some(event => event[0] === 'set' && event[1] > 0 && event[2] === 10.705));
+  const outputGain = connections.find(([kind, target]) => kind === 'gain' && target?.gain?.value === 2.8)?.[1];
+  assert.ok(outputGain, 'sampled piano should pass through a 2.8× output gain');
+  assert.ok(connections.some(([kind, target]) => kind === 'gain' && target === limiter), 'output gain should feed the limiter');
+  assert.ok(connections.some(([kind, target]) => kind === 'limiter' && target === context.destination), 'limiter should feed the destination');
+  assert.deepEqual({
+    threshold: limiter.threshold.value,
+    knee: limiter.knee.value,
+    ratio: limiter.ratio.value,
+    attack: limiter.attack.value,
+    release: limiter.release.value
+  }, { threshold: -1, knee: 0, ratio: 20, attack: 0.003, release: 0.1 });
   assert.equal(player.context, context);
 });
 
-test('applies the saved playback volume to sampled piano audio', async () => {
+test('boosts fallback sampled piano audio while respecting the browser maximum', async () => {
   const started = [];
   class FakeAudio {
     constructor() { this.volume = 1; }
@@ -98,7 +120,7 @@ test('applies the saved playback volume to sampled piano audio', async () => {
   });
   await player.play([60]);
   timers.shift()();
-  assert.equal(started[0].volume, 0.145);
+  assert.ok(Math.abs(started[0].volume - 0.595) < 0.000001);
 });
 
 test('uses a synthesized oscillator voice for the organ instrument', async () => {
@@ -118,5 +140,5 @@ test('uses a synthesized oscillator voice for the organ instrument', async () =>
   await player.play([69], { duration: 0.5 });
   assert.equal(oscillators.length, 1);
   assert.equal(oscillators[0].frequency.value, 440);
-  assert.ok(gains.some(value => Math.abs(value - 0.29) < 0.000001));
+  assert.ok(gains.some(value => Math.abs(value - 0.425) < 0.000001));
 });

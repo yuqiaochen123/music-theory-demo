@@ -6,7 +6,10 @@
 
   const navigation = document.createElement('nav');
   navigation.className = 'curriculum-tabs';
-  navigation.setAttribute('aria-label', 'Grade 5 subject areas');
+  const activeGrade = document.body?.dataset?.grade;
+  navigation.setAttribute('aria-label', activeGrade ? `Grade ${activeGrade} subject areas` : 'Grade subject areas');
+  const rail = document.createElement('div');
+  rail.className = 'curriculum-tabs-rail';
 
   const select = index => {
     [...navigation.children].forEach((button, buttonIndex) => {
@@ -52,6 +55,7 @@
     navigation.append(button);
   });
 
-  curriculum.before(navigation);
+  rail.append(navigation);
+  curriculum.before(rail);
   select(0);
 })();

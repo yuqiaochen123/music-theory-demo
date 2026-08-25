@@ -9,8 +9,9 @@ describe("practice retries and correct-answer feedback", () => {
     assert.match(page, /answered=ok/);
     assert.match(page, /button\.disabled=ok/);
     assert.match(page, /nextButton\.hidden=!ok/);
-    assert.match(page, /nextButton\.disabled=ok/);
-    assert.match(page, /await window\.ListeningDeskProgress\?\.recordAnswer[\s\S]*nextButton\.disabled=false/);
+    assert.doesNotMatch(page, /nextButton\.disabled=ok/);
+    assert.match(page, /createSaveGatedNavigation/);
+    assert.match(page, /onNavigationReady:\(\)=>nextNavigation\.release\(\)/);
     assert.match(page, /Try again/);
     assert.doesNotMatch(page, /The correct answer is/);
   });

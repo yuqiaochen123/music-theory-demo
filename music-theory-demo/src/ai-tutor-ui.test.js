@@ -45,7 +45,7 @@ test('appends an unobtrusive loading region without replacing deterministic feed
   const pending = controller.explain({ exerciseId: 'one' });
   assert.equal(feedback.children[0], deterministic);
   assert.equal(feedback.children[1].className, 'tutor-feedback');
-  assert.match(feedback.children[1].textContent, /preparing/i);
+  assert.equal(feedback.children[1].textContent, 'Quaver is preparing a short explanation…');
   resolve(null);
   await pending;
 });
@@ -59,7 +59,7 @@ test('renders successful model output as text in the tutor region', async () => 
 
   await controller.explain({ exerciseId: 'one' });
   const region = feedback.children[1];
-  assert.equal(region.children[0].textContent, 'AI tutor');
+  assert.equal(region.children[0].textContent, 'Quaver');
   assert.equal(region.children[1].textContent, '<b>C to E is four semitones.</b>');
   assert.equal(region.children[2].textContent, 'Try this: Count each half-step.');
 });
@@ -125,7 +125,7 @@ test('reset prevents a stale response from appearing on the next question', asyn
   assert.deepEqual(feedback.children, [deterministic]);
 });
 
-test('builds bounded trusted facts from a practice record', () => {
+test('builds bounded musical facts without exposing playback implementation details', () => {
   const result = buildTutorRequest({
     topicId: 'intervals',
     exerciseId: 'interval-1',
@@ -150,7 +150,6 @@ test('builds bounded trusted facts from a practice record', () => {
     facts: [
       'Available choices: major, minor',
       'Written notes: c/4, e/4',
-      'Playback MIDI pitches: 60, 64',
     ],
   });
 });

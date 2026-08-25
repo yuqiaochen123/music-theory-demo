@@ -82,6 +82,19 @@ test('recognizes only bounded explanation payloads', () => {
   assert.equal(isTutorExplanation(null), false);
 });
 
+test('blocks technical pitch details returned by an older tutor deployment', async () => {
+  for (const explanation of [
+    'The playback used MIDI pitch 67.',
+    'The piano pitch number was 99.',
+    'The note was played at 440 Hz.',
+  ]) {
+    assert.equal(isTutorExplanation({ explanation, tip: 'Listen again.' }), false);
+    assert.equal(await requestTutorExplanation(request, {
+      client: clientWith({ data: { explanation, tip: 'Listen again.' } }),
+    }), null);
+  }
+});
+
 test('sends a bounded follow-up conversation for the same exercise', async () => {
   const followUp = {
     ...request,

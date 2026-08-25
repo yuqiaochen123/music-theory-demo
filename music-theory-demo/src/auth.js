@@ -1,5 +1,26 @@
 import { getSupabaseClient } from './progress-store.js';
 
+const LOCAL_APP_ORIGIN = 'http://127.0.0.1:4173';
+const PROJECT_PATH_MARKER = '/music-theory-demo/';
+
+export function canonicalLocalAppUrl(location = globalThis.location) {
+  if (location?.protocol !== 'file:') return null;
+  const pathname = String(location.pathname ?? '');
+  const markerIndex = pathname.lastIndexOf(PROJECT_PATH_MARKER);
+  const relativePath = markerIndex >= 0
+    ? pathname.slice(markerIndex + PROJECT_PATH_MARKER.length)
+    : pathname.slice(pathname.lastIndexOf('/') + 1);
+  const pagePath = relativePath || 'index.html';
+  return `${LOCAL_APP_ORIGIN}/${pagePath}${location.search ?? ''}${location.hash ?? ''}`;
+}
+
+export function redirectFileAppToLocalServer(location = globalThis.location) {
+  const url = canonicalLocalAppUrl(location);
+  if (!url) return false;
+  location.replace(url);
+  return true;
+}
+
 export async function getCurrentUser() {
   const client = await getSupabaseClient();
   const { data, error } = await client.auth.getUser();
@@ -32,7 +53,7 @@ export async function signOut() {
 }
 
 export function passwordRecoveryRedirect(location = globalThis.location) {
-  if (location.protocol === 'file:') return 'http://localhost:3000/login.html?mode=recovery';
+  if (location.protocol === 'file:') return `${LOCAL_APP_ORIGIN}/login.html?mode=recovery`;
   return new URL('login.html?mode=recovery', location.href).href;
 }
 

@@ -8,6 +8,14 @@ const styles = page("src/horizontal-flow.css");
 const responsiveStyles = page("src/responsive-safety.css");
 
 describe("learning journey pages", () => {
+  it("keeps the homepage identity compact and confined to the top header", () => {
+    const chooser = page("index.html");
+    assert.match(chooser, /rel="icon"[^>]*href="\/assets\/brand\/listening-note-app-icon\.png"/);
+    assert.match(chooser, /<a class="brand brand-lockup"[^>]*><img[^>]*listening-desk-header-logo\.png[^>]*alt="Listening Desk"[^>]*><\/a>/);
+    assert.doesNotMatch(chooser, /What if music theory sounded like music\?/);
+    assert.match(chooser, /\.brand-lockup img\{[^}]*object-fit:contain/);
+  });
+
   it("keeps every guide card and its footer content inside the visible border", () => {
     assert.match(responsiveStyles, /\.lesson-guide-card\s*\{[^}]*height:auto!important[^}]*overflow-y:auto!important/);
     assert.match(responsiveStyles, /\.lesson-guide-footer>p\s*\{[^}]*min-width:0[^}]*overflow-wrap:anywhere/);

@@ -13,26 +13,26 @@
     .curriculum-intro .lead{margin-bottom:0}.availability{margin:0;padding:11px 15px;border:1px solid var(--line);background:#fff;color:var(--blue);font-size:13px;font-weight:800;letter-spacing:.05em;white-space:nowrap}
     .curriculum{display:grid;gap:44px}.curriculum-section{border-top:3px solid var(--ink);padding-top:17px}.section-head{display:flex;justify-content:space-between;gap:18px;align-items:baseline;margin-bottom:17px}.section-head h2{margin:0;font-size:23px;letter-spacing:-.03em}.section-head span{color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
     .topic-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.topic-card{position:relative;min-height:210px;padding:20px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);text-decoration:none;box-shadow:0 8px 22px rgba(28,66,143,.045)}.topic-card h3{margin:40px 0 9px;font-size:20px;line-height:1.08;letter-spacing:-.035em}.topic-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}.module-number{position:absolute;top:18px;left:20px;color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.14em}.status{position:absolute;top:16px;right:17px;padding:5px 7px;background:var(--blue);color:#fff;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}.ready{border-color:#8fb3f5;background:linear-gradient(145deg,#fff 58%,#edf4ff)}.ready::after{content:'Explore →';margin-top:auto;padding-top:19px;color:var(--blue);font-size:13px;font-weight:900}.ready:hover{border-color:var(--blue);transform:translateY(-3px)}
-    .mastery-callout{display:flex;align-items:center;justify-content:space-between;gap:18px;width:min(920px,86vw);box-sizing:border-box;margin:0 auto 18px;padding:11px 14px 11px 17px;border:1px solid rgba(255,255,255,.34);border-radius:4px;background:rgba(255,255,255,.13);color:#fff;text-decoration:none}.mastery-callout span:first-child{font-size:14px;font-weight:600;letter-spacing:.005em}.mastery-callout__action{flex:0 0 auto;padding:7px 11px;border-radius:3px;background:#fff;color:var(--brand-deep,#631838);font-size:12px;font-weight:750;white-space:nowrap}
-    @media(prefers-reduced-motion:no-preference){.topic-card,.mastery-callout{transition:transform .16s ease,border-color .16s ease,background .16s ease}.ready:hover{box-shadow:0 13px 26px rgba(15,92,226,.13)}.mastery-callout:hover{border-color:rgba(255,255,255,.72);background:rgba(255,255,255,.2);transform:translateY(-1px)}}@media(max-width:940px){.topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.curriculum-intro{grid-template-columns:1fr}.availability{justify-self:start}}@media(max-width:560px){.topic-grid{grid-template-columns:1fr}.topic-card{min-height:178px}.mastery-callout{width:calc(100vw - 32px);gap:10px;padding:10px 10px 10px 13px}.mastery-callout span:first-child{font-size:12px}.mastery-callout__action{padding:7px 9px}.section-head{align-items:flex-start;flex-direction:column;gap:6px}.curriculum{gap:36px}.curriculum-intro{margin-bottom:40px}}
+    .mastery-link{display:block;width:max-content;margin:16px auto 0;padding:8px 14px;border:1px solid rgba(255,255,255,.45);border-radius:999px;color:#fff;text-decoration:none;font-size:12px;font-weight:700}.mastery-link:hover{background:rgba(255,255,255,.14)}
+    @media(prefers-reduced-motion:no-preference){.topic-card,.mastery-link{transition:transform .16s ease,border-color .16s ease,background .16s ease}.ready:hover{box-shadow:0 13px 26px rgba(15,92,226,.13)}.mastery-link:hover{transform:translateY(-1px)}}@media(max-width:940px){.topic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.curriculum-intro{grid-template-columns:1fr}.availability{justify-self:start}}@media(max-width:560px){.topic-grid{grid-template-columns:1fr}.topic-card{min-height:178px}.section-head{align-items:flex-start;flex-direction:column;gap:6px}.curriculum{gap:36px}.curriculum-intro{margin-bottom:40px}}
   </style>
   <link rel="stylesheet" href="src/redesign.css?v=20260819-visible1">
   <link rel="stylesheet" href="src/horizontal-flow.css?v=20260814-flow7">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
-  <link rel="stylesheet" href="src/daily-practice.css?v=20260826-notebook-tabs1">
-  <link rel="stylesheet" href="src/quaver-guide.css?v=20260825-space1">
+  <link rel="stylesheet" href="src/daily-practice.css?v=20260826-global2">
+  <link rel="stylesheet" href="src/quaver-guide.css?v=20260826-glass2">
   <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
 </head>
-<body class="grade-five-body">
+<body class="grade-five-body" data-grade="4">
   <div class="page-transition-curtain" aria-hidden="true" hidden></div>
   <div class="grade-five-topbar"><strong>Grade: 4</strong><a class="grade-five-close" href="index.html" aria-label="Close Grade 4 contents">×</a></div>
   <main class="grade-five-page">
     <p class="eyebrow">ABRSM Music Theory</p><h1>Grade 4 <em>contents.</em></h1>
     <div class="curriculum-intro"><p class="lead">Grade 4 introduces alto clef, richer rhythm, chromatic writing and primary harmony, then applies them to real musical extracts.</p><p class="availability">14 of 14 topics available</p></div>
-    <a class="mastery-callout" href="practice.html?grade=4&amp;mode=mastery"><span>Grade 4 mastery check · 28 untimed questions</span><span class="mastery-callout__action">Start →</span></a>
+    <div class="global-learning-tools" aria-label="Learning tools"><div data-notebook-shortcut></div><div class="daily-practice-summary" data-daily-practice-summary data-grade="4" aria-live="polite"></div></div>
     <section class="grade-dashboard" aria-labelledby="grade-progress-heading"><div class="grade-dashboard-head"><div><p class="eyebrow">Your learning history</p><h2 id="grade-progress-heading">Grade 4 progress</h2></div><p class="progress-sync" data-progress-sync aria-live="polite">Loading saved progress…</p></div><div data-grade-dashboard><p class="empty-activity">Loading your saved lessons and exercise results…</p></div></section>
     <div class="curriculum">
-      <section class="curriculum-section"><div class="section-head"><h2>Rhythm and notation</h2><span>Modules 01–03</span></div><div data-notebook-shortcut></div><div class="category-progress" data-category-progress role="img" aria-label="Rhythm and notation progress: 0%"><strong>0%</strong></div><div class="topic-grid">
+      <section class="curriculum-section"><div class="section-head"><h2>Rhythm and notation</h2><span>Modules 01–03</span></div><div class="category-progress" data-category-progress role="img" aria-label="Rhythm and notation progress: 0%"><strong>0%</strong></div><div class="topic-grid">
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=rhythm-note-values"><span class="module-number">01</span><span class="status">Available</span><h3>Rhythm and note values</h3><p>Breves, double dots, rests and duplets.</p></a>
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=time-signatures"><span class="module-number">02</span><span class="status">Available</span><h3>Time signatures and grouping</h3><p>Simple and compound metre with accurate grouping.</p></a>
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=clefs"><span class="module-number">03</span><span class="status">Available</span><h3>Alto clef and pitch comparison</h3><p>Compare the same sounding pitch in treble, alto and bass.</p></a>
@@ -53,17 +53,19 @@
       <section class="curriculum-section"><div class="section-head"><h2>Instruments and analysis</h2><span>Modules 13–14</span></div><div class="category-progress" data-category-progress role="img" aria-label="Instruments and analysis progress: 0%"><strong>0%</strong></div><div class="topic-grid">
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=orchestral-instruments"><span class="module-number">13</span><span class="status">Available</span><h3>Orchestral instruments</h3><p>Answer simple instrument questions from score context.</p></a>
         <a class="topic-card ready" href="topic.html?grade=4&amp;topic=musical-observation"><span class="module-number">14</span><span class="status">Available</span><h3>Passage analysis</h3><p>Apply the complete Grade 4 syllabus to a musical extract.</p></a>
-      </div></section>
+      </div><a class="mastery-link" href="practice.html?grade=4&amp;mode=mastery">Open Grade 4 mastery check</a></section>
     </div>
   </main>
   <footer hidden>Grade 4 · 14 of 14 topics available</footer>
   <script type="module" src="src/auth-nav.js"></script>
-  <script type="module" src="src/daily-practice-entry.js?v=20260825-streak2"></script>
+  <script src="src/grade-4-topic-data.js?v=20260823-trill2"></script>
+  <script src="src/grade-4-practice-data.js?v=20260824-direct1"></script>
+  <script type="module" src="src/daily-practice-entry.js?v=20260826-global2"></script>
   <script type="module" src="src/notebook-shortcut.js?v=20260825-book2"></script>
-  <script type="module" src="src/notebook-overlay.js?v=20260825-layout3"></script>
+  <script type="module" src="src/notebook-overlay.js?v=20260826-global2"></script>
   <!-- 先加载固定版本的 Supabase 浏览器客户端，确保进度模块能恢复登录会话。 -->
   <script src="vendor/supabase-2.111.0.js"></script>
   <script type="module">import{loadGradeDashboard,renderCachedCategoryProgress}from'./src/progress-ui.js?v=20260806-progress-animation2';renderCachedCategoryProgress();loadGradeDashboard(4);</script>
-  <script src="src/interface.js?v=20260806-ui5"></script><script type="module" src="src/motion.js?v=20260825-parity1"></script><script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
+  <script src="src/interface.js?v=20260826-tabrail1"></script><script type="module" src="src/motion.js?v=20260825-parity1"></script><script type="module" src="src/quaver-guide.js?v=20260826-phrases1"></script>
 </body>
 </html>

@@ -4,19 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Listening Desk · Choose your grade</title>
-  <style>html{background:#f3efec}</style>
+  <link rel="icon" type="image/png" href="/assets/brand/listening-note-app-icon.png">
+  <link rel="apple-touch-icon" href="/assets/brand/listening-note-app-icon.png">
+  <style>
+    html{background:#f3efec}
+    .brand-lockup{display:block;width:190px;height:auto}
+    .brand-lockup img{display:block;width:100%;height:auto;max-height:52px;object-fit:contain}
+    @media(max-width:720px){.brand-lockup{width:158px}.brand-lockup img{max-height:44px}}
+  </style>
   <script>try{if(sessionStorage.getItem('listening-desk:page-transition'))document.documentElement.classList.add('is-transition-arriving')}catch{}</script>
   <link rel="stylesheet" href="src/page-transitions.css?v=20260825-parity1">
   <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css">
   <link rel="stylesheet" href="src/redesign.css?v=20260802-red4">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
-  <link rel="stylesheet" href="src/quaver-guide.css?v=20260825-space1">
+  <link rel="stylesheet" href="src/quaver-guide.css?v=20260826-glass2">
   <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
 </head>
 <body>
   <div class="page-transition-curtain" aria-hidden="true"></div>
-  <header><a class="brand" href="index.html">Listening Desk <span>♪</span></a><nav><a class="active" href="index.html">Grades</a><a href="login.html?v=20260731-auth6" data-account-link>Sign in</a></nav></header>
+  <header><a class="brand brand-lockup" href="index.html"><img src="public/assets/brand/listening-desk-header-logo.png" alt="Listening Desk"></a><nav><a class="active" href="index.html">Grades</a><a href="login.html?v=20260731-auth6" data-account-link>Sign in</a></nav></header>
   <main class="home grade-picker-page">
     <p class="eyebrow">Music theory that you can hear</p>
     <h1>Choose your <em>grade.</em></h1>
@@ -42,6 +49,6 @@
     loadGradeOverview();
   </script>
   <script type="module" src="src/motion.js?v=20260825-parity1"></script>
-  <script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
+  <script type="module" src="src/quaver-guide.js?v=20260826-phrases1"></script>
 </body>
 </html>

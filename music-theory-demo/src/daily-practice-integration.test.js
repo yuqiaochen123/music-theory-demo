@@ -11,6 +11,22 @@ function loadPracticeShell() {
 }
 
 describe("daily practice integration", () => {
+  it("accepts a Back click immediately and navigates once the required save is released", async () => {
+    const navigationModule = await import("./practice-navigation.js").catch(() => ({}));
+    assert.equal(typeof navigationModule.createSaveGatedNavigation, "function");
+    const events = [];
+    const gate = navigationModule.createSaveGatedNavigation({
+      navigate() { events.push("navigate"); },
+      onWaiting() { events.push("waiting"); },
+    });
+
+    gate.request();
+    assert.deepEqual(events, ["waiting"]);
+    gate.release();
+    gate.release();
+    assert.deepEqual(events, ["waiting", "navigate"]);
+  });
+
   it("routes a stable exercise ID into a one-question session", () => {
     const shell = loadPracticeShell();
     const bank = { exercises: [{ id: "one" }, { id: "two" }] };
@@ -47,6 +63,45 @@ describe("daily practice integration", () => {
     assert.match(syncElement.textContent, /Review progress will sync later/);
   });
 
+  it("releases daily navigation as soon as the challenge row is saved", async () => {
+    let releaseNotebook;
+    const notebookGate = new Promise(resolve => { releaseNotebook = resolve; });
+    const events = [];
+    const savedProgress = [];
+    const dailyStore = {
+      async recordDailyAnswer() { events.push("daily"); },
+      async recordNotebookAnswer() { events.push("notebook-start"); await notebookGate; events.push("notebook-end"); },
+    };
+    const progressStore = {
+      async recordExerciseAttempt() { events.push("attempt"); return {}; },
+      async saveProgress(input) { events.push("progress"); savedProgress.push(input); return {}; },
+    };
+
+    const saving = recordAnswer({
+      grade: 5,
+      topicId: "musical-observation",
+      exerciseId: "mo-9",
+      answerGiven: "Imitation",
+      correctAnswer: "Imitation",
+      isCorrect: true,
+      correctCount: 1,
+      exerciseNumber: 1,
+      totalExercises: 1,
+      challengeDate: "2026-08-26",
+    }, {
+      store: progressStore,
+      dailyStore,
+      onNavigationReady() { events.push("navigation-ready"); },
+    });
+    await new Promise(resolve => setImmediate(resolve));
+
+    assert.deepEqual(events, ["daily", "navigation-ready", "notebook-start"]);
+    releaseNotebook();
+    await saving;
+    assert.equal(savedProgress[0].status, "completed");
+    assert.equal(savedProgress[0].progressPercent, 100);
+  });
+
   it("registers a wrong answer in the notebook even when the general progress write fails", async () => {
     const notebook = [];
     const dailyStore = {
@@ -76,13 +131,71 @@ describe("daily practice integration", () => {
     assert.equal(notebook[0].exerciseId, "interval-1");
   });
 
+  it("keeps an ordinary session in progress when its final exercise is answered incorrectly", async () => {
+    const savedProgress = [];
+    const progressStore = {
+      async recordExerciseAttempt() { return { progress: [], attempts: [] }; },
+      async saveProgress(input) { savedProgress.push(input); return { progress: [], attempts: [] }; },
+    };
+    const dailyStore = {
+      async recordNotebookAnswer() { return {}; },
+      async recordDailyAnswer() { return {}; },
+    };
+
+    await recordAnswer({
+      grade: 5,
+      topicId: "intervals",
+      exerciseId: "interval-10",
+      answerGiven: "Minor 3rd",
+      correctAnswer: "Major 3rd",
+      isCorrect: false,
+      correctCount: 8,
+      exerciseNumber: 10,
+      totalExercises: 10,
+    }, { store: progressStore, dailyStore });
+
+    assert.equal(savedProgress.length, 1);
+    assert.equal(savedProgress[0].status, "in_progress");
+    assert.equal(savedProgress[0].progressPercent, 99);
+  });
+
+  it("keeps a focused one-question session in progress after a wrong first attempt", async () => {
+    const savedProgress = [];
+    const progressStore = {
+      async recordExerciseAttempt() { return { progress: [], attempts: [] }; },
+      async saveProgress(input) { savedProgress.push(input); return { progress: [], attempts: [] }; },
+    };
+    const dailyStore = {
+      async recordNotebookAnswer() { return {}; },
+      async recordDailyAnswer() { return {}; },
+    };
+
+    await recordAnswer({
+      grade: 5,
+      topicId: "cadences",
+      exerciseId: "cadence-1",
+      answerGiven: "Imperfect",
+      correctAnswer: "Perfect",
+      isCorrect: false,
+      correctCount: 0,
+      exerciseNumber: 1,
+      totalExercises: 1,
+      challengeDate: "2026-08-26",
+    }, { store: progressStore, dailyStore });
+
+    assert.equal(savedProgress.length, 1);
+    assert.equal(savedProgress[0].status, "in_progress");
+    assert.equal(savedProgress[0].progressPercent, 99);
+  });
+
   it("wires focused routes and daily metadata through the real practice page", () => {
     const page = readFileSync(new URL("../practice.html", import.meta.url), "utf8");
     assert.match(page, /params\.get\('exercise'\)/);
     assert.match(page, /ListeningDeskPracticeShell\.questionsFor/);
     assert.match(page, /challengeDate:params\.get\('daily'\)/);
     assert.match(page, /reviewMode=params\.get\('review'\)==='1'/);
-    assert.match(page, /daily-challenge\.html/);
+    assert.match(page, /grade-5\.html\?overlay=daily-practice/);
+    assert.doesNotMatch(page, /params\.get\('daily'\)\?'daily-challenge\.html'/);
     assert.match(page, /mistake-notebook\.html/);
   });
 });

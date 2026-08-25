@@ -25,7 +25,7 @@ function calendarDate(value) {
   return dailyDate(value);
 }
 
-function previousCalendarDate(date) {
+export function previousCalendarDate(date) {
   const [year, month, day] = calendarDate(date).split("-").map(Number);
   const previous = new Date(Date.UTC(year, month - 1, day - 1));
   return `${previous.getUTCFullYear()}-${String(previous.getUTCMonth() + 1).padStart(2, "0")}-${String(previous.getUTCDate()).padStart(2, "0")}`;
@@ -48,8 +48,9 @@ export function flattenExerciseBank(registry = {}) {
   return Object.entries(registry).flatMap(([topicId, topic]) =>
     (topic.exercises ?? []).filter(exercise => exercise?.id).map(exercise => ({
       ...exercise,
-      topicId,
+      topicId: topic.topicId ?? topicId,
       topicName: topic.name ?? topicId,
+      grade: Number(exercise.grade ?? topic.grade ?? 5),
     })));
 }
 
@@ -79,7 +80,7 @@ export function selectDailyChallenge({ exercises = [], attempts = [], notebook =
   const usedTopics = new Set();
   const add = (exercise, role) => {
     if (!exercise || usedIds.has(exercise.id)) return false;
-    selected.push({ exerciseId: exercise.id, topicId: exercise.topicId, role });
+    selected.push({ exerciseId: exercise.id, topicId: exercise.topicId, grade: Number(exercise.grade ?? 5), role });
     usedIds.add(exercise.id);
     usedTopics.add(exercise.topicId);
     return true;

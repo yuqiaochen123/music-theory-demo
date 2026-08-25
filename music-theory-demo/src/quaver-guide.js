@@ -2,6 +2,14 @@ import { ensureRiveRuntime } from './daily-streak-rive.js';
 
 const STORAGE_KEY = 'listening-desk:quaver-preferences';
 const GUIDE_EVENT = 'listening-desk:quaver';
+const ROTATING_PHRASES = Object.freeze([
+  'Let’s keep going.',
+  'Listen for the pattern.',
+  'One step at a time.',
+  'Every mistake teaches you something.',
+  'Trust what you hear.',
+  'Ready for the next one?',
+]);
 
 const REACTIONS = Object.freeze({
   'lesson:opened': { mood: 'welcome', message: 'Let’s try this together.' },
@@ -14,6 +22,63 @@ const REACTIONS = Object.freeze({
 
 export function reactionForEvent(eventName) {
   return REACTIONS[eventName] ? { ...REACTIONS[eventName] } : null;
+}
+
+export function createQuaverMessageCycle({
+  onMessage,
+  phrases = ROTATING_PHRASES,
+  interval = 7000,
+  setTimer = setTimeout,
+  clearTimer = clearTimeout,
+} = {}) {
+  const messages = phrases.filter(Boolean);
+  let phraseIndex = 0;
+  let timer = null;
+  let paused = false;
+  let destroyed = false;
+
+  const cancelTimer = () => {
+    if (timer !== null) clearTimer(timer);
+    timer = null;
+  };
+  const schedule = delay => {
+    cancelTimer();
+    timer = setTimer(() => {
+      timer = null;
+      rotate();
+    }, delay);
+  };
+  const rotate = () => {
+    if (paused || destroyed || messages.length === 0) return;
+    onMessage?.(messages[phraseIndex]);
+    phraseIndex = (phraseIndex + 1) % messages.length;
+    schedule(interval);
+  };
+
+  return {
+    show(text, duration = 4500) {
+      if (paused || destroyed) return;
+      if (!text) {
+        rotate();
+        return;
+      }
+      onMessage?.(text);
+      schedule(duration);
+    },
+    pause() {
+      paused = true;
+      cancelTimer();
+    },
+    resume() {
+      if (destroyed) return;
+      paused = false;
+      rotate();
+    },
+    destroy() {
+      destroyed = true;
+      cancelTimer();
+    },
+  };
 }
 
 function readPreferences(storage) {
@@ -162,10 +227,16 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   const chatInput = chatForm?.querySelector('input');
   const preferences = readPreferences(storage);
   let riveInstance = null;
-  let messageTimer = null;
   let audioReactionTimer = null;
   let positionFrame = null;
   let stopTransparentRender = null;
+  const messageCycle = createQuaverMessageCycle({
+    onMessage: text => {
+      if (!message) return;
+      message.textContent = text;
+      message.hidden = false;
+    },
+  });
 
   const protectedSelector = '#answers, #feedback:not([hidden]), #next:not([hidden]), .notation-practice__toolbar, [data-check-answer], [data-check-matches]';
   const schedulePosition = () => {
@@ -196,21 +267,17 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
     chatToggle.textContent = open ? 'Minimize chat' : 'Ask Quaver a follow-up →';
     chatToggle.setAttribute('aria-expanded', String(open));
     if (open) {
+      messageCycle.pause();
       if (message) message.hidden = true;
       if (focus) chatInput?.focus();
+    } else {
+      messageCycle.resume();
     }
     schedulePosition();
   };
 
   const showMessage = (text, duration = 4500, force = false) => {
-    clearTimeout(messageTimer);
-    if (!message || !text) {
-      if (message) message.hidden = true;
-      return;
-    }
-    message.textContent = text;
-    message.hidden = false;
-    messageTimer = setTimeout(() => { message.hidden = true; }, duration);
+    messageCycle.show(text, duration);
   };
 
   const showThinkingMessage = (text, duration = 15000, force = true) => {
@@ -246,6 +313,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   };
 
   hideQuaver?.addEventListener('click', () => {
+    messageCycle.pause();
     root.hidden = true;
     restore.hidden = false;
     restore.focus();
@@ -254,6 +322,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
     restore.hidden = true;
     root.hidden = false;
     root.dataset.mood = 'welcome';
+    messageCycle.resume();
     showMessage('I’m back—let’s keep going!', 4200, true);
     schedulePosition();
     hideQuaver?.focus();
@@ -299,6 +368,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   try {
     riveInstance = createRive(canvas, loaded => {
       if (!loaded) {
+        messageCycle.pause();
         root.hidden = true;
         return;
       }
@@ -316,12 +386,10 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   const onGuideEvent = event => {
     const detail = event.detail || {};
     if (detail.type === 'exercise:reset') {
-      clearTimeout(messageTimer);
       chatMessages?.replaceChildren();
       setChatOpen(false, { focus: false });
       delete root.dataset.chatReady;
       root.dataset.mood = 'idle';
-      if (message) message.hidden = true;
       if (chatToggle) {
         chatToggle.hidden = true;
         chatToggle.textContent = 'Ask Quaver a follow-up →';
@@ -397,7 +465,7 @@ export function mountQuaverGuide({ root, storage = window.localStorage } = {}) {
   return {
     emit,
     destroy() {
-      clearTimeout(messageTimer);
+      messageCycle.destroy();
       clearTimeout(audioReactionTimer);
       if (positionFrame !== null) window.cancelAnimationFrame(positionFrame);
       window.removeEventListener(GUIDE_EVENT, onGuideEvent);

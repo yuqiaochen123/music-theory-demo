@@ -46,12 +46,13 @@ function findAndMount() {
   if (source && output) void mountNotebookAnimation(source, output);
   const dialogue = document.querySelector("[data-notebook-dialogue]");
   if (dialogue && dialogue.dataset.rotationMounted !== "true") {
+    const dialogueText = dialogue.querySelector("[data-notebook-dialogue-text]");
     dialogue.dataset.rotationMounted = "true";
     let index = 0;
     const showNext = () => {
       if (document.hidden) return;
       index = nextNotebookDialogueIndex(index);
-      dialogue.textContent = NOTEBOOK_DIALOGUES[index];
+      if (dialogueText) dialogueText.textContent = NOTEBOOK_DIALOGUES[index];
       dialogue.classList.remove("is-switching");
       void dialogue.offsetWidth;
       dialogue.classList.add("is-switching");

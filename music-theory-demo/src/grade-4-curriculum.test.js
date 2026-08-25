@@ -16,15 +16,15 @@ test('Grade 4 has its own complete dashboard and route',()=>{
   for(const heading of ['Rhythm and notation','Pitch and tonality','Harmony','Musical language','Instruments and analysis']) assert.match(html,new RegExp(heading));
   assert.match(read('index.html'),/href="grade-4\.html"/);
   assert.equal((html.match(/practice\.html\?grade=4&amp;mode=mastery/g)||[]).length,1);
-  assert.match(html,/Grade 4 mastery check · 28 untimed questions/);
+  assert.match(html,/Open Grade 4 mastery check/);
 });
 
-test('Grade 4 exposes mastery as a compact single-action navigation row',()=>{
+test('Grade 4 keeps mastery available without putting it above the curriculum',()=>{
   const html=read('grade-4.html');
-  const callout=html.match(/<a class="mastery-callout"[\s\S]*?<\/a>/)?.[0]??'';
-  assert.match(callout,/Grade 4 mastery check · 28 untimed questions/);
-  assert.match(callout,/>Start →</);
-  assert.doesNotMatch(callout,/<p>|<strong>|<b>/);
+  const link=html.match(/<a class="mastery-link"[\s\S]*?<\/a>/)?.[0]??'';
+  assert.match(link,/Open Grade 4 mastery check/);
+  assert.doesNotMatch(html,/class="mastery-callout"/);
+  assert.ok(html.indexOf('data-daily-practice-summary') < html.indexOf('class="curriculum"'));
 });
 
 test('Grade 4 dashboard loads the pinned Supabase browser client before progress',()=>{

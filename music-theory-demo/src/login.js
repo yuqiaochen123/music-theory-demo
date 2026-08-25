@@ -1,4 +1,6 @@
-import { getCurrentUser, observeAuth, requestPasswordReset, signIn, signOut, signUp, updatePassword } from './auth.js';
+import { getCurrentUser, observeAuth, redirectFileAppToLocalServer, requestPasswordReset, signIn, signOut, signUp, updatePassword } from './auth.js';
+
+redirectFileAppToLocalServer();
 
 const form = document.querySelector('#auth-form');
 const status = document.querySelector('#auth-status');

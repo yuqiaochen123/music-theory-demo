@@ -20882,8 +20882,9 @@ ${suffix}`;
   function flattenExerciseBank(registry = {}) {
     return Object.entries(registry).flatMap(([topicId, topic]) => (topic.exercises ?? []).filter((exercise) => exercise?.id).map((exercise) => ({
       ...exercise,
-      topicId,
-      topicName: topic.name ?? topicId
+      topicId: topic.topicId ?? topicId,
+      topicName: topic.name ?? topicId,
+      grade: Number(exercise.grade ?? topic.grade ?? 5)
     })));
   }
   function topicWeakness(attempts = []) {
@@ -20911,7 +20912,7 @@ ${suffix}`;
     const usedTopics = /* @__PURE__ */ new Set();
     const add = (exercise, role) => {
       if (!exercise || usedIds.has(exercise.id)) return false;
-      selected.push({ exerciseId: exercise.id, topicId: exercise.topicId, role });
+      selected.push({ exerciseId: exercise.id, topicId: exercise.topicId, grade: Number(exercise.grade ?? 5), role });
       usedIds.add(exercise.id);
       usedTopics.add(exercise.topicId);
       return true;
@@ -20979,9 +20980,11 @@ ${suffix}`;
   function createDailyPracticeStore({ client = null, progressStore: progressStore2 = progressStore } = {}) {
     let activeClient = client;
     const getClient = async () => activeClient ?? (activeClient = await getSupabaseClient());
-    async function challengeRow(studentId, grade, date) {
+    async function challengeRow(studentId, grade, date, scope = "grade") {
       const db = await getClient();
-      const { data, error } = await db.from("daily_challenges").select("*").eq("student_id", studentId).eq("grade", Number(grade)).eq("challenge_date", date).maybeSingle();
+      let query = db.from("daily_challenges").select("*").eq("student_id", studentId).eq("challenge_scope", scope).eq("challenge_date", date);
+      query = scope === "global" ? query.is("grade", null) : query.eq("grade", Number(grade));
+      const { data, error } = await query.maybeSingle();
       throwIfError2(error, "Unable to load today's challenge");
       return data;
     }
@@ -20991,27 +20994,64 @@ ${suffix}`;
       throwIfError2(error, "Unable to load the notebook item");
       return data;
     }
-    async function loadNotebook({ grade = 5, status } = {}) {
+    async function loadNotebook({ grade, status, sinceDate } = {}) {
       const studentId = await progressStore2.initializeStudent();
       const db = await getClient();
-      let query = db.from("mistake_notebook").select("*").eq("student_id", studentId).eq("grade", Number(grade));
+      let query = db.from("mistake_notebook").select("*").eq("student_id", studentId);
+      if (grade != null) query = query.eq("grade", Number(grade));
       if (status) query = query.eq("status", status);
-      const { data, error } = await query.order("latest_mistake_date", { ascending: false });
+      const dateField = status === "resolved" ? "resolved_date" : "latest_mistake_date";
+      if (sinceDate) query = query.gte(dateField, sinceDate);
+      const { data, error } = await query.order(dateField, { ascending: false });
       throwIfError2(error, "Unable to load the Mistake Notebook");
       return data ?? [];
     }
-    async function loadCompletedChallengeDates({ grade = 5 } = {}) {
+    async function loadCompletedChallengeDates({ grade = 5, scope = "grade" } = {}) {
       const studentId = await progressStore2.initializeStudent();
       const db = await getClient();
-      const { data, error } = await db.from("daily_challenges").select("challenge_date").eq("student_id", studentId).eq("grade", Number(grade)).not("completed_at", "is", null).order("challenge_date", { ascending: false });
+      let query = db.from("daily_challenges").select("challenge_date").eq("student_id", studentId).eq("challenge_scope", scope);
+      query = scope === "global" ? query.is("grade", null) : query.eq("grade", Number(grade));
+      const { data, error } = await query.not("completed_at", "is", null).order("challenge_date", { ascending: false });
       throwIfError2(error, "Unable to load the practice streak");
       return [...new Set((data ?? []).map((row) => row.challenge_date).filter(Boolean))];
     }
-    async function getOrCreateChallenge({ grade = 5, date = dailyDate(), registry } = {}) {
+    async function reconcileChallengeFromAttempts(studentId, current, date) {
+      try {
+        const studentData = await progressStore2.loadStudentData(studentId);
+        const challengeIds = new Set((current.items ?? []).map((item) => String(item.exerciseId)));
+        const completed = new Set((current.completed_exercise_ids ?? []).map(String));
+        const createdAt = current.created_at ? Date.parse(current.created_at) : null;
+        for (const attempt of studentData.attempts ?? []) {
+          if (!(attempt.is_correct ?? attempt.isCorrect)) continue;
+          const exerciseId = String(attempt.exercise_id ?? attempt.exerciseId ?? "");
+          const attemptedAt = attempt.attempted_at ?? attempt.attemptedAt;
+          const attemptedTimestamp = attemptedAt ? Date.parse(attemptedAt) : NaN;
+          if (!challengeIds.has(exerciseId) || !Number.isFinite(attemptedTimestamp)) continue;
+          if (dailyDate(new Date(attemptedTimestamp)) !== date) continue;
+          if (Number.isFinite(createdAt) && attemptedTimestamp < createdAt) continue;
+          completed.add(exerciseId);
+        }
+        const completedExerciseIds = [...completed];
+        const isComplete = challengeIds.size > 0 && completedExerciseIds.length === challengeIds.size;
+        const changed = completedExerciseIds.length !== (current.completed_exercise_ids ?? []).length || isComplete && !current.completed_at;
+        if (!changed) return current;
+        const db = await getClient();
+        const { error } = await db.from("daily_challenges").update({
+          completed_exercise_ids: completedExerciseIds,
+          completed_at: isComplete ? current.completed_at ?? (/* @__PURE__ */ new Date()).toISOString() : null
+        }).eq("id", current.id).eq("student_id", studentId);
+        throwIfError2(error, "Unable to repair today's challenge progress");
+        return challengeRow(studentId, current.grade, date, current.challenge_scope ?? "grade");
+      } catch (error) {
+        console.error(error);
+        return current;
+      }
+    }
+    async function getOrCreateChallenge({ grade = 5, date = dailyDate(), registry, scope = "grade" } = {}) {
       const studentId = await progressStore2.initializeStudent();
-      const existing = await challengeRow(studentId, grade, date);
-      if (existing) return existing;
-      const [studentData, notebook] = await Promise.all([progressStore2.loadStudentData(studentId), loadNotebook({ grade })]);
+      const existing = await challengeRow(studentId, grade, date, scope);
+      if (existing) return reconcileChallengeFromAttempts(studentId, existing, date);
+      const [studentData, notebook] = await Promise.all([progressStore2.loadStudentData(studentId), loadNotebook(scope === "global" ? {} : { grade })]);
       const items = selectDailyChallenge({
         exercises: flattenExerciseBank(registry),
         attempts: studentData.attempts,
@@ -21022,23 +21062,28 @@ ${suffix}`;
       const db = await getClient();
       const { error } = await db.from("daily_challenges").insert({
         student_id: studentId,
-        grade: Number(grade),
+        grade: scope === "global" ? null : Number(grade),
+        challenge_scope: scope,
         challenge_date: date,
         items,
         first_attempt_results: {},
         completed_exercise_ids: []
       });
       throwIfError2(error, "Unable to create today's challenge");
-      return challengeRow(studentId, grade, date);
+      const created = await challengeRow(studentId, grade, date, scope);
+      return reconcileChallengeFromAttempts(studentId, created, date);
     }
-    async function recordDailyAnswer({ grade = 5, date = dailyDate(), exerciseId, isCorrect } = {}) {
+    async function recordDailyAnswer({ grade = 5, date = dailyDate(), exerciseId, isCorrect, scope = "grade" } = {}) {
       const studentId = await progressStore2.initializeStudent();
-      const current = await challengeRow(studentId, grade, date);
-      if (!current || !current.items.some((item) => item.exerciseId === String(exerciseId))) return current;
+      const current = await challengeRow(studentId, grade, date, scope);
+      const requestedId = String(exerciseId);
+      const matchedItem = current?.items?.find((item) => item.exerciseId === requestedId || Number(item.grade) === Number(grade) && item.exerciseId.endsWith(`:${requestedId}`));
+      if (!current || !matchedItem) return current;
+      const challengeExerciseId = matchedItem.exerciseId;
       const firstAttemptResults = { ...current.first_attempt_results ?? {} };
-      if (!(exerciseId in firstAttemptResults)) firstAttemptResults[exerciseId] = Boolean(isCorrect);
+      if (!(challengeExerciseId in firstAttemptResults)) firstAttemptResults[challengeExerciseId] = Boolean(isCorrect);
       const completed = new Set(current.completed_exercise_ids ?? []);
-      if (isCorrect) completed.add(String(exerciseId));
+      if (isCorrect) completed.add(challengeExerciseId);
       const completedExerciseIds = [...completed];
       const payload = {
         first_attempt_results: firstAttemptResults,
@@ -21048,7 +21093,7 @@ ${suffix}`;
       const db = await getClient();
       const { error } = await db.from("daily_challenges").update(payload).eq("id", current.id).eq("student_id", studentId);
       throwIfError2(error, "Unable to update today's challenge");
-      return challengeRow(studentId, grade, date);
+      return challengeRow(studentId, grade, date, scope);
     }
     async function recordNotebookAnswer({ grade = 5, topicId, exerciseId, exerciseType = "choice", prompt = "", answerGiven = "", correctAnswer = "", date = dailyDate(), isCorrect } = {}) {
       const studentId = await progressStore2.initializeStudent();
@@ -21786,7 +21831,7 @@ ${suffix}`;
     root.style?.setProperty?.("--playback-volume", `${preferences.volume}%`);
   }
 
-  // src/piano-audio.js?v=20260825-timing2
+  // src/piano-audio.js?v=20260826-boost3
   var import_meta = {};
   applyPreferences(loadPreferences());
   var SAMPLE_ANCHORS = [
@@ -21802,6 +21847,14 @@ ${suffix}`;
     "Piano.pp.C4.m4a": 0.479,
     "Piano.pp.C5.m4a": 0.459,
     "Piano.pp.C6.m4a": 0.115
+  });
+  var SAMPLE_OUTPUT_BOOST = 2.8;
+  var SAMPLE_LIMITER = Object.freeze({
+    threshold: -1,
+    knee: 0,
+    ratio: 20,
+    attack: 3e-3,
+    release: 0.1
   });
   function nearestPianoSample(midi) {
     const pitch = Number(midi);
@@ -21820,13 +21873,14 @@ ${suffix}`;
     setTimer = globalThis.setTimeout?.bind(globalThis),
     clearTimer = globalThis.clearTimeout?.bind(globalThis),
     assetBase = new URL("../assets/audio/felt-piano/", import_meta.url).href,
-    volume = 0.58,
+    volume = 0.85,
     getPreferences = () => loadPreferences()
   } = {}) {
     const timers = /* @__PURE__ */ new Set();
     const voices = /* @__PURE__ */ new Set();
     const buffers = /* @__PURE__ */ new Map();
     let context = null;
+    let sampledOutput = null;
     const playbackSettings = () => {
       const preferences = getPreferences?.() || {};
       const savedVolume = Number(preferences.volume);
@@ -21848,7 +21902,7 @@ ${suffix}`;
       const sample = nearestPianoSample(midi);
       const audio = new AudioElement(`${assetBase}${sample.file}`);
       audio.preload = "auto";
-      audio.volume = playbackSettings().volume;
+      audio.volume = Math.min(1, playbackSettings().volume * SAMPLE_OUTPUT_BOOST);
       audio.playbackRate = pianoPlaybackRate(midi, sample.midi);
       audio.preservesPitch = false;
       audio.currentTime = 0;
@@ -21877,6 +21931,24 @@ ${suffix}`;
       }
       return buffers.get(sample.file);
     };
+    const sampledOutputNode = () => {
+      if (sampledOutput) return sampledOutput;
+      const boost = context.createGain();
+      boost.gain.value = SAMPLE_OUTPUT_BOOST;
+      const limiter = context.createDynamicsCompressor?.();
+      if (limiter) {
+        limiter.threshold.value = SAMPLE_LIMITER.threshold;
+        limiter.knee.value = SAMPLE_LIMITER.knee;
+        limiter.ratio.value = SAMPLE_LIMITER.ratio;
+        limiter.attack.value = SAMPLE_LIMITER.attack;
+        limiter.release.value = SAMPLE_LIMITER.release;
+        boost.connect(limiter).connect(context.destination);
+      } else {
+        boost.connect(context.destination);
+      }
+      sampledOutput = boost;
+      return sampledOutput;
+    };
     const prepare = async (midis) => {
       const audioContext = await ensureContext();
       if (!audioContext) return null;
@@ -21896,7 +21968,7 @@ ${suffix}`;
       const end = startAt + Math.max(0.06, duration);
       source.buffer = buffer;
       source.playbackRate.value = pianoPlaybackRate(midi, sample.midi);
-      source.connect(gain).connect(context.destination);
+      source.connect(gain).connect(sampledOutputNode());
       gain.gain.setValueAtTime(1e-4, startAt);
       const outputVolume = playbackSettings().volume;
       gain.gain.linearRampToValueAtTime(outputVolume, startAt + 8e-3);

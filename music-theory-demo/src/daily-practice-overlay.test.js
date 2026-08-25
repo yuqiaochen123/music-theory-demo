@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { dailyPracticeOverlayMarkup } from "./daily-practice-overlay.js";
+import { dailyPracticeOverlayMarkup, dailyPracticeOverlayRequested } from "./daily-practice-overlay.js";
 
 describe("daily practice overlay", () => {
   it("renders the current Daily Practice styling as an accessible floating dialog", () => {
@@ -15,12 +15,18 @@ describe("daily practice overlay", () => {
     assert.match(html, /data-daily-challenge/);
   });
 
-  it("wires Grade 5's existing Daily Practice link to the overlay controller", () => {
+  it("wires each grade-aware Daily Practice link to the overlay controller", () => {
     const entry = readFileSync(new URL("./daily-practice-entry.js", import.meta.url), "utf8");
     const ui = readFileSync(new URL("./daily-practice-ui.js", import.meta.url), "utf8");
     assert.match(entry, /daily-practice-overlay\.js/);
     assert.match(entry, /installDailyPracticeOverlay/);
-    assert.match(ui, /data-local-overlay="daily-practice" href="daily-challenge\.html"/);
+    assert.match(ui, /data-local-overlay="daily-practice" href="daily-challenge\.html\?grade=/);
+  });
+
+  it("recognizes the one-time return route that reopens Daily Practice over Grade 5", () => {
+    assert.equal(dailyPracticeOverlayRequested({ search: "?overlay=daily-practice" }), true);
+    assert.equal(dailyPracticeOverlayRequested({ search: "" }), false);
+    assert.equal(dailyPracticeOverlayRequested({ search: "?overlay=mistake-notebook" }), false);
   });
 
   it("blurs the Grade 5 page beneath the floating Daily Practice sheet", () => {
@@ -49,7 +55,7 @@ describe("daily practice overlay", () => {
     const overlay = readFileSync(new URL("./daily-practice-overlay.js", import.meta.url), "utf8");
     const ui = readFileSync(new URL("./daily-practice-ui.js", import.meta.url), "utf8");
     assert.doesNotMatch(ui, /Building today’s challenge/);
-    assert.match(overlay, /await mountChallenge\(challenge, \{ registry \}\);[\s\S]*overlay\.classList\.add\("is-open"\)/);
+    assert.match(overlay, /await mountChallenge\(challenge, \{ registry: activeRegistry, grade: activeGrade \}\);[\s\S]*overlay\.classList\.add\("is-open"\)/);
     assert.match(css, /\.daily-practice-overlay\.is-open \.daily-practice-overlay__backdrop\{[^}]*animation:daily-practice-backdrop-in \.6s/);
     assert.match(css, /\.daily-practice-overlay\.is-open \.daily-practice-overlay__panel\{[^}]*animation:daily-practice-overlay-in \.6s/);
   });
