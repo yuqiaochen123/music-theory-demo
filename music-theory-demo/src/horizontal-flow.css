@@ -61,10 +61,10 @@
 body[data-topic='clef-transposition'] .lesson-slide.clef-editor{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain;scrollbar-gutter:stable}
 
 /* Keep the first lesson card centered identically in source and production. */
-.lesson-carousel{--lesson-slide-width:min(88vw,1180px);padding-inline:max(16px,calc((100vw - var(--lesson-slide-width))/2));scroll-padding-inline:max(16px,calc((100vw - var(--lesson-slide-width))/2))}
+.lesson-body .lesson-carousel{--lesson-slide-width:min(88vw,1180px);--lesson-carousel-gutter:max(16px,calc(50vw - min(44vw,590px)));padding-inline:var(--lesson-carousel-gutter);scroll-padding-inline:var(--lesson-carousel-gutter)}
 .lesson-slide{flex-basis:var(--lesson-slide-width)}
 .lesson-slide[hidden]{display:none!important}
-@media(max-width:720px){.lesson-carousel{--lesson-slide-width:calc(100vw - 32px)}}
+@media(max-width:720px){.lesson-body .lesson-carousel{--lesson-slide-width:calc(100vw - 32px);--lesson-carousel-gutter:16px}}
 
 /* The production bundler may extract redesign.css after this file. These
    selectors deliberately outrank its red-stage text rules so every white

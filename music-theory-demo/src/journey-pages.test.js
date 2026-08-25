@@ -113,8 +113,11 @@ describe("learning journey pages", () => {
 
   it("centres the first lesson at every desktop width and keeps unready slides out of layout", () => {
     assert.match(styles, /--lesson-slide-width:min\(88vw,1180px\)/);
-    assert.match(styles, /padding-inline:max\(16px,calc\(\(100vw - var\(--lesson-slide-width\)\)\/2\)\)/);
+    assert.match(styles, /\.lesson-body \.lesson-carousel\{--lesson-slide-width:min\(88vw,1180px\);--lesson-carousel-gutter:max\(16px,calc\(50vw - min\(44vw,590px\)\)\)/);
+    assert.match(styles, /padding-inline:var\(--lesson-carousel-gutter\)/);
+    assert.doesNotMatch(styles, /--lesson-carousel-gutter:[^;}]*\/2/);
     assert.match(styles, /\.lesson-slide\[hidden\]\{display:none!important\}/);
+    assert.match(topic, /carousel\.scrollLeft=0/);
   });
 
   it("keeps every first lesson card readable when production reorders extracted CSS", () => {

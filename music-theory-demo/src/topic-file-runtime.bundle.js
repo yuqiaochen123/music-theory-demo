@@ -22142,6 +22142,7 @@ ${suffix}`;
     }, setupLessonCarousel = function() {
       requestAnimationFrame(() => {
         const carousel = $(".lesson-carousel"), dots = $(".lesson-dots"), slides = [...carousel.children].filter((slide) => !slide.hidden);
+        carousel.scrollLeft = 0;
         dots.replaceChildren(...slides.map((slide, index) => {
           const button = document.createElement("button");
           button.type = "button";
