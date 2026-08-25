@@ -65,3 +65,12 @@ body[data-topic='clef-transposition'] .lesson-slide.clef-editor{overflow-x:hidde
 .lesson-slide{flex-basis:var(--lesson-slide-width)}
 .lesson-slide[hidden]{display:none!important}
 @media(max-width:720px){.lesson-carousel{--lesson-slide-width:calc(100vw - 32px)}}
+
+/* The production bundler may extract redesign.css after this file. These
+   selectors deliberately outrank its red-stage text rules so every white
+   first card remains readable regardless of stylesheet order. */
+.lesson-body .lesson-slide.hero .eyebrow{color:#ad1c59!important}
+.lesson-body .lesson-slide.hero h1{color:#191516!important}
+.lesson-body .lesson-slide.hero .lead{color:#61585a!important}
+.lesson-body .lesson-slide.hero .intro,.lesson-body .lesson-slide.hero .intro p{color:#61585a!important}
+.lesson-body .lesson-slide.hero .progress-sync{color:#9a2f5a!important}

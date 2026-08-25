@@ -117,6 +117,12 @@ describe("learning journey pages", () => {
     assert.match(styles, /\.lesson-slide\[hidden\]\{display:none!important\}/);
   });
 
+  it("keeps every first lesson card readable when production reorders extracted CSS", () => {
+    assert.match(styles, /\.lesson-body \.lesson-slide\.hero \.eyebrow\{[^}]*color:#ad1c59!important/);
+    assert.match(styles, /\.lesson-body \.lesson-slide\.hero h1\{[^}]*color:#191516!important/);
+    assert.match(styles, /\.lesson-body \.lesson-slide\.hero \.lead\{[^}]*color:#61585a!important/);
+  });
+
   it("ships a centred meaningful first frame while the production lesson bundle loads", () => {
     assert.match(topic, /<body class="lesson-body is-lesson-loading">/);
     assert.match(topic, /<h1 id="title">Loading lesson…<\/h1>/);
