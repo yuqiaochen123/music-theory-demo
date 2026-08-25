@@ -21077,16 +21077,16 @@ ${suffix}`;
       throwIfError2(error, "Unable to update the Mistake Notebook");
       return notebookRow(studentId, { grade, topicId, exerciseId });
     }
-    async function hideNotebookItem({ grade = 5, topicId, exerciseId } = {}) {
+    async function discardNotebookItem({ grade = 5, topicId, exerciseId } = {}) {
       const studentId = await progressStore2.initializeStudent();
       const current = await notebookRow(studentId, { grade, topicId, exerciseId });
       if (!current) return null;
       const db = await getClient();
       const { error } = await db.from("mistake_notebook").update({ status: "hidden" }).eq("id", current.id).eq("student_id", studentId);
-      throwIfError2(error, "Unable to hide the notebook item");
+      throwIfError2(error, "Unable to discard the notebook item");
       return notebookRow(studentId, { grade, topicId, exerciseId });
     }
-    return { getOrCreateChallenge, loadCompletedChallengeDates, loadNotebook, recordDailyAnswer, recordNotebookAnswer, hideNotebookItem };
+    return { getOrCreateChallenge, loadCompletedChallengeDates, loadNotebook, recordDailyAnswer, recordNotebookAnswer, discardNotebookItem };
   }
   var dailyPracticeStore = createDailyPracticeStore();
 
@@ -21138,6 +21138,26 @@ ${suffix}`;
       console.error(error);
       return null;
     }
+  }
+
+  // src/interval-navigation.js
+  function configureIntervalBackLink({ link, grade, topic, lessonId }) {
+    if (!link) return;
+    const isIndividualIntervalLesson = Number(grade) === 5 && topic === "intervals" && Boolean(lessonId);
+    link.hidden = !isIndividualIntervalLesson;
+    if (!isIndividualIntervalLesson) {
+      link.removeAttribute("href");
+      return;
+    }
+    link.setAttribute("href", "topic.html?topic=intervals#quick-guide");
+    link.setAttribute("aria-label", "Back to all intervals");
+  }
+  function initialIntervalOverviewSlide(slides, hash2 = "") {
+    const availableSlides = Array.from(slides || []);
+    if (hash2 === "#quick-guide") {
+      return availableSlides.find((slide) => slide.id === "quick-guide") || availableSlides[0] || null;
+    }
+    return availableSlides[0] || null;
   }
 
   // src/intervals.js
@@ -21727,8 +21747,48 @@ ${suffix}`;
     return { getState: () => state };
   }
 
+  // src/settings-preferences.js
+  var SETTINGS_KEY = "listening-desk:preferences";
+  var DEFAULT_PREFERENCES = Object.freeze({
+    volume: 70,
+    instrument: "felt-piano",
+    reduceMotion: false,
+    largerText: false,
+    highContrast: false,
+    decorativeAnimations: true
+  });
+  var INSTRUMENTS = /* @__PURE__ */ new Set(["felt-piano", "bright-piano", "organ", "reference-tone"]);
+  function sanitizePreferences(saved = {}) {
+    const parsedVolume = Number(saved.volume);
+    return {
+      volume: Number.isFinite(parsedVolume) ? Math.min(100, Math.max(0, parsedVolume)) : DEFAULT_PREFERENCES.volume,
+      instrument: INSTRUMENTS.has(saved.instrument) ? saved.instrument : DEFAULT_PREFERENCES.instrument,
+      reduceMotion: typeof saved.reduceMotion === "boolean" ? saved.reduceMotion : DEFAULT_PREFERENCES.reduceMotion,
+      largerText: typeof saved.largerText === "boolean" ? saved.largerText : DEFAULT_PREFERENCES.largerText,
+      highContrast: typeof saved.highContrast === "boolean" ? saved.highContrast : DEFAULT_PREFERENCES.highContrast,
+      decorativeAnimations: typeof saved.decorativeAnimations === "boolean" ? saved.decorativeAnimations : DEFAULT_PREFERENCES.decorativeAnimations
+    };
+  }
+  function loadPreferences(storage = globalThis.localStorage) {
+    try {
+      return sanitizePreferences(JSON.parse(storage?.getItem(SETTINGS_KEY) || "{}"));
+    } catch {
+      return { ...DEFAULT_PREFERENCES };
+    }
+  }
+  function applyPreferences(preferences, root = globalThis.document?.documentElement) {
+    if (!root) return;
+    root.dataset.instrument = preferences.instrument;
+    root.dataset.reduceMotion = preferences.reduceMotion ? "on" : "off";
+    root.dataset.largerText = preferences.largerText ? "on" : "off";
+    root.dataset.highContrast = preferences.highContrast ? "on" : "off";
+    root.dataset.decorativeAnimations = preferences.decorativeAnimations ? "on" : "off";
+    root.style?.setProperty?.("--playback-volume", `${preferences.volume}%`);
+  }
+
   // src/piano-audio.js?v=20260825-timing2
   var import_meta = {};
+  applyPreferences(loadPreferences());
   var SAMPLE_ANCHORS = [
     { midi: 36, file: "Piano.pp.C2.m4a" },
     { midi: 48, file: "Piano.pp.C3.m4a" },
@@ -21760,12 +21820,21 @@ ${suffix}`;
     setTimer = globalThis.setTimeout?.bind(globalThis),
     clearTimer = globalThis.clearTimeout?.bind(globalThis),
     assetBase = new URL("../assets/audio/felt-piano/", import_meta.url).href,
-    volume = 0.58
+    volume = 0.58,
+    getPreferences = () => loadPreferences()
   } = {}) {
     const timers = /* @__PURE__ */ new Set();
     const voices = /* @__PURE__ */ new Set();
     const buffers = /* @__PURE__ */ new Map();
     let context = null;
+    const playbackSettings = () => {
+      const preferences = getPreferences?.() || {};
+      const savedVolume = Number(preferences.volume);
+      return {
+        instrument: ["felt-piano", "bright-piano", "organ", "reference-tone"].includes(preferences.instrument) ? preferences.instrument : "felt-piano",
+        volume: volume * (Number.isFinite(savedVolume) ? Math.min(100, Math.max(0, savedVolume)) / 100 : 1)
+      };
+    };
     const later = (callback, seconds) => {
       const timer = setTimer?.(() => {
         timers.delete(timer);
@@ -21779,7 +21848,7 @@ ${suffix}`;
       const sample = nearestPianoSample(midi);
       const audio = new AudioElement(`${assetBase}${sample.file}`);
       audio.preload = "auto";
-      audio.volume = volume;
+      audio.volume = playbackSettings().volume;
       audio.playbackRate = pianoPlaybackRate(midi, sample.midi);
       audio.preservesPitch = false;
       audio.currentTime = 0;
@@ -21811,6 +21880,7 @@ ${suffix}`;
     const prepare = async (midis) => {
       const audioContext = await ensureContext();
       if (!audioContext) return null;
+      if (playbackSettings().instrument !== "felt-piano") return audioContext;
       const samples = [...new Map((midis || []).filter(isMidi).map((midi) => {
         const sample = nearestPianoSample(midi);
         return [sample.file, sample];
@@ -21828,8 +21898,9 @@ ${suffix}`;
       source.playbackRate.value = pianoPlaybackRate(midi, sample.midi);
       source.connect(gain).connect(context.destination);
       gain.gain.setValueAtTime(1e-4, startAt);
-      gain.gain.linearRampToValueAtTime(volume, startAt + 8e-3);
-      gain.gain.setValueAtTime(volume, Math.max(startAt + 9e-3, end - 0.015));
+      const outputVolume = playbackSettings().volume;
+      gain.gain.linearRampToValueAtTime(outputVolume, startAt + 8e-3);
+      gain.gain.setValueAtTime(outputVolume, Math.max(startAt + 9e-3, end - 0.015));
       gain.gain.linearRampToValueAtTime(1e-4, end);
       source.start(startAt, SAMPLE_ATTACK_OFFSETS[sample.file] || 0);
       source.stop(end);
@@ -21837,11 +21908,35 @@ ${suffix}`;
       source.onended = () => voices.delete(source);
       return source;
     };
+    const scheduleSynthVoice = (midi, startAt, duration) => {
+      if (!context || !isMidi(midi)) return null;
+      const { instrument, volume: outputVolume } = playbackSettings();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const end = startAt + Math.max(0.06, duration);
+      oscillator.type = instrument === "bright-piano" ? "triangle" : "sine";
+      oscillator.frequency.value = 440 * 2 ** ((Number(midi) - 69) / 12);
+      oscillator.connect(gain).connect(context.destination);
+      gain.gain.setValueAtTime(1e-4, startAt);
+      gain.gain.linearRampToValueAtTime(outputVolume, startAt + (instrument === "organ" ? 0.025 : 8e-3));
+      if (instrument === "bright-piano") {
+        gain.gain.linearRampToValueAtTime(Math.max(1e-4, outputVolume * 0.28), Math.max(startAt + 0.02, end - 0.035));
+      } else {
+        gain.gain.setValueAtTime(outputVolume, Math.max(startAt + 0.026, end - 0.02));
+      }
+      gain.gain.linearRampToValueAtTime(1e-4, end);
+      oscillator.start(startAt);
+      oscillator.stop(end);
+      voices.add(oscillator);
+      oscillator.onended = () => voices.delete(oscillator);
+      return oscillator;
+    };
+    const scheduleContextVoice = (midi, startAt, duration) => playbackSettings().instrument === "felt-piano" ? scheduleBufferedVoice(midi, startAt, duration) : scheduleSynthVoice(midi, startAt, duration);
     const play = async (midis, { delay = 0, spread = 0, duration = 0.62, startAt } = {}) => {
       const audioContext = await prepare(midis);
       if (audioContext) {
         const base = startAt ?? audioContext.currentTime + 0.06 + delay;
-        await Promise.all((midis || []).map((midi, index) => isMidi(midi) ? scheduleBufferedVoice(Number(midi), base + index * spread, duration) : null));
+        await Promise.all((midis || []).map((midi, index) => isMidi(midi) ? scheduleContextVoice(Number(midi), base + index * spread, duration) : null));
         return base;
       }
       (midis || []).forEach((midi, index) => {
@@ -21856,7 +21951,7 @@ ${suffix}`;
       (midis || []).forEach((midi, index) => {
         const duration = Math.max(0.05, Number(durations[index]) || 0.24);
         if (isMidi(midi)) {
-          if (audioContext) scheduled.push(scheduleBufferedVoice(Number(midi), (startAt ?? audioContext.currentTime + 0.06) + cursor, duration));
+          if (audioContext) scheduled.push(scheduleContextVoice(Number(midi), (startAt ?? audioContext.currentTime + 0.06) + cursor, duration));
           else later(() => startVoice(Number(midi), duration), cursor);
         }
         cursor += duration;
@@ -21872,7 +21967,7 @@ ${suffix}`;
       (events || []).forEach((event) => {
         if (event.rest || !isMidi(event.midi)) return;
         const duration = Math.max(0.06, event.duration || 0.24);
-        if (audioContext) scheduled.push(scheduleBufferedVoice(Number(event.midi), base + (event.time || 0), duration));
+        if (audioContext) scheduled.push(scheduleContextVoice(Number(event.midi), base + (event.time || 0), duration));
         else later(() => startVoice(Number(event.midi), duration), delay + (event.time || 0));
       });
       await Promise.all(scheduled);
@@ -21949,32 +22044,15 @@ ${suffix}`;
       if (!base.variants) return "";
       const revealed = revealedGroupingSelectors.has(index);
       return `<div class="grouping-control"><button class="grouping-toggle" data-reveal-grouping="${index}" aria-expanded="${revealed}">${revealed ? "Hide groupings" : "Change grouping"}</button><div class="grouping-options" ${revealed ? "" : "hidden"}>${base.variants.map((variant) => `<button class="grouping-option" data-index="${index}" data-grouping="${variant.id}" aria-pressed="${variant.id === item.id}">${variant.id}</button>`).join("")}</div></div>`;
-    }, resetScaleDegreeScroll = function() {
-      if (topic !== "scale-degrees") return;
-      document.querySelectorAll(".scale-direction .notation").forEach((target) => {
-        target.scrollLeft = 0;
-      });
     }, scaleDegreeNotation = function(item, index) {
-      return `<div class="scale-direction"><div class="scale-direction-head"><p class="direction-label">Ascending</p><button class="scale-start" data-scale-start="notation-${index}-ascending">\u2190 Clef &amp; tonic</button></div><div class="notation" id="notation-${index}-ascending" aria-label="${item.label} ascending notation"></div></div><div class="scale-direction"><div class="scale-direction-head"><p class="direction-label">Descending</p><button class="scale-start" data-scale-start="notation-${index}-descending">\u2190 Clef &amp; tonic</button></div><div class="notation" id="notation-${index}-descending" aria-label="${item.label} descending notation"></div></div>`;
+      return `<div class="scale-direction"><div class="scale-direction-head"><p class="direction-label">Ascending</p></div><div class="notation" id="notation-${index}-ascending" aria-label="${item.label} ascending notation"></div></div><div class="scale-direction"><div class="scale-direction-head"><p class="direction-label">Descending</p></div><div class="notation" id="notation-${index}-descending" aria-label="${item.label} descending notation"></div></div>`;
     }, renderScaleDegreeNotation = function(item, index) {
       const directions = [["ascending", item.notation.notes, item.notation.ascendingDegreeLabels], ["descending", item.notation.descendingNotes, item.notation.descendingDegreeLabels]];
       directions.forEach(([direction, notes, degreeLabels]) => {
         const target = document.querySelector(`#notation-${index}-${direction}`);
         try {
-          ListeningDeskNotation.render(target, { type: "scale", notes, degreeLabels, singleDirection: true }, { width: 1700 });
-          let initializing = true;
-          const holdAtTonic = () => {
-            if (initializing) target.scrollLeft = 0;
-          };
-          target.addEventListener("scroll", holdAtTonic);
-          target.scrollLeft = 0;
-          requestAnimationFrame(() => {
-            target.scrollLeft = 0;
-          });
-          setTimeout(() => {
-            initializing = false;
-            target.removeEventListener("scroll", holdAtTonic);
-          }, 1e3);
+          const width = Math.max(320, target.clientWidth || 900);
+          ListeningDeskNotation.render(target, { type: "scale", notes, degreeLabels, singleDirection: true }, { width });
         } catch (error) {
           target.textContent = "Notation is unavailable in this browser.";
         }
@@ -22134,15 +22212,16 @@ ${suffix}`;
           playExample(index);
         } else playPart(index, part);
       });
-      $("#examples").querySelectorAll("[data-scale-start]").forEach((button) => button.onclick = () => document.getElementById(button.dataset.scaleStart)?.scrollTo({ left: 0, behavior: "smooth" }));
-      requestAnimationFrame(resetScaleDegreeScroll);
-      setTimeout(resetScaleDegreeScroll, 120);
-      setTimeout(resetScaleDegreeScroll, 500);
       if (!(window.AudioContext || window.webkitAudioContext)) showAudioFallback();
     }, setupLessonCarousel = function() {
       requestAnimationFrame(() => {
         const carousel = $(".lesson-carousel"), dots = $(".lesson-dots"), slides = [...carousel.children].filter((slide) => !slide.hidden);
         carousel.scrollLeft = 0;
+        const initialSlide = initialIntervalOverviewSlide(slides, location.hash);
+        if (initialSlide && initialSlide !== slides[0]) {
+          const centeredLeft = initialSlide.offsetLeft - (carousel.clientWidth - initialSlide.offsetWidth) / 2;
+          carousel.scrollLeft = Math.max(0, centeredLeft);
+        }
         dots.replaceChildren(...slides.map((slide, index) => {
           const button = document.createElement("button");
           button.type = "button";
@@ -22200,6 +22279,7 @@ ${suffix}`;
     document.body.dataset.topic = topic;
     document.body.dataset.grade = String(grade);
     $(".lesson-close").href = grade === 5 ? "grade-5.html" : `grade-${grade}.html`;
+    configureIntervalBackLink({ link: $("#interval-back"), grade, topic, lessonId: intervalLesson2?.id || null });
     const selectedVariants = {};
     const revealedGroupingSelectors = /* @__PURE__ */ new Set();
     const audioUnavailable = "Audio playback is unavailable; you can continue with notation.";
@@ -22209,8 +22289,6 @@ ${suffix}`;
       playExample(0);
       setTimeout(() => playExample(1), topic === "cadences" ? 2100 : ["scales", "time-signatures"].includes(topic) ? 2500 : 1100);
     };
-    window.addEventListener("pageshow", resetScaleDegreeScroll);
-    window.addEventListener("load", resetScaleDegreeScroll);
     window.ListeningDeskPlayMidis = sound;
     render();
     if (topic === "clef-transposition") mountClefTranspositionEditor({ container: $("#clef-editor"), notation: window.ListeningDeskNotation, play: sound, mode: grade === 4 ? "grade4-clef" : void 0 });

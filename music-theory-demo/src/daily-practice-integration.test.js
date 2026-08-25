@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { describe, it } from "node:test";
-import { recordDailyPracticeEnhancements } from "./progress-page.js";
+import { recordAnswer, recordDailyPracticeEnhancements } from "./progress-page.js";
 
 function loadPracticeShell() {
   const window = { URLSearchParams };
@@ -18,7 +18,7 @@ describe("daily practice integration", () => {
     assert.deepEqual(Array.from(shell.questionsFor(bank, "missing"), item => item.id), ["one", "two"]);
   });
 
-  it("updates notebook and challenge after primary answer persistence", async () => {
+  it("records the daily challenge before secondary notebook work", async () => {
     const calls = [];
     const store = {
       async recordNotebookAnswer(input) { calls.push(["notebook", input]); },
@@ -29,20 +29,51 @@ describe("daily practice integration", () => {
       answerGiven: "D4", correctAnswer: "E4", isCorrect: false, challengeDate: "2026-08-23",
     }, { store });
     assert.equal(result, true);
-    assert.deepEqual(calls.map(([kind]) => kind), ["notebook", "daily"]);
-    assert.equal(calls[0][1].exerciseType, "notation-entry");
-    assert.equal(calls[1][1].date, "2026-08-23");
+    assert.deepEqual(calls.map(([kind]) => kind), ["daily", "notebook"]);
+    assert.equal(calls[0][1].date, "2026-08-23");
+    assert.equal(calls[1][1].exerciseType, "notation-entry");
   });
 
-  it("keeps practice usable when secondary tracking fails", async () => {
+  it("still records daily completion when notebook tracking fails", async () => {
     const syncElement = { textContent: "", dataset: {}, hidden: true };
+    let dailyCalls = 0;
     const store = {
       async recordNotebookAnswer() { throw new Error("offline"); },
-      async recordDailyAnswer() { throw new Error("should not run"); },
+      async recordDailyAnswer() { dailyCalls += 1; },
     };
-    const result = await recordDailyPracticeEnhancements({ grade: 5, topicId: "clefs", exerciseId: "c1", isCorrect: false }, { store, syncElement });
+    const result = await recordDailyPracticeEnhancements({ grade: 5, topicId: "clefs", exerciseId: "c1", isCorrect: true, challengeDate: "2026-08-23" }, { store, syncElement });
     assert.equal(result, false);
+    assert.equal(dailyCalls, 1);
     assert.match(syncElement.textContent, /Review progress will sync later/);
+  });
+
+  it("registers a wrong answer in the notebook even when the general progress write fails", async () => {
+    const notebook = [];
+    const dailyStore = {
+      async recordNotebookAnswer(input) { notebook.push(input); },
+      async recordDailyAnswer() {},
+    };
+    const progressStore = {
+      async recordExerciseAttempt() { throw new Error("exercise_attempts unavailable"); },
+      async saveProgress() { throw new Error("should not run"); },
+    };
+
+    const result = await recordAnswer({
+      grade: 5,
+      topicId: "intervals",
+      exerciseId: "interval-1",
+      answerGiven: "Minor 3rd",
+      correctAnswer: "Major 3rd",
+      isCorrect: false,
+      correctCount: 0,
+      exerciseNumber: 1,
+      totalExercises: 10,
+    }, { store: progressStore, dailyStore });
+
+    assert.equal(result, null);
+    assert.equal(notebook.length, 1);
+    assert.equal(notebook[0].isCorrect, false);
+    assert.equal(notebook[0].exerciseId, "interval-1");
   });
 
   it("wires focused routes and daily metadata through the real practice page", () => {

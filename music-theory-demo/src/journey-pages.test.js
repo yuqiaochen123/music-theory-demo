@@ -137,7 +137,7 @@ describe("learning journey pages", () => {
 
   it("provides a classic-script lesson fallback when opened directly from disk", () => {
     const topic = page("topic.html");
-    assert.match(topic, /src="src\/topic-file-runtime\.bundle\.js\?v=20260825-parity1"/);
+    assert.match(topic, /src="src\/topic-file-runtime\.bundle\.js\?v=20260826-intervalback1"/);
     assert.match(page("src/topic-file-runtime.bundle.js"), /file:/);
   });
 
@@ -339,7 +339,7 @@ describe("learning journey pages", () => {
     assert.match(topic,/\.play-row\{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:44px 44px;gap:9px\}/);
   });
 
-  it("gives each scale-degree example a full-width readable row",()=>{
+  it("fits every scale-degree staff into its card without horizontal scrolling",()=>{
     const topic=page("topic.html");
     assert.match(topic,/body\[data-topic="scale-degrees"\] \.examples\{grid-template-columns:1fr;/);
     assert.match(topic,/body\[data-topic="scale-degrees"\] \.example\+\.example\{border-left:0;border-top:1px solid var\(--line\)\}/);
@@ -350,28 +350,14 @@ describe("learning journey pages", () => {
     assert.match(topic,/notation-\$\{index\}-ascending/);
     assert.match(topic,/notation-\$\{index\}-descending/);
     assert.doesNotMatch(topic,/function degreeLabels/);
-    assert.match(topic,/overflow-x:auto/);
-    assert.match(topic,/\.scale-direction \.notation svg\{[^}]*max-width:none/);
-    assert.match(topic,/\{width:1700\}/);
-    assert.match(topic,/target\.scrollLeft=0/);
-    assert.match(topic,/function resetScaleDegreeScroll/);
-    assert.match(topic,/addEventListener\('pageshow',resetScaleDegreeScroll\)/);
-    assert.match(topic,/addEventListener\('load',resetScaleDegreeScroll\)/);
-    assert.match(topic,/setTimeout\(resetScaleDegreeScroll,120\)/);
-    assert.match(topic,/addEventListener\('scroll',holdAtTonic\)/);
-    assert.match(topic,/setTimeout\(\(\)=>\{initializing=false/);
-  });
-
-  it("lets learners return every scale row to the clef and tonic",()=>{
-    const topic=page("topic.html");
-    assert.match(topic,/data-scale-start=/);
-    assert.match(topic,/scrollTo\(\{left:0,behavior:'smooth'\}\)/);
-    assert.match(topic,/direction:ltr/);
-    assert.match(topic,/touch-action:pan-x pan-y/);
-    assert.match(topic,/place-items:start/);
+    assert.match(topic,/overflow-x:hidden!important/);
+    assert.match(topic,/\.scale-direction \.notation svg\{[^}]*width:100%[^}]*max-width:100%/);
+    assert.match(topic,/const width=Math\.max\(320,target\.clientWidth\|\|900\)/);
+    assert.match(topic,/\{width\}\)/);
+    assert.doesNotMatch(topic,/data-scale-start=|function resetScaleDegreeScroll|target\.scrollLeft|holdAtTonic/);
+    assert.match(topic,/place-items:center/);
     assert.match(topic,/contain:inline-size/);
     assert.match(topic,/min-width:0;max-width:100%/);
-    assert.match(topic,/justify-content:flex-start/);
   });
 
   it("links every simple interval lesson from the Interval overview",()=>{

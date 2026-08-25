@@ -78,8 +78,24 @@ export function notebookMarkup({ status = "to_review", items = [] } = {}) {
   if (!items.length) return `${tabs}<div class="notebook-empty"><strong>${resolved ? "No resolved mistakes yet." : "Your review list is clear."}</strong><p>${resolved ? "Resolved exercises will remain here as a record of your progress." : "Mistakes from signed-in practice sessions will appear here automatically."}</p></div>`;
   return `${tabs}<div class="notebook-list">${items.map(item => {
     const params = new URLSearchParams({ topic: item.topic_id, exercise: item.exercise_id, review: "1" });
-    return `<article class="notebook-card"><div class="notebook-card-head"><span>${escapeHtml(item.topic_id.replaceAll("-", " "))}</span><small>${resolved ? `Resolved ${escapeHtml(item.resolved_date)}` : `${item.mistake_count} mistake${item.mistake_count === 1 ? "" : "s"}`}</small></div><h2>${escapeHtml(item.prompt || "Review this exercise")}</h2><div class="notebook-actions"><a href="practice.html?${escapeHtml(params.toString())}">${resolved ? "Practise again" : "Practise this"} →</a>${resolved ? "" : `<button type="button" data-hide-mistake="${escapeHtml(item.exercise_id)}" data-topic="${escapeHtml(item.topic_id)}">Hide</button>`}</div></article>`;
+    return `<article class="notebook-card"><div class="notebook-card-head"><span>${escapeHtml(item.topic_id.replaceAll("-", " "))}</span><small>${resolved ? `Resolved ${escapeHtml(item.resolved_date)}` : `${item.mistake_count} mistake${item.mistake_count === 1 ? "" : "s"}`}</small></div><h2>${escapeHtml(item.prompt || "Review this exercise")}</h2><div class="notebook-actions"><a href="practice.html?${escapeHtml(params.toString())}">${resolved ? "Practise again" : "Practise this"}</a>${resolved ? "" : `<button type="button" data-discard-mistake="${escapeHtml(item.exercise_id)}" data-topic="${escapeHtml(item.topic_id)}">Discard</button><span class="notebook-discard-status" data-discard-status aria-live="polite"></span>`}</div></article>`;
   }).join("")}</div>`;
+}
+
+export async function discardNotebookItemFromView({ button, discard } = {}) {
+  const status = button?.closest?.(".notebook-actions")?.querySelector?.("[data-discard-status]");
+  button.disabled = true;
+  button.textContent = "Discarding…";
+  if (status) status.textContent = "";
+  try {
+    await discard();
+    return true;
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Discard";
+    if (status) status.textContent = "Could not discard this mistake. Try again.";
+    return false;
+  }
 }
 
 export async function loadSummaryData({ registry = globalThis.window?.ListeningDeskPractice, store = dailyPracticeStore } = {}) {
@@ -156,9 +172,12 @@ async function mountNotebook(root, {
   try {
     const items = await store.loadNotebook({ grade: 5, status });
     root.innerHTML = notebookMarkup({ status, items });
-    root.querySelectorAll("[data-hide-mistake]").forEach(button => button.addEventListener("click", async () => {
-      button.disabled = true;
-      await store.hideNotebookItem({ grade: 5, topicId: button.dataset.topic, exerciseId: button.dataset.hideMistake });
+    root.querySelectorAll("[data-discard-mistake]").forEach(button => button.addEventListener("click", async () => {
+      const discarded = await discardNotebookItemFromView({
+        button,
+        discard: () => store.discardNotebookItem({ grade: 5, topicId: button.dataset.topic, exerciseId: button.dataset.discardMistake }),
+      });
+      if (!discarded) return;
       button.closest(".notebook-card")?.remove();
       if (!root.querySelector(".notebook-card")) root.innerHTML = notebookMarkup({ status, items: [] });
     }));

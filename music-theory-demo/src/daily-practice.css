@@ -167,6 +167,12 @@
 .notebook-overlay .notebook-card-head{font-weight:650}
 .notebook-overlay .notebook-card h2{font-weight:620}
 .notebook-overlay .notebook-actions a{font-weight:650}
+.notebook-overlay .notebook-actions{justify-content:space-between}
+.notebook-overlay .notebook-actions button{display:inline-flex;align-items:center;justify-content:center;padding:9px 16px;border:1px solid #9a2f5a;border-radius:999px;background:transparent;color:#631838;font:inherit;font-size:13px;font-weight:650;text-decoration:none;cursor:pointer}
+.notebook-overlay .notebook-actions button:hover,.notebook-overlay .notebook-actions button:focus-visible{background:#9a2f5a;color:#fff;outline:none}
+.notebook-overlay .notebook-actions button:disabled{opacity:.55;cursor:wait}
+.notebook-overlay .notebook-discard-status:empty{display:none}
+.notebook-overlay .notebook-discard-status:not(:empty){flex-basis:100%;color:#9a2f5a;font-size:12px}
 .daily-practice-overlay .daily-page-head h1{font-size:clamp(38px,4.8vw,52px)}
 .daily-practice-overlay .daily-page-head>p:last-child{margin-top:12px;font-size:15px;color:#74666b}
 .daily-practice-overlay .daily-question-list{gap:8px;margin-top:24px}

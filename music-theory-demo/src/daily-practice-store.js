@@ -49,10 +49,44 @@ export function createDailyPracticeStore({ client = null, progressStore = defaul
     return [...new Set((data ?? []).map(row => row.challenge_date).filter(Boolean))];
   }
 
+  async function reconcileChallengeFromAttempts(studentId, current, date) {
+    try {
+      const studentData = await progressStore.loadStudentData(studentId);
+      const challengeIds = new Set((current.items ?? []).map(item => String(item.exerciseId)));
+      const completed = new Set((current.completed_exercise_ids ?? []).map(String));
+      const createdAt = current.created_at ? Date.parse(current.created_at) : null;
+      for (const attempt of studentData.attempts ?? []) {
+        if (!(attempt.is_correct ?? attempt.isCorrect)) continue;
+        const exerciseId = String(attempt.exercise_id ?? attempt.exerciseId ?? "");
+        const attemptedAt = attempt.attempted_at ?? attempt.attemptedAt;
+        const attemptedTimestamp = attemptedAt ? Date.parse(attemptedAt) : NaN;
+        if (!challengeIds.has(exerciseId) || !Number.isFinite(attemptedTimestamp)) continue;
+        if (dailyDate(new Date(attemptedTimestamp)) !== date) continue;
+        if (Number.isFinite(createdAt) && attemptedTimestamp < createdAt) continue;
+        completed.add(exerciseId);
+      }
+      const completedExerciseIds = [...completed];
+      const isComplete = challengeIds.size > 0 && completedExerciseIds.length === challengeIds.size;
+      const changed = completedExerciseIds.length !== (current.completed_exercise_ids ?? []).length
+        || (isComplete && !current.completed_at);
+      if (!changed) return current;
+      const db = await getClient();
+      const { error } = await db.from("daily_challenges").update({
+        completed_exercise_ids: completedExerciseIds,
+        completed_at: isComplete ? current.completed_at ?? new Date().toISOString() : null,
+      }).eq("id", current.id).eq("student_id", studentId);
+      throwIfError(error, "Unable to repair today's challenge progress");
+      return challengeRow(studentId, current.grade, date);
+    } catch (error) {
+      console.error(error);
+      return current;
+    }
+  }
+
   async function getOrCreateChallenge({ grade = 5, date = dailyDate(), registry } = {}) {
     const studentId = await progressStore.initializeStudent();
     const existing = await challengeRow(studentId, grade, date);
-    if (existing) return existing;
+    if (existing) return reconcileChallengeFromAttempts(studentId, existing, date);
     const [studentData, notebook] = await Promise.all([progressStore.loadStudentData(studentId), loadNotebook({ grade })]);
     const items = selectDailyChallenge({
       exercises: flattenExerciseBank(registry),
@@ -71,7 +105,8 @@ export function createDailyPracticeStore({ client = null, progressStore = defaul
       completed_exercise_ids: [],
     });
     throwIfError(error, "Unable to create today's challenge");
-    return challengeRow(studentId, grade, date);
+    const created = await challengeRow(studentId, grade, date);
+    return reconcileChallengeFromAttempts(studentId, created, date);
   }
 
   async function recordDailyAnswer({ grade = 5, date = dailyDate(), exerciseId, isCorrect } = {}) {
@@ -124,17 +159,17 @@ export function createDailyPracticeStore({ client = null, progressStore = defaul
     return notebookRow(studentId, { grade, topicId, exerciseId });
   }
 
-  async function hideNotebookItem({ grade = 5, topicId, exerciseId } = {}) {
+  async function discardNotebookItem({ grade = 5, topicId, exerciseId } = {}) {
     const studentId = await progressStore.initializeStudent();
     const current = await notebookRow(studentId, { grade, topicId, exerciseId });
     if (!current) return null;
     const db = await getClient();
     const { error } = await db.from("mistake_notebook").update({ status: "hidden" }).eq("id", current.id).eq("student_id", studentId);
-    throwIfError(error, "Unable to hide the notebook item");
+    throwIfError(error, "Unable to discard the notebook item");
     return notebookRow(studentId, { grade, topicId, exerciseId });
   }
 
-  return { getOrCreateChallenge, loadCompletedChallengeDates, loadNotebook, recordDailyAnswer, recordNotebookAnswer, hideNotebookItem };
+  return { getOrCreateChallenge, loadCompletedChallengeDates, loadNotebook, recordDailyAnswer, recordNotebookAnswer, discardNotebookItem };
 }
 
 export const dailyPracticeStore = createDailyPracticeStore();

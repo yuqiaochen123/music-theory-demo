@@ -41,7 +41,7 @@ export function calculateDailyStreak({ completedDates = [], today = dailyDate() 
     streak += 1;
     cursor = previousCalendarDate(cursor);
   }
-  return Math.max(1, streak);
+  return 1 + streak;
 }
 
 export function flattenExerciseBank(registry = {}) {

@@ -74,10 +74,11 @@ export async function recordAnswer({
   exerciseType,
   prompt,
   challengeDate,
-}) {
+}, { store = progressStore, dailyStore = dailyPracticeStore } = {}) {
   try {
     displaySync(syncElement, 'Saving answer…');
-    await progressStore.recordExerciseAttempt({
+    const enhanced = await recordDailyPracticeEnhancements({ grade, topicId: sourceTopicId ?? topicId, exerciseId, exerciseType, prompt, answerGiven, correctAnswer, isCorrect, challengeDate }, { store: dailyStore, syncElement });
+    await store.recordExerciseAttempt({
       grade,
       topicId: sourceTopicId ?? topicId,
       lessonId,
@@ -88,14 +89,13 @@ export async function recordAnswer({
       score: Math.round((Number(correctCount) / Number(exerciseNumber)) * 100),
     });
     const completed = Number(exerciseNumber) >= Number(totalExercises);
-    const refreshed = await progressStore.saveProgress({
+    const refreshed = await store.saveProgress({
       grade,
       topicId,
       lessonId,
       status: completed ? 'completed' : 'in_progress',
       progressPercent: Math.round((Number(exerciseNumber) / Number(totalExercises)) * 100),
     });
-    const enhanced = await recordDailyPracticeEnhancements({ grade, topicId: sourceTopicId ?? topicId, exerciseId, exerciseType, prompt, answerGiven, correctAnswer, isCorrect, challengeDate }, { syncElement });
     if (enhanced) displaySync(syncElement, 'Answer and progress saved');
     return refreshed;
   } catch (error) {
@@ -106,20 +106,30 @@ export async function recordAnswer({
 }
 
 export async function recordDailyPracticeEnhancements(input, { store = dailyPracticeStore, syncElement } = {}) {
+  let saved = true;
+  if (input.challengeDate) {
+    try {
+      await store.recordDailyAnswer({
+        grade: input.grade,
+        date: input.challengeDate,
+        exerciseId: input.exerciseId,
+        isCorrect: input.isCorrect,
+      });
+    } catch (error) {
+      saved = false;
+      console.error(error);
+    }
+  }
   try {
     await store.recordNotebookAnswer(input);
-    if (input.challengeDate) await store.recordDailyAnswer({
-      grade: input.grade,
-      date: input.challengeDate,
-      exerciseId: input.exerciseId,
-      isCorrect: input.isCorrect,
-    });
-    return true;
   } catch (error) {
-    displaySync(syncElement, 'Answer saved. Review progress will sync later.', true);
+    saved = false;
     console.error(error);
-    return false;
   }
+  if (!saved) {
+    displaySync(syncElement, 'Answer saved. Review progress will sync later.', true);
+  }
+  return saved;
 }
 
 export function masteryExerciseAttemptId(exerciseId, attemptNumber, isFirstAttempt) {

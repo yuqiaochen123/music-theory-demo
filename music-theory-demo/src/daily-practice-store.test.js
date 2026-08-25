@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { createDailyPracticeStore } from "./daily-practice-store.js";
+import { calculateDailyStreak } from "./daily-practice.js";
 
 function memoryClient() {
   const tables = { daily_challenges: [], mistake_notebook: [] };
@@ -48,11 +49,12 @@ const registry = {
 
 function makeStore() {
   const client = memoryClient();
+  const attempts = [];
   const progressStore = {
     async initializeStudent() { return "student-1"; },
-    async loadStudentData() { return { studentId: "student-1", progress: [], attempts: [] }; },
+    async loadStudentData() { return { studentId: "student-1", progress: [], attempts: structuredClone(attempts) }; },
   };
-  return { client, store: createDailyPracticeStore({ client, progressStore }) };
+  return { attempts, client, store: createDailyPracticeStore({ client, progressStore }) };
 }
 
 describe("daily practice persistence", () => {
@@ -79,6 +81,19 @@ describe("daily practice persistence", () => {
     assert.equal(item.mistake_count, 2);
   });
 
+  it("discards a notebook item from every visible notebook status", async () => {
+    const { client, store } = makeStore();
+    const identity = { grade: 5, topicId: "rhythm", exerciseId: "r1", prompt: "How many?", correctAnswer: "3" };
+    await store.recordNotebookAnswer({ ...identity, date: "2026-08-20", isCorrect: false, answerGiven: "2" });
+
+    const discarded = await store.discardNotebookItem(identity);
+
+    assert.equal(discarded.status, "hidden");
+    assert.deepEqual(await store.loadNotebook({ grade: 5, status: "to_review" }), []);
+    assert.deepEqual(await store.loadNotebook({ grade: 5, status: "resolved" }), []);
+    assert.equal(client.tables.mistake_notebook[0].status, "hidden");
+  });
+
   it("records only the first challenge result while completion remains retryable", async () => {
     const { store } = makeStore();
     const created = await store.getOrCreateChallenge({ grade: 5, date: "2026-08-23", registry });
@@ -87,6 +102,40 @@ describe("daily practice persistence", () => {
     const challenge = await store.recordDailyAnswer({ grade: 5, date: "2026-08-23", exerciseId, isCorrect: true });
     assert.equal(challenge.first_attempt_results[exerciseId], false);
     assert.deepEqual(challenge.completed_exercise_ids, [exerciseId]);
+  });
+
+  it("completes all four exercises and advances the visible streak", async () => {
+    const { store } = makeStore();
+    const created = await store.getOrCreateChallenge({ grade: 5, date: "2026-08-23", registry });
+    let challenge = created;
+    for (const item of created.items) {
+      challenge = await store.recordDailyAnswer({ grade: 5, date: "2026-08-23", exerciseId: item.exerciseId, isCorrect: true });
+    }
+
+    const completedDates = await store.loadCompletedChallengeDates({ grade: 5 });
+
+    assert.equal(challenge.completed_exercise_ids.length, 4);
+    assert.ok(challenge.completed_at);
+    assert.deepEqual(completedDates, ["2026-08-23"]);
+    assert.equal(calculateDailyStreak({ completedDates, today: "2026-08-23" }), 2);
+  });
+
+  it("repairs a daily challenge from correct exercise attempts when navigation interrupted its direct update", async () => {
+    const { attempts, store } = makeStore();
+    const created = await store.getOrCreateChallenge({ grade: 5, date: "2026-08-23", registry });
+    attempts.push(
+      ...created.items.map((item, index) => ({
+        exercise_id: item.exerciseId,
+        is_correct: true,
+        attempted_at: `2026-08-23T12:0${index}:00.000Z`,
+      })),
+      { exercise_id: created.items[0].exerciseId, is_correct: true, attempted_at: "2026-08-22T12:00:00.000Z" },
+    );
+
+    const repaired = await store.getOrCreateChallenge({ grade: 5, date: "2026-08-23", registry });
+
+    assert.deepEqual(new Set(repaired.completed_exercise_ids), new Set(created.items.map(item => item.exerciseId)));
+    assert.ok(repaired.completed_at, "all four persisted correct attempts should complete the challenge");
   });
 
   it("loads only the current learner's completed challenge dates for the selected grade", async () => {

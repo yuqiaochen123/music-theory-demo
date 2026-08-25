@@ -20,18 +20,22 @@ describe("daily practice domain", () => {
     assert.equal(calculateDailyStreak({ completedDates: [], today: "2026-08-25" }), 1);
   });
 
+  it("increments the displayed streak after the first completed daily challenge", () => {
+    assert.equal(calculateDailyStreak({ completedDates: ["2026-08-25"], today: "2026-08-25" }), 2);
+  });
+
   it("counts unique consecutive completed local dates", () => {
     assert.equal(calculateDailyStreak({
       completedDates: ["2026-08-23", "2026-08-24", "2026-08-25", "2026-08-25"],
       today: "2026-08-25",
-    }), 3);
+    }), 4);
   });
 
   it("keeps yesterday's streak alive during an unfinished current day", () => {
     assert.equal(calculateDailyStreak({
       completedDates: ["2026-08-22", "2026-08-23", "2026-08-24"],
       today: "2026-08-25",
-    }), 3);
+    }), 4);
   });
 
   it("resets to one after one entire missed day", () => {
@@ -45,14 +49,14 @@ describe("daily practice domain", () => {
     assert.equal(calculateDailyStreak({
       completedDates: ["2025-12-31", "2026-01-01", "2026-01-02"],
       today: "2026-01-02",
-    }), 3);
+    }), 4);
   });
 
   it("counts calendar days across the spring daylight-saving transition", () => {
     assert.equal(calculateDailyStreak({
       completedDates: ["2026-03-07", "2026-03-08", "2026-03-09"],
       today: "2026-03-09",
-    }), 3);
+    }), 4);
   });
 
   it("flattens a validated registry with stable topic metadata", () => {

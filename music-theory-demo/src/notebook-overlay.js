@@ -1,5 +1,5 @@
 import { dailyPracticeStore } from "./daily-practice-store.js";
-import { notebookMarkup } from "./daily-practice-ui.js";
+import { discardNotebookItemFromView, notebookMarkup } from "./daily-practice-ui.js";
 
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -80,10 +80,13 @@ export function openNotebookOverlay({ grade = pageGrade() } = {}) {
       content.querySelector('.notebook-tabs a[aria-current="page"]')?.focus();
       return;
     }
-    const hideButton = event.target.closest("[data-hide-mistake]");
-    if (!hideButton) return;
-    hideButton.disabled = true;
-    await dailyPracticeStore.hideNotebookItem({ grade, topicId: hideButton.dataset.topic, exerciseId: hideButton.dataset.hideMistake });
+    const discardButton = event.target.closest("[data-discard-mistake]");
+    if (!discardButton) return;
+    const discarded = await discardNotebookItemFromView({
+      button: discardButton,
+      discard: () => dailyPracticeStore.discardNotebookItem({ grade, topicId: discardButton.dataset.topic, exerciseId: discardButton.dataset.discardMistake }),
+    });
+    if (!discarded) return;
     await renderNotebook(content, { grade, status });
   });
 

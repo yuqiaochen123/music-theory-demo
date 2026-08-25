@@ -36,6 +36,13 @@ describe("clef transposition lesson editor", () => {
     assert.match(topicPage, /aria-live="polite"/);
   });
 
+  it("styles the open transposition menus with the lesson palette", () => {
+    assert.match(topicPage, /@supports\s*\(appearance:\s*base-select\)/);
+    assert.match(topicPage, /\.clef-editor select::picker\(select\)\s*\{[^}]*appearance:\s*base-select[^}]*background:\s*#fffaf6[^}]*border-color:\s*#d5b8c3/s);
+    assert.match(topicPage, /\.clef-editor option:checked\s*\{[^}]*background:\s*#9a2f5a[^}]*color:\s*#fff/s);
+    assert.match(topicPage, /\.clef-editor option:hover[^}]*background:\s*#f6e5eb/s);
+  });
+
   it("uses compact notation icons instead of visible note-value and accidental names", () => {
     assert.match(topicPage, /class="editor-choice editor-choice--notation"[^>]*aria-label="Crotchet"/);
     assert.match(topicPage, /class="editor-choice editor-choice--notation"[^>]*aria-label="Quaver"/);

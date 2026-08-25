@@ -264,6 +264,41 @@ describe("daily practice UI", () => {
     assert.match(html, /practice\.html\?topic=scales&amp;exercise=s1&amp;review=1/);
   });
 
+  it("offers a working discard action instead of the old Hide control", () => {
+    const html = notebookMarkup({ status: "to_review", items: [{
+      topic_id: "scales", exercise_id: "s1", prompt: "Name the scale", mistake_count: 2,
+    }] });
+    assert.match(html, /data-discard-mistake="s1"/);
+    assert.match(html, />Discard<\/button>/);
+    assert.match(html, /data-discard-status[^>]*aria-live="polite"/);
+    assert.match(html, />Practise this<\/a>/);
+    assert.doesNotMatch(html, /Practise this →/);
+    assert.doesNotMatch(html, />Hide<\/button>|data-hide-mistake/);
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.notebook-overlay \.notebook-actions\{[^}]*justify-content:space-between/);
+    assert.match(css, /\.notebook-overlay \.notebook-actions button\{[^}]*border:1px solid #9a2f5a[^}]*border-radius:999px/);
+  });
+
+  it("restores Discard and explains the failure when persistence fails", async () => {
+    const status = { textContent: "" };
+    const actions = { querySelector: selector => selector === "[data-discard-status]" ? status : null };
+    const button = {
+      disabled: false,
+      textContent: "Discard",
+      closest: selector => selector === ".notebook-actions" ? actions : null,
+    };
+
+    const removed = await dailyUi.discardNotebookItemFromView({
+      button,
+      discard: async () => { throw new Error("offline"); },
+    });
+
+    assert.equal(removed, false);
+    assert.equal(button.disabled, false);
+    assert.equal(button.textContent, "Discard");
+    assert.equal(status.textContent, "Could not discard this mistake. Try again.");
+  });
+
   it("wires the new pages and Grade 5 summary mount", () => {
     const grade = readFileSync(new URL("../grade-5.html", import.meta.url), "utf8");
     const daily = readFileSync(new URL("../daily-challenge.html", import.meta.url), "utf8");
