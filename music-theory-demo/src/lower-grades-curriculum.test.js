@@ -40,7 +40,8 @@ for(const grade of [3,2]){
 
   test(`Grade ${grade} has its own accessible dashboard`,()=>{
     const html=read(`grade-${grade}.html`);
-    assert.match(html,new RegExp(`Grade: ${grade} · Choose a topic`));
+    assert.match(html,new RegExp(`Grade: ${grade}<\\/strong>`));
+    assert.doesNotMatch(html,/Choose a topic/);
     assert.doesNotMatch(html,/Coming soon/i);
     assert.equal((html.match(new RegExp(`topic\\.html\\?grade=${grade}&amp;topic=`, 'g'))||[]).length,expected[grade].length);
     assert.match(read('index.html'),new RegExp(`href="grade-${grade}\\.html"`));

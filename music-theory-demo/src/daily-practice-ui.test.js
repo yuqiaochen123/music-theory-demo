@@ -253,14 +253,14 @@ describe("daily practice UI", () => {
     assert.match(html, /daily-question--complete/);
   });
 
-  it("keeps resolved notebook mistakes visible with an authentic review route", () => {
+  it("keeps notebook cards focused on the exercise and review action", () => {
     const html = notebookMarkup({ status: "resolved", items: [{
       topic_id: "scales", exercise_id: "s1", prompt: "Name the scale", latest_wrong_answer: "D major",
       correct_answer: "G major", mistake_count: 2, resolved_date: "2026-08-23", status: "resolved",
     }] });
     assert.match(html, /Resolved/);
-    assert.match(html, /D major/);
-    assert.match(html, /G major/);
+    assert.match(html, /Name the scale/);
+    assert.doesNotMatch(html, /Your last answer|Correct answer|D major|G major|<dl>/);
     assert.match(html, /practice\.html\?topic=scales&amp;exercise=s1&amp;review=1/);
   });
 
@@ -273,7 +273,7 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260825-glass8/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260826-notebook-tabs1/);
     assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-overlay2/);
     assert.doesNotMatch(grade, /<script[^>]+src="src\/daily-practice-ui\.js/);
     assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
@@ -323,7 +323,7 @@ describe("daily practice UI", () => {
 
   it("mounts the animated mistake notebook on Grade 4", () => {
     const grade = readFileSync(new URL("../grade-4.html", import.meta.url), "utf8");
-    assert.match(grade, /src\/daily-practice\.css\?v=20260825-compact5/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260826-notebook-tabs1/);
     assert.match(grade, /data-notebook-shortcut/);
     assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-streak2/);
     assert.match(grade, /src\/notebook-shortcut\.js\?v=20260825-book2/);

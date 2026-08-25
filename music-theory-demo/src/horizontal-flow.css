@@ -77,3 +77,9 @@ body[data-topic='clef-transposition'] .lesson-slide.clef-editor{overflow-x:hidde
 .lesson-body .lesson-slide.hero .progress-sync{color:#9a2f5a!important}
 .lesson-body .lesson-dots button{background:#8f888a!important}
 .lesson-body .lesson-dots button[aria-current="page"]{background:var(--brand-accent,#D2A36B)!important}
+body[data-topic="scale-degrees"] .scale-direction .notation{position:relative}
+.scale-degree-hover-note{cursor:help;outline:none;pointer-events:all!important}
+.scale-degree-hover-note:focus{filter:drop-shadow(0 0 3px rgba(154,47,90,.48))}
+.scale-degree-tooltip{position:absolute;z-index:6;padding:7px 11px;border:1px solid rgba(99,24,56,.18);border-radius:999px;background:#fff8f5;color:var(--brand-primary,#9a2f5a);font-size:13px;font-weight:800;line-height:1.15;white-space:nowrap;pointer-events:none;transform:translate(-50%,18px);box-shadow:0 8px 22px rgba(42,11,28,.15)}
+.scale-degree-tooltip::before{content:"";position:absolute;left:50%;bottom:100%;width:1px;height:14px;background:var(--brand-primary,#9a2f5a);transform:translateX(-50%)}
+.scale-degree-tooltip[hidden]{display:none}

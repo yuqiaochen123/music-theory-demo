@@ -1,5 +1,8 @@
 import { getCurrentUser } from './auth.js';
 import { setTutorAvailability } from './tutor-availability.js';
+import { applyPreferences, loadPreferences } from './settings-preferences.js';
+
+applyPreferences(loadPreferences());
 
 export async function installAccountLinks() {
   const links = document.querySelectorAll('[data-account-link]');

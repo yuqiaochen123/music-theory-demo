@@ -53,8 +53,20 @@ describe("mistake notebook overlay", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.notebook-overlay__panel\{[^}]*overflow:hidden/);
     assert.match(css, /\.notebook-overlay__content\{[^}]*min-width:0[^}]*flex:1[^}]*overflow-y:auto/);
+    assert.match(css, /\.notebook-tabs\{[^}]*height:auto[^}]*flex-wrap:wrap/);
+    assert.match(css, /\.notebook-tabs a\{[^}]*display:inline-flex[^}]*height:auto[^}]*align-items:center/);
     assert.match(css, /\.notebook-overlay \.notebook-card[^}]*overflow-wrap:anywhere/);
     assert.match(css, /\.notebook-overlay \.notebook-tabs a\[aria-current="page"\]\{[^}]*background:#a62c5d[^}]*color:#fff/);
     assert.match(css, /@media\(max-width:620px\)\{\.notebook-overlay\{[^}]*\}\.notebook-overlay__panel/);
+  });
+
+  it("uses a restrained type hierarchy inside the notebook", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+    assert.match(css, /\.notebook-overlay__head \.eyebrow\{[^}]*font-weight:650/);
+    assert.match(css, /\.notebook-overlay__head h2\{[^}]*font-weight:620/);
+    assert.match(css, /\.notebook-overlay \.notebook-tabs a\{[^}]*font-weight:650/);
+    assert.match(css, /\.notebook-overlay \.notebook-card-head\{[^}]*font-weight:650/);
+    assert.match(css, /\.notebook-overlay \.notebook-card h2\{[^}]*font-weight:620/);
+    assert.match(css, /\.notebook-overlay \.notebook-actions a\{[^}]*font-weight:650/);
   });
 });

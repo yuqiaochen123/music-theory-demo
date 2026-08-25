@@ -4,6 +4,16 @@ Run the local server yourself and open the preview in the browser available to t
 
 Before making substantial visual changes, use the Product Design plugin's `get-context` skill when the visual source is unclear or no longer matches the current goal. When the user gives durable prototype-specific design feedback, preferences, or decisions, record them in `AGENTS.md`.
 
+## Proportional verification and fast iteration
+
+- Scale the workflow to the risk of the requested change. Do not run broad checks when a narrower check proves the result.
+- For tiny visual edits such as a color, spacing, radius, font-size, or one CSS rule, make the bounded edit and run only the most relevant targeted check.
+- For small interaction or component behavior changes, run the relevant targeted tests and at most one focused browser verification.
+- Reserve the full test suite and production build for structural changes, shared behavior, release preparation, or changes whose effects cannot be proven narrowly.
+- Reuse the existing local server and browser session when healthy. Avoid redundant reloads, duplicate browser tabs, repeated screenshots, and rebuilding unchanged pages.
+- Keep progress updates concise. Combine closely related corrections into one pass and avoid repeating design discussion when the user's intent is already precise.
+- These efficiency rules do not override required safety checks, explicit user requests, or verification needed to support a completion claim.
+
 ## Listening Desk design and notation standards
 
 - Use the pinned local VexFlow 5 bundle for all staff notation; do not hand-position clefs, key signatures, accidentals, or noteheads.

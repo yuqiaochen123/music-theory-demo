@@ -9,6 +9,41 @@ vm.createContext(context);
 vm.runInContext(source,context);
 
 describe("new topic notation renderers",()=>{
+  it("shows only the hovered scale degree name and clears it on leave",()=>{
+    const notation=context.window.ListeningDeskNotation;
+    class FakeTarget extends EventTarget {
+      constructor(){super();this.attributes=new Map();this.classList={add:()=>{}};this.ownerSVGElement={getBoundingClientRect:()=>({left:0,top:0,width:100,height:100}),viewBox:{baseVal:{width:100,height:100}}};}
+      setAttribute(name,value){this.attributes.set(name,value);}
+      getBoundingClientRect(){return {left:0,top:0,width:12,height:12};}
+    }
+    const tooltip={hidden:true,textContent:"",style:{},setAttribute(){},remove(){}};
+    const frame={
+      ownerDocument:{createElement:()=>tooltip},
+      querySelectorAll:()=>[],
+      append(){},
+      getBoundingClientRect(){return {left:0,top:0};},
+    };
+    const firstTarget=new FakeTarget();
+    const secondTarget=new FakeTarget();
+    const notes=[
+      {getSVGElement:()=>firstTarget,getAbsoluteX:()=>30,getYs:()=>[40]},
+      {getSVGElement:()=>secondTarget,getAbsoluteX:()=>70,getYs:()=>[45]},
+    ];
+
+    notation.attachScaleDegreeHoverLabels(frame,notes,["Tonic","Supertonic"]);
+    firstTarget.dispatchEvent(new Event("mouseenter"));
+    assert.equal(tooltip.hidden,false);
+    assert.equal(tooltip.textContent,"Tonic");
+    assert.equal(tooltip.style.left,"30px");
+    assert.equal(tooltip.style.top,"40px");
+
+    secondTarget.dispatchEvent(new Event("mouseenter"));
+    assert.equal(tooltip.textContent,"Supertonic");
+
+    secondTarget.dispatchEvent(new Event("mouseleave"));
+    assert.equal(tooltip.hidden,true);
+  });
+
   it("exports a dedicated key-signature renderer",()=>{
     const notation=context.window.ListeningDeskNotation;
     assert.equal(typeof notation.renderKeySignature,"function");
@@ -232,13 +267,4 @@ describe("new topic notation renderers",()=>{
     assert.doesNotMatch(scaleSource,/new VF\.Annotation/);
   });
 
-  it("anchors scale-degree labels to engraved notes with enough vertical room",()=>{
-    const scaleSource=source.slice(source.indexOf("function renderScale"),source.indexOf("function render(element"));
-    assert.match(scaleSource,/notes\[index\]\.getAbsoluteX\(\)/);
-    assert.match(scaleSource,/specification\.degreeLabels/);
-    assert.match(scaleSource,/singleDirection \? 170 : 320/);
-    assert.match(scaleSource,/context\.fillText\(label/);
-    assert.match(scaleSource,/const leftInset = specification\.degreeLabels \? 28 : 18/);
-    assert.match(scaleSource,/width - leftInset - 40/);
-  });
 });

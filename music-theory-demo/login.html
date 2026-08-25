@@ -9,7 +9,7 @@
   <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css?v=20260801-auth9"><link rel="stylesheet" href="src/redesign.css?v=20260802-red4"><link rel="stylesheet" href="src/palette.css?v=20260803-palette1"><link rel="stylesheet" href="src/quaver-guide.css?v=20260825-space1">
   <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
-  <link rel="stylesheet" href="src/account-page.css?v=20260825-account7">
+  <link rel="stylesheet" href="src/account-page.css?v=20260825-account10">
 </head>
 <body class="account-page">
   <div class="page-transition-curtain" aria-hidden="true"></div>
@@ -69,12 +69,25 @@
       <div class="settings-dialog-head"><div><p class="eyebrow">Your preferences</p><h2 id="settings-heading">Settings</h2></div><button id="close-settings" class="settings-close" type="button" aria-label="Close settings">×</button></div>
       <p class="settings-intro">Choose how Listening Desk sounds and moves. Changes save automatically on this device.</p>
       <form id="settings-form">
-        <label class="setting-row"><span><strong>Lesson sound</strong><small>Play notation, examples, and feedback sounds.</small></span><input type="checkbox" name="sound"><i aria-hidden="true"></i></label>
-        <label class="setting-row"><span><strong>Interface motion</strong><small>Use page transitions and decorative movement.</small></span><input type="checkbox" name="motion"><i aria-hidden="true"></i></label>
-        <label class="setting-row"><span><strong>Progress animations</strong><small>Animate progress rings as they reach your score.</small></span><input type="checkbox" name="progressAnimation"><i aria-hidden="true"></i></label>
+        <section class="settings-section" aria-labelledby="sound-settings-heading">
+          <h3 class="settings-section-title" id="sound-settings-heading">Sound</h3>
+          <div class="settings-group" role="group" aria-labelledby="sound-settings-heading">
+          <label class="settings-control settings-volume-row"><span><strong>Playback volume</strong><small>Set the level for notes, examples, and feedback.</small></span><span class="settings-volume-control"><output id="volume-value" for="volume">70%</output><input name="volume" type="range" min="0" max="100" step="5" value="70"></span></label>
+          <div class="settings-control settings-instrument-row"><span><strong>Instrument sound</strong><small>Choose the voice used for lesson playback.</small></span><details class="settings-instrument-menu"><summary><span id="instrument-label">Felt piano</span></summary><div class="settings-instrument-options" role="radiogroup" aria-label="Instrument sound"><label class="settings-instrument-option"><input type="radio" name="instrument" value="felt-piano"><span>Felt piano</span></label><label class="settings-instrument-option"><input type="radio" name="instrument" value="bright-piano"><span>Bright piano</span></label><label class="settings-instrument-option"><input type="radio" name="instrument" value="organ"><span>Organ</span></label><label class="settings-instrument-option"><input type="radio" name="instrument" value="reference-tone"><span>Reference tone</span></label></div></details></div>
+          </div>
+        </section>
+        <section class="settings-section" aria-labelledby="accessibility-settings-heading">
+          <h3 class="settings-section-title" id="accessibility-settings-heading">Accessibility</h3>
+          <div class="settings-group" role="group" aria-labelledby="accessibility-settings-heading">
+          <label class="setting-row"><span><strong>Reduce motion</strong><small>Remove movement and animated transitions.</small></span><input type="checkbox" name="reduceMotion"><i aria-hidden="true"></i></label>
+          <label class="setting-row"><span><strong>Larger text</strong><small>Increase the reading size across the website.</small></span><input type="checkbox" name="largerText"><i aria-hidden="true"></i></label>
+          <label class="setting-row"><span><strong>Higher contrast</strong><small>Strengthen text and control contrast.</small></span><input type="checkbox" name="highContrast"><i aria-hidden="true"></i></label>
+          <label class="setting-row"><span><strong>Decorative animations</strong><small>Show the moving musical artwork.</small></span><input type="checkbox" name="decorativeAnimations"><i aria-hidden="true"></i></label>
+          </div>
+        </section>
       </form>
       <div class="settings-dialog-footer"><p id="settings-status" aria-live="polite">Changes save automatically.</p><button id="reset-settings" type="button">Restore defaults</button></div>
     </div>
   </dialog>
-  <script type="module" src="src/login.js?v=20260801-auth9"></script><script type="module" src="src/settings.js?v=20260825-settings2"></script><script type="module" src="src/motion.js?v=20260825-parity1"></script><script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
+  <script type="module" src="src/login.js?v=20260801-auth9"></script><script type="module" src="src/settings.js?v=20260825-settings4"></script><script type="module" src="src/motion.js?v=20260825-parity1"></script><script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>
 </body></html>

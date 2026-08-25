@@ -224,10 +224,36 @@
 .settings-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .settings-dialog-head .eyebrow { margin: 0 0 7px; color: #b22160; }
 .settings-dialog-head h2 { margin: 0; color: #391020; font-size: clamp(34px, 5vw, 48px); letter-spacing: -.045em; }
-.settings-close { width: 42px; height: 42px; border: 1px solid #d7bac7; border-radius: 50%; background: #fffaf6; color: #70123d; font: 400 30px/1 Arial, sans-serif; cursor: pointer; }
-.settings-close:hover { border-color: #b22160; background: #fae6ee; }
+.settings-close { display: grid; width: 54px; height: 54px; padding: 0; place-items: center; border: 0; background: transparent; color: #74103e; font: 300 52px/1 Arial, sans-serif; cursor: pointer; transition: transform .18s ease, opacity .18s ease; }
+.settings-close:hover { transform: rotate(7deg) scale(1.08); opacity: .82; }
+.settings-close:focus-visible { outline: 2px solid #74103e; outline-offset: -5px; border-radius: 50%; }
 .account-settings-dialog .settings-intro { max-width: 475px; margin: 14px 0 24px; color: #74666b; font-size: 15px; line-height: 1.5; }
-.account-settings-dialog form { overflow: hidden; border: 1px solid #dfccd3; border-radius: 16px; background: rgba(255, 250, 246, .78); }
+.account-settings-dialog form { display: grid; gap: 18px; }
+.account-settings-dialog .settings-section { min-width: 0; }
+.account-settings-dialog .settings-section-title { margin: 0 0 12px; color: #8f174c; font-size: 12px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.account-settings-dialog .settings-group { min-width: 0; margin: 0; padding: 0; overflow: visible; border: 1px solid #dfccd3; border-radius: 16px; background: rgba(255, 250, 246, .78); }
+.account-settings-dialog .settings-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center; min-height: 94px; padding: 18px 22px; }
+.account-settings-dialog .settings-control+.settings-control { border-top: 1px solid #dfccd3; }
+.account-settings-dialog .settings-control > span:first-child { display: grid; gap: 6px; }
+.account-settings-dialog .settings-control strong { color: #391020; font-size: 17px; }
+.account-settings-dialog .settings-control small { color: #74666b; font-size: 13px; line-height: 1.4; }
+.account-settings-dialog .settings-volume-control { display: grid; min-width: 155px; gap: 6px; justify-items: end; }
+.account-settings-dialog .settings-volume-control output { color: #70123d; font-size: 13px; font-weight: 850; }
+.account-settings-dialog .settings-volume-row input[type="range"] { width: 155px; accent-color: #b22160; cursor: pointer; }
+.account-settings-dialog .settings-instrument-menu { position: relative; width: min(190px, 38vw); color: #391020; font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Arial, sans-serif; }
+.account-settings-dialog .settings-instrument-menu[open] { z-index: 6; }
+.account-settings-dialog .settings-instrument-menu summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 13px; border: 1px solid #d7bac7; border-radius: 10px; background: #fffaf6; color: #391020; font-size: 14px; font-weight: 750; cursor: pointer; list-style: none; }
+.account-settings-dialog .settings-instrument-menu summary::-webkit-details-marker { display: none; }
+.account-settings-dialog .settings-instrument-menu summary::after { content: ''; width: 8px; height: 8px; flex: 0 0 auto; border-right: 2px solid #74103e; border-bottom: 2px solid #74103e; transform: translateY(-2px) rotate(45deg); transition: transform .16s ease; }
+.account-settings-dialog .settings-instrument-menu[open] summary::after { transform: translateY(2px) rotate(225deg); }
+.account-settings-dialog .settings-instrument-menu summary:focus-visible { outline: 3px solid #d2a36b; outline-offset: 2px; }
+.account-settings-dialog .settings-instrument-options { position: absolute; z-index: 4; top: calc(100% + 6px); right: 0; width: 100%; overflow: hidden; padding: 5px; border: 1px solid #d7bac7; border-radius: 12px; background: #fffaf6; box-shadow: 0 14px 30px rgba(57, 16, 32, .18); }
+.account-settings-dialog .settings-instrument-option { position: relative; display: flex; min-height: 40px; align-items: center; justify-content: space-between; padding: 9px 11px; border-radius: 8px; color: #391020; font-family: 'Avenir Next', Avenir, 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 650; cursor: pointer; }
+.account-settings-dialog .settings-instrument-option:hover { background: #f8f2eb; color: #70123d; }
+.account-settings-dialog .settings-instrument-option:has(input:checked) { background: #fae6ee; color: #70123d; }
+.account-settings-dialog .settings-instrument-option:has(input:checked)::after { content: '✓'; color: #b22160; font-size: 14px; font-weight: 900; }
+.account-settings-dialog .settings-instrument-option:has(input:focus-visible) { outline: 3px solid #d2a36b; outline-offset: -2px; }
+.account-settings-dialog .settings-instrument-option input { position: absolute; opacity: 0; pointer-events: none; }
 .account-settings-dialog .setting-row { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; min-height: 102px; padding: 20px 22px; cursor: pointer; }
 .account-settings-dialog .setting-row+.setting-row { border-top: 1px solid #dfccd3; }
 .account-settings-dialog .setting-row span { display: grid; gap: 6px; }
@@ -243,8 +269,17 @@
 .settings-dialog-footer p { margin: 0; color: #74666b; font-size: 13px; }
 .settings-dialog-footer button { border: 1px solid #b22160; border-radius: 999px; background: #fffaf6; color: #70123d; padding: 10px 14px; font: 800 13px/1 Arial, sans-serif; cursor: pointer; }
 .settings-dialog-footer button:hover { background: #fae6ee; }
-html[data-motion="off"] *, html[data-motion="off"] *::before, html[data-motion="off"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-html[data-progress-animation="off"] .category-progress { transition: none !important; }
+html[data-larger-text="on"] { font-size: 112.5%; }
+html[data-high-contrast="on"] .account-page { color: #22000f; }
+html[data-high-contrast="on"] .account-page .auth-card,
+html[data-high-contrast="on"] .account-settings-dialog { background: #fffaf6; }
+html[data-high-contrast="on"] .account-page .auth-form input,
+html[data-high-contrast="on"] .account-settings-dialog .settings-group,
+html[data-high-contrast="on"] .account-settings-dialog .settings-instrument-menu summary,
+html[data-high-contrast="on"] .account-settings-dialog .settings-instrument-options { border-color: #74103e; }
+html[data-decorative-animations="off"] .music-pattern-charm,
+html[data-decorative-animations="off"] .quaver-guide { display: none !important; }
+html[data-reduce-motion="on"] *, html[data-reduce-motion="on"] *::before, html[data-reduce-motion="on"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 
 .account-page .auth-primary {
   background: #b22160;
@@ -298,6 +333,11 @@ html[data-progress-animation="off"] .category-progress { transition: none !impor
   .account-page .auth-main { padding: 0; }
   .account-page .account-settings-trigger { top: 16px; right: 18px; }
   .account-settings-dialog .settings-glass { padding: 22px 18px; }
+  .account-settings-dialog .settings-control { grid-template-columns: 1fr; gap: 12px; padding: 18px 16px; }
+  .account-settings-dialog .settings-volume-control { width: 100%; min-width: 0; justify-items: stretch; }
+  .account-settings-dialog .settings-volume-control output { text-align: right; }
+  .account-settings-dialog .settings-volume-row input[type="range"],
+  .account-settings-dialog .settings-instrument-menu { width: 100%; }
   .account-settings-dialog .setting-row { min-height: 96px; padding: 18px 16px; }
   .settings-dialog-footer { align-items: flex-start; flex-direction: column; }
 }

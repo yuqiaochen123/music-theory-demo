@@ -81,3 +81,42 @@ test('buffered rhythm playback uses one audio clock and sustains each note to it
   assert.ok(gainEvents.some(event => event[0] === 'set' && event[1] > 0 && event[2] === 10.705));
   assert.equal(player.context, context);
 });
+
+test('applies the saved playback volume to sampled piano audio', async () => {
+  const started = [];
+  class FakeAudio {
+    constructor() { this.volume = 1; }
+    play() { started.push(this); return Promise.resolve(); }
+    pause() {}
+  }
+  const timers = [];
+  const player = createPianoPlayer({
+    AudioElement: FakeAudio,
+    AudioContextFactory: null,
+    getPreferences: () => ({ volume: 25, instrument: 'felt-piano' }),
+    setTimer(callback) { timers.push(callback); return timers.length; },
+  });
+  await player.play([60]);
+  timers.shift()();
+  assert.equal(started[0].volume, 0.145);
+});
+
+test('uses a synthesized oscillator voice for the organ instrument', async () => {
+  const oscillators = [];
+  const gains = [];
+  const context = {
+    currentTime: 2,
+    state: 'running',
+    destination: {},
+    createOscillator() { const oscillator = { frequency: { value: 0 }, connect() { return this; }, start(time) { this.startedAt = time; }, stop(time) { this.stoppedAt = time; } }; oscillators.push(oscillator); return oscillator; },
+    createGain() { const gain = { gain: { setValueAtTime(value) { gains.push(value); }, linearRampToValueAtTime(value) { gains.push(value); } }, connect() { return this; } }; return gain; },
+  };
+  const player = createPianoPlayer({
+    AudioContextFactory: class { constructor() { return context; } },
+    getPreferences: () => ({ volume: 50, instrument: 'organ' }),
+  });
+  await player.play([69], { duration: 0.5 });
+  assert.equal(oscillators.length, 1);
+  assert.equal(oscillators[0].frequency.value, 440);
+  assert.ok(gains.some(value => Math.abs(value - 0.29) < 0.000001));
+});

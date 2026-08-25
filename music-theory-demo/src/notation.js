@@ -270,6 +270,54 @@
     voice.draw(context, stave);
   }
 
+  function attachScaleDegreeHoverLabels(element, notes, labels) {
+    element.querySelectorAll(".scale-degree-tooltip").forEach((tooltip) => tooltip.remove());
+    if (!Array.isArray(labels) || labels.length !== notes.length) return;
+
+    const tooltip = element.ownerDocument.createElement("div");
+    tooltip.className = "scale-degree-tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    tooltip.hidden = true;
+    element.append(tooltip);
+    let activeTarget = null;
+
+    function show(noteElement, note, label) {
+      const frame = element.getBoundingClientRect();
+      const svg = noteElement.ownerSVGElement;
+      const svgBox = svg?.getBoundingClientRect();
+      const viewBox = svg?.viewBox?.baseVal;
+      const scaleX = svgBox && viewBox?.width ? svgBox.width / viewBox.width : 1;
+      const scaleY = svgBox && viewBox?.height ? svgBox.height / viewBox.height : 1;
+      const engravedX = note.getAbsoluteX?.();
+      const engravedY = note.getYs?.()?.[0];
+      activeTarget = noteElement;
+      tooltip.textContent = label;
+      tooltip.hidden = false;
+      tooltip.style.left = `${svgBox && Number.isFinite(engravedX) ? svgBox.left - frame.left + engravedX * scaleX : 0}px`;
+      tooltip.style.top = `${svgBox && Number.isFinite(engravedY) ? svgBox.top - frame.top + engravedY * scaleY : 0}px`;
+    }
+
+    function hide(noteElement) {
+      if (activeTarget !== noteElement) return;
+      activeTarget = null;
+      tooltip.hidden = true;
+    }
+
+    notes.forEach((note, index) => {
+      const noteElement = note.getSVGElement?.();
+      if (!noteElement) return;
+      const label = labels[index];
+      noteElement.classList.add("scale-degree-hover-note");
+      noteElement.setAttribute("tabindex", "0");
+      noteElement.setAttribute("role", "img");
+      noteElement.setAttribute("aria-label", label);
+      noteElement.addEventListener("mouseenter", () => show(noteElement, note, label));
+      noteElement.addEventListener("mouseleave", () => hide(noteElement));
+      noteElement.addEventListener("focus", () => show(noteElement, note, label));
+      noteElement.addEventListener("blur", () => hide(noteElement));
+    });
+  }
+
   function renderScale(element, specification, options = {}) {
     const requestedWidth = options.width || 820;
     const responsiveScaleWidth = responsiveWidth(element, requestedWidth);
@@ -308,16 +356,7 @@
       });
       VF.Formatter.SimpleFormat(notes, Math.max(22, (stave.getWidth() - 110) / Math.max(1, notes.length - 1)));
       notes.forEach(note => note.setStave(stave).setContext(context).draw());
-      if (labels?.length === notes.length) {
-        context.save();
-        context.setFont("Arial, sans-serif", 11, 700);
-        context.setFillStyle("#344567");
-        labels.forEach((label, index) => {
-          const labelWidth = context.measureText(label).width;
-          context.fillText(label, notes[index].getAbsoluteX() - labelWidth / 2, 148);
-        });
-        context.restore();
-      }
+      attachScaleDegreeHoverLabels(element, notes, labels);
     }
     drawScalePath(specification.notes, ascendingStave, specification.degreeLabels);
     if (descendingStave) drawScalePath(descendingNotes, descendingStave);
@@ -453,5 +492,5 @@
     }
   }
 
-  window.ListeningDeskNotation = { accidentalFor, accidentalForKey, responsiveWidth, scaleEngravingWidth, render, renderInterval, renderCadence, renderTriad, renderRhythm, renderOrnament, renderScale, renderKeySignature, renderMelody };
+  window.ListeningDeskNotation = { accidentalFor, accidentalForKey, responsiveWidth, scaleEngravingWidth, attachScaleDegreeHoverLabels, render, renderInterval, renderCadence, renderTriad, renderRhythm, renderOrnament, renderScale, renderKeySignature, renderMelody };
 })();

@@ -21,7 +21,8 @@ describe("learning journey pages", () => {
 
     assert.match(chooser, /<nav><a class="active" href="index\.html">Grades<\/a><a href="login\.html/);
     assert.doesNotMatch(chooser, /<nav>[\s\S]*href="grade-5\.html">Grade 5<\/a>/);
-    assert.match(gradeFive, /<strong>Grade: 5 · Choose a topic<\/strong>/);
+    assert.match(gradeFive, /<strong>Grade: 5<\/strong>/);
+    assert.doesNotMatch(gradeFive, /Choose a topic/);
     assert.match(practice, /<nav><a href="grade-5\.html">Grade: 5<\/a>/);
   });
 

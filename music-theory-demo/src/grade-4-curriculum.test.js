@@ -9,7 +9,8 @@ const loadRegistry=(file,key,preload=[])=>{const window={};const context={window
 
 test('Grade 4 has its own complete dashboard and route',()=>{
   const html=read('grade-4.html');
-  assert.match(html,/Grade: 4 · Choose a topic/);
+  assert.match(html,/Grade: 4<\/strong>/);
+  assert.doesNotMatch(html,/Choose a topic/);
   assert.doesNotMatch(html,/Coming soon/i);
   assert.equal((html.match(/topic\.html\?grade=4&amp;topic=/g)||[]).length,14);
   for(const heading of ['Rhythm and notation','Pitch and tonality','Harmony','Musical language','Instruments and analysis']) assert.match(html,new RegExp(heading));

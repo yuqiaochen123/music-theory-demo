@@ -529,3 +529,21 @@ main.grade-five-page { background: var(--red); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Preferences shared by the account, grade, lesson and practice screens. */
+html[data-larger-text="on"] { font-size: 112.5%; }
+html[data-high-contrast="on"] {
+  --ink: #22000f;
+  --muted: #514148;
+  --line: #74103e;
+}
+html[data-high-contrast="on"] body { color: #22000f; }
+html[data-decorative-animations="off"] .music-pattern-charm,
+html[data-decorative-animations="off"] .quaver-guide { display: none !important; }
+html[data-reduce-motion="on"] *,
+html[data-reduce-motion="on"] *::before,
+html[data-reduce-motion="on"] *::after {
+  scroll-behavior: auto !important;
+  transition: none !important;
+  animation: none !important;
+}
