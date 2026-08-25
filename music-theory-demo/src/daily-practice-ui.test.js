@@ -273,8 +273,8 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260825-overlay2/);
-    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-overlay1/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260825-glass6/);
+    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-overlay2/);
     assert.doesNotMatch(grade, /<script[^>]+src="src\/daily-practice-ui\.js/);
     assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
     assert.match(daily, /src\/daily-practice\.css\?v=20260825-page2/);
@@ -326,6 +326,6 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/daily-practice\.css\?v=20260824-compact3/);
     assert.match(grade, /data-notebook-shortcut/);
     assert.match(grade, /src\/daily-practice-entry\.js\?v=20260825-streak2/);
-    assert.match(grade, /src\/notebook-shortcut\.js\?v=20260824-compact2/);
+    assert.match(grade, /src\/notebook-shortcut\.js\?v=20260825-book2/);
   });
 });

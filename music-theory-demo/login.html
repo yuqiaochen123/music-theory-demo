@@ -9,41 +9,58 @@
   <script src="vendor/supabase-2.111.0.js"></script>
   <link rel="stylesheet" href="src/journey.css?v=20260801-auth9"><link rel="stylesheet" href="src/redesign.css?v=20260802-red4"><link rel="stylesheet" href="src/palette.css?v=20260803-palette1"><link rel="stylesheet" href="src/quaver-guide.css?v=20260825-space1">
   <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
+  <link rel="stylesheet" href="src/account-page.css?v=20260825-account5">
 </head>
-<body>
+<body class="account-page">
   <div class="page-transition-curtain" aria-hidden="true"></div>
   <header><a class="brand" href="index.html">Listening Desk <span>♪</span></a><nav><a href="index.html">Grades</a><a class="active" href="login.html">Account</a></nav></header>
   <main class="auth-main">
     <section class="auth-shell" aria-labelledby="auth-heading">
-      <div class="auth-identity">
-        <div class="auth-copy">
-          <p class="eyebrow">Your private learning record</p><h1 id="auth-heading">Save your<br><em>progress.</em></h1>
-          <p class="lead">Sign in on any device to continue with your own lessons, scores and exercise history.</p>
+        <div class="auth-identity">
+          <div class="auth-copy">
+            <p class="eyebrow">Your private learning record</p><h1 id="auth-heading">Save your<br><em>progress.</em></h1>
+            <p class="lead">Sign in on any device to continue with your own lessons, scores and exercise history.</p>
+          </div>
+          <div class="staff-art music-pattern-charm" aria-hidden="true">
+            <div class="staff-system staff-system-upper">
+              <svg class="staff-lines staff-lines-flow" viewBox="0 0 1000 82" preserveAspectRatio="none" focusable="false">
+                <path d="M0 8 C180 0 315 18 500 10 S820 2 1000 12"/><path d="M0 25 C180 17 315 35 500 27 S820 19 1000 29"/><path d="M0 42 C180 34 315 52 500 44 S820 36 1000 46"/><path d="M0 59 C180 51 315 69 500 61 S820 53 1000 63"/><path d="M0 76 C180 68 315 86 500 78 S820 70 1000 80"/>
+              </svg>
+              <i class="staff-note phrase-note-one"></i><i class="staff-note phrase-note-two"></i><i class="staff-note phrase-note-three"></i>
+            </div>
+            <div class="staff-system staff-system-middle">
+              <svg class="staff-lines staff-lines-flow" viewBox="0 0 1000 82" preserveAspectRatio="none" focusable="false">
+                <path d="M0 12 C170 22 340 0 520 11 S820 23 1000 8"/><path d="M0 29 C170 39 340 17 520 28 S820 40 1000 25"/><path d="M0 46 C170 56 340 34 520 45 S820 57 1000 42"/><path d="M0 63 C170 73 340 51 520 62 S820 74 1000 59"/><path d="M0 80 C170 90 340 68 520 79 S820 91 1000 76"/>
+              </svg>
+              <i class="staff-note phrase-note-four"></i><i class="staff-note phrase-note-five"></i><i class="staff-note phrase-note-six"></i>
+            </div>
+            <div class="staff-system staff-system-main">
+              <svg class="staff-lines staff-lines-flow" viewBox="0 0 1000 82" preserveAspectRatio="none" focusable="false">
+                <path d="M0 9 C210 20 350 0 520 8 S790 21 1000 11"/><path d="M0 26 C210 37 350 17 520 25 S790 38 1000 28"/><path d="M0 43 C210 54 350 34 520 42 S790 55 1000 45"/><path d="M0 60 C210 71 350 51 520 59 S790 72 1000 62"/><path d="M0 77 C210 88 350 68 520 76 S790 89 1000 79"/>
+              </svg>
+              <span class="staff-clef">𝄞</span>
+              <i class="staff-note note-one"></i><i class="staff-note note-two"></i><i class="staff-note note-three"></i><i class="staff-note note-four"></i>
+            </div>
+          </div>
         </div>
-        <div class="staff-art" aria-hidden="true">
-          <div class="staff-lines"></div>
-          <span class="staff-clef">𝄞</span>
-          <i class="staff-note note-one"></i><i class="staff-note note-two"></i><i class="staff-note note-three"></i><i class="staff-note note-four"></i>
+        <div class="auth-card">
+          <p id="auth-status" class="progress-sync" aria-live="polite"></p>
+          <form id="auth-form" class="auth-form" method="post" onsubmit="return false">
+            <label>Email<input name="email" type="email" autocomplete="email" required></label>
+            <label>Password<input name="password" type="password" autocomplete="current-password" minlength="8" required></label>
+            <button class="auth-primary" id="auth-submit" type="submit" data-auth-action="signin">Sign in</button>
+            <button class="auth-secondary" id="signup-submit" type="submit" data-auth-action="signup">Create account</button>
+            <button class="auth-recovery-link" id="forgot-password" type="button">Forgot password?</button>
+          </form>
+          <form id="password-reset-form" class="auth-form" method="post" onsubmit="return false" hidden>
+            <h2>Choose a new password</h2>
+            <p>Use at least 8 characters. Your learning progress will stay with this account.</p>
+            <label>New password<input name="newPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+            <label>Confirm new password<input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+            <button class="auth-primary" id="password-reset-submit" type="submit">Save new password</button>
+          </form>
+          <div id="account-panel" hidden><p>Signed in as <strong id="account-email"></strong></p><a class="auth-primary" href="index.html">Continue learning</a><button id="sign-out" type="button">Sign out</button></div>
         </div>
-      </div>
-      <div class="auth-card">
-        <p id="auth-status" class="progress-sync" aria-live="polite"></p>
-        <form id="auth-form" class="auth-form" method="post" onsubmit="return false">
-          <label>Email<input name="email" type="email" autocomplete="email" required></label>
-          <label>Password<input name="password" type="password" autocomplete="current-password" minlength="8" required></label>
-          <button class="auth-primary" id="auth-submit" type="submit" data-auth-action="signin">Sign in</button>
-          <button class="auth-secondary" id="signup-submit" type="submit" data-auth-action="signup">Create account</button>
-          <button class="auth-recovery-link" id="forgot-password" type="button">Forgot password?</button>
-        </form>
-        <form id="password-reset-form" class="auth-form" method="post" onsubmit="return false" hidden>
-          <h2>Choose a new password</h2>
-          <p>Use at least 8 characters. Your learning progress will stay with this account.</p>
-          <label>New password<input name="newPassword" type="password" autocomplete="new-password" minlength="8" required></label>
-          <label>Confirm new password<input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required></label>
-          <button class="auth-primary" id="password-reset-submit" type="submit">Save new password</button>
-        </form>
-        <div id="account-panel" hidden><p>Signed in as <strong id="account-email"></strong></p><a class="auth-primary" href="index.html">Continue learning</a><button id="sign-out" type="button">Sign out</button></div>
-      </div>
     </section>
   </main>
   <script type="module" src="src/login.js?v=20260801-auth9"></script><script type="module" src="src/motion.js?v=20260825-smooth2"></script><script type="module" src="src/quaver-guide.js?v=20260825-chat2"></script>

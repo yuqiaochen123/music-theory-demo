@@ -68,7 +68,7 @@ export function challengeMarkup({ challenge, registry, preview = false } = {}) {
     const { topicName, exercise } = exerciseFor(registry, item);
     const done = completed.has(item.exerciseId);
     const params = new URLSearchParams({ topic: item.topicId, exercise: item.exerciseId, daily: challenge.challenge_date, slot: String(index) });
-    return `<li class="daily-question${done ? " daily-question--complete" : ""}"><span class="daily-number">${done ? "✓" : index + 1}</span><div><small>${escapeHtml(roleLabels[item.role] ?? item.role)} · ${escapeHtml(topicName)}</small><strong>${escapeHtml(exercise?.prompt ?? "Practice this exercise")}</strong></div><a href="practice.html?${escapeHtml(params.toString())}">${done ? "Practise again" : "Start"} →</a></li>`;
+    return `<li class="daily-question${done ? " daily-question--complete" : ""}"><span class="daily-number">${done ? "✓" : index + 1}</span><div><small>${escapeHtml(roleLabels[item.role] ?? item.role)} · ${escapeHtml(topicName)}</small><strong>${escapeHtml(exercise?.prompt ?? "Practice this exercise")}</strong></div><a href="practice.html?${escapeHtml(params.toString())}">${done ? "Practise again" : "Start"}</a></li>`;
   }).join("")}</ol>${preview ? '<p class="daily-notice">Sign in to personalize this challenge and save your result.</p>' : ""}`;
 }
 
@@ -135,7 +135,6 @@ export async function mountChallenge(root, {
   store = dailyPracticeStore,
   logError = globalThis.console?.error,
 } = {}) {
-  root.innerHTML = '<p class="daily-loading">Building today’s challenge…</p>';
   try {
     const challenge = await store.getOrCreateChallenge({ grade: 5, registry });
     root.innerHTML = challengeMarkup({ challenge, registry });

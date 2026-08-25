@@ -24,6 +24,7 @@ describe("mistake notebook overlay", () => {
     for (const pageName of ["grade-4.html", "grade-5.html"]) {
       const html = readFileSync(new URL(`../${pageName}`, import.meta.url), "utf8");
       assert.match(html, /src\/notebook-overlay\.js/);
+      assert.match(html, /src\/notebook-shortcut\.js\?v=20260825-book2/);
     }
   });
 

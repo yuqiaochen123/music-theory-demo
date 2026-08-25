@@ -10,7 +10,7 @@ function focusableElements(root) {
   return [...root.querySelectorAll(FOCUSABLE)].filter(element => !element.hidden && element.getAttribute("aria-hidden") !== "true");
 }
 
-export function openDailyPracticeOverlay({
+export async function openDailyPracticeOverlay({
   documentObject = globalThis.document,
   windowObject = globalThis.window,
   registry = windowObject?.ListeningDeskPractice,
@@ -57,10 +57,11 @@ export function openDailyPracticeOverlay({
     if (event.target.closest("[data-daily-practice-overlay-close]")) close();
   });
   documentObject.body.append(overlay);
+  await mountChallenge(challenge, { registry });
   documentObject.body.classList.add("daily-practice-overlay-open");
   documentObject.addEventListener("keydown", onKeydown);
+  overlay.classList.add("is-open");
   overlay.querySelector(".daily-feature-close").focus();
-  void mountChallenge(challenge, { registry });
   return { close, overlay };
 }
 
@@ -71,6 +72,6 @@ export function installDailyPracticeOverlay(documentObject = globalThis.document
     const shortcut = event.target.closest('a.today-card[href="daily-challenge.html"]');
     if (!shortcut || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    openDailyPracticeOverlay({ documentObject, windowObject: documentObject.defaultView });
+    void openDailyPracticeOverlay({ documentObject, windowObject: documentObject.defaultView });
   });
 }

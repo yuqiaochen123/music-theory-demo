@@ -32,3 +32,48 @@ The implementation matches the reference interaction pattern while preserving th
 ## Final result
 
 final result: passed
+
+---
+
+## Daily Practice liquid-glass refinement · 2026-08-25
+
+- Source visual truth: `/var/folders/c7/6h34hftj6zjbhlflldghg3dr0000gn/T/codex-clipboard-4024f488-018d-45b1-9a83-55a8951fcce4.png`
+- Implementation screenshot: `/Users/yuqiaochen/Documents/AI music theory website/music-theory-demo/design-qa-implementation.png`
+- Side-by-side comparison: `/Users/yuqiaochen/Documents/AI music theory website/music-theory-demo/design-qa-comparison.png`
+- Mobile evidence: `/Users/yuqiaochen/Documents/AI music theory website/music-theory-demo/design-qa-mobile.png`
+- Viewport and state: Grade 5 at 927 × 889 CSS px, Daily Practice modal open; responsive check at 390 × 844 CSS px.
+- Density normalization: source was 1854 × 1778 px and was downsampled 50% to 927 × 889 px; implementation was captured at 927 × 889 px at browser density 1.
+- Primary interactions tested: open from the Grade 5 Daily Practice entry, render all four questions, retain the Grade 5 route beneath the modal, and close back to the trigger.
+- Browser console checked. The Daily Practice interaction produced no new errors. A pre-existing `notebook-shortcut.js` import error and duplicate Supabase-client warning remain outside this modal change.
+
+### Full-view comparison evidence
+
+The revised modal deliberately preserves the screenshot's hierarchy and content while applying the approved refinement: substantially more blurred Grade 5 background remains visible, the frame is centered and compact, the warm-paper sheet has visibly rounded corners, and the Start controls read as restrained pills instead of rectangular generated-looking buttons.
+
+### Required fidelity surfaces
+
+- Fonts and typography: the existing Avenir Next/Helvetica hierarchy, weights, wrapping, and compact uppercase labels remain intact at desktop and mobile sizes.
+- Spacing and layout rhythm: the 820px cap, 82dvh maximum, 28px outer radius, 20px inner radius, tighter question rows, and balanced outside margin match the approved smaller composition.
+- Colors and tokens: implementation uses `#2A0B1C`, `#631838`, `#9A2F5A`, `#D2A36B`, `#F6F1E9`, `#DFD0D5`, and `#74666B` from the site palette. The glass layer uses `rgba(42,11,28,.34)` and the frame uses `rgba(99,24,56,.88)`.
+- Image quality and assets: this interface contains no product imagery or custom illustration assets; the blurred Grade 5 page remains sharp enough to communicate context without competing with the modal.
+- Copy and content: all four exercise prompts and labels are preserved. The decorative arrow was removed from Start, leaving a direct action label.
+
+### Focused-region evidence
+
+No extra crop was required because the normalized side-by-side comparison renders the title, question labels, radii, and Start controls clearly. The separate mobile capture verifies wrapping and full-width pill controls at 390px without horizontal overflow.
+
+### Comparison history
+
+- Initial P2: the older standalone-page minimum height and 3px radius won the CSS cascade inside the overlay, producing excess blank space and square inner corners.
+- Fix: added a modal-specific high-specificity rule that sets `min-height: 0`, `background: #F6F1E9`, and `border-radius: 20px`, then refreshed the Grade 5 stylesheet version.
+- Post-fix evidence: the panel measures approximately 768 × 578 CSS px at the normalized desktop viewport; computed inner radius is 20px, inner background is `rgb(246, 241, 233)`, blur is 12px, and no horizontal overflow is present.
+
+### Findings
+
+No actionable P0, P1, or P2 visual differences remain for the approved refinement.
+
+### Follow-up polish
+
+- P3: the existing notebook-shortcut module error can be repaired separately; it does not affect Daily Practice opening, rendering, responsiveness, or closing.
+
+final result: passed
