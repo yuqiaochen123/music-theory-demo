@@ -9,7 +9,7 @@ export function notebookStatusFromHref(href) {
 }
 
 export function notebookOverlayMarkup() {
-  return `<div class="notebook-overlay" data-notebook-overlay><button class="notebook-overlay__backdrop" type="button" data-notebook-overlay-close tabindex="-1" aria-label="Close Mistake Notebook"></button><section class="notebook-overlay__panel daily-feature-body" role="dialog" aria-modal="true" aria-labelledby="notebook-overlay-title"><div class="daily-feature-topbar"><strong id="notebook-overlay-title">Mistake Notebook</strong><button class="daily-feature-close" type="button" data-notebook-overlay-close aria-label="Close Mistake Notebook">×</button></div><main class="daily-feature-main"><header class="notebook-overlay__head daily-page-head"><p class="eyebrow">Your learning history</p><h2>Mistake <em>Notebook.</em></h2><p>Return to difficult ideas until they become secure.</p></header><div class="notebook-overlay__content" data-notebook-overlay-content aria-live="polite"><p class="daily-loading">Opening your notebook…</p></div></main></section></div>`;
+  return `<div class="notebook-overlay" data-notebook-overlay><button class="notebook-overlay__backdrop" type="button" data-notebook-overlay-close tabindex="-1" aria-label="Close Mistake Notebook"></button><section class="notebook-overlay__panel" role="dialog" aria-modal="true" aria-labelledby="notebook-overlay-title"><button class="notebook-overlay__close" type="button" data-notebook-overlay-close aria-label="Close Mistake Notebook">×</button><main class="notebook-overlay__sheet"><header class="notebook-overlay__head"><p class="eyebrow">Your learning history</p><h2 id="notebook-overlay-title">Mistake <em>Notebook.</em></h2><p>Return to difficult ideas until they become secure.</p></header><div class="notebook-overlay__content" data-notebook-overlay-content aria-live="polite"><p class="daily-loading">Opening your notebook…</p></div></main></section></div>`;
 }
 
 function pageGrade() {
@@ -91,7 +91,7 @@ export function openNotebookOverlay({ grade = pageGrade() } = {}) {
   document.body.classList.add("notebook-overlay-open");
   document.addEventListener("keydown", onKeydown);
   overlay.classList.add("is-open");
-  overlay.querySelector(".daily-feature-close").focus();
+  overlay.querySelector(".notebook-overlay__close").focus();
   void renderNotebook(content, { grade, status });
   return { close, overlay };
 }

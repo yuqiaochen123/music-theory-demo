@@ -14,17 +14,18 @@ describe("mistake notebook overlay", () => {
     assert.match(html, /data-notebook-overlay-content/);
   });
 
-  it("uses the same glass shell and cream content sheet as Daily Practice", () => {
+  it("uses one uncluttered glass shell without a duplicate title bar", () => {
     const html = notebookOverlayMarkup();
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
-    assert.match(html, /class="notebook-overlay__panel daily-feature-body"/);
-    assert.match(html, /class="daily-feature-topbar"/);
-    assert.match(html, /class="daily-feature-close"/);
-    assert.match(html, /<main class="daily-feature-main">/);
+    assert.match(html, /class="notebook-overlay__panel"/);
+    assert.match(html, /class="notebook-overlay__close"/);
+    assert.match(html, /<main class="notebook-overlay__sheet">/);
+    assert.doesNotMatch(html, /daily-feature-topbar/);
+    assert.doesNotMatch(html, /<strong id="notebook-overlay-title">Mistake Notebook<\/strong>/);
     assert.match(css, /\.notebook-overlay\{[^}]*place-items:center/);
     assert.match(css, /\.notebook-overlay__backdrop\{[^}]*backdrop-filter:blur\(12px\)/);
-    assert.match(css, /\.notebook-overlay__panel\{[^}]*border-radius:28px[^}]*background:rgba\(99,24,56,\.88\)/);
-    assert.match(css, /\.notebook-overlay \.daily-feature-body main\.daily-feature-main\{[^}]*border-radius:20px[^}]*background:#f6f1e9/);
+    assert.match(css, /\.notebook-overlay__panel\{[^}]*height:min\(82dvh,860px\)[^}]*overflow:hidden[^}]*background:rgba\(99,24,56,\.88\)/);
+    assert.match(css, /\.notebook-overlay__sheet\{[^}]*display:flex[^}]*height:100%[^}]*overflow:hidden[^}]*background:#f6f1e9/);
   });
 
   it("switches notebook tabs inside the overlay instead of navigating", () => {
@@ -37,7 +38,7 @@ describe("mistake notebook overlay", () => {
     for (const pageName of ["grade-4.html", "grade-5.html"]) {
       const html = readFileSync(new URL(`../${pageName}`, import.meta.url), "utf8");
       assert.match(html, /src\/notebook-overlay\.js/);
-      assert.match(html, /src\/notebook-overlay\.js\?v=20260825-glass2/);
+      assert.match(html, /src\/notebook-overlay\.js\?v=20260825-layout3/);
       assert.match(html, /src\/notebook-shortcut\.js\?v=20260825-book2/);
     }
   });
@@ -51,7 +52,7 @@ describe("mistake notebook overlay", () => {
   it("contains long notebook content without border collisions", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.notebook-overlay__panel\{[^}]*overflow:hidden/);
-    assert.match(css, /\.notebook-overlay__content\{[^}]*min-width:0[^}]*overflow-y:auto/);
+    assert.match(css, /\.notebook-overlay__content\{[^}]*min-width:0[^}]*flex:1[^}]*overflow-y:auto/);
     assert.match(css, /\.notebook-overlay \.notebook-card[^}]*overflow-wrap:anywhere/);
     assert.match(css, /\.notebook-overlay \.notebook-tabs a\[aria-current="page"\]\{[^}]*background:#a62c5d[^}]*color:#fff/);
     assert.match(css, /@media\(max-width:620px\)\{\.notebook-overlay\{[^}]*\}\.notebook-overlay__panel/);
