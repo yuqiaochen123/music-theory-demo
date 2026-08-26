@@ -53,18 +53,34 @@ export async function mountDailyStreak(element, streak, {
   const canvas = element?.querySelector("[data-daily-streak-canvas]");
   const fallback = element?.querySelector("[data-daily-streak-fallback]");
   const controller = { cleanup() {} };
+  const revealFallback = () => {
+    if (fallback) fallback.hidden = false;
+    if (element) element.dataset.dailyStreakReady = "true";
+  };
+  const revealAnimation = () => {
+    if (fallback) fallback.hidden = true;
+    if (element) element.dataset.dailyStreakReady = "true";
+  };
 
-  if (!element || !canvas || reducedMotion) return controller;
+  if (!element) return controller;
+  if (!canvas || reducedMotion) {
+    revealFallback();
+    return controller;
+  }
 
   let RiveConstructor = Rive;
   if (!RiveConstructor) {
     try {
       RiveConstructor = await loadRuntime();
     } catch {
+      revealFallback();
       return controller;
     }
   }
-  if (!RiveConstructor) return controller;
+  if (!RiveConstructor) {
+    revealFallback();
+    return controller;
+  }
 
   try {
     let instance;
@@ -78,16 +94,19 @@ export async function mountDailyStreak(element, streak, {
       onLoad() {
         try {
           const property = instance?.viewModelInstance?.number?.("streak");
-          if (!property) return;
+          if (!property) {
+            revealFallback();
+            return;
+          }
           property.value = value;
-          if (fallback) fallback.hidden = true;
           instance.resizeDrawingSurfaceToCanvas?.();
+          revealAnimation();
         } catch {
-          if (fallback) fallback.hidden = false;
+          revealFallback();
         }
       },
       onLoadError() {
-        if (fallback) fallback.hidden = false;
+        revealFallback();
       },
     });
     let cleaned = false;
@@ -99,7 +118,7 @@ export async function mountDailyStreak(element, streak, {
       },
     };
   } catch {
-    if (fallback) fallback.hidden = false;
+    revealFallback();
     return controller;
   }
 }

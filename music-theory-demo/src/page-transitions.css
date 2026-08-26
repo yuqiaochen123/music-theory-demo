@@ -65,11 +65,17 @@ html.is-grade-opening .page-transition-curtain__label { opacity: 0; }
 .grade-transition-underlay .home { padding-top: 44px; }
 .grade-five-body > .grade-five-topbar,
 .grade-five-body > .grade-five-page,
-.grade-five-body > .quaver-guide,
 .grade-five-body > footer {
   position: relative;
   z-index: 2;
   transition: transform 720ms cubic-bezier(.76,0,.24,1);
+  will-change: transform;
+}
+.grade-five-body > .quaver-guide {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  z-index: 40;
+  transition: bottom 180ms ease, transform 720ms cubic-bezier(.76,0,.24,1);
   will-change: transform;
 }
 html.is-grade-dropping .grade-five-body > .grade-five-topbar,

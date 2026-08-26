@@ -9,6 +9,7 @@ function makeStreakElement() {
   const canvas = {};
   const fallback = { hidden: false };
   return {
+    dataset: { dailyStreakReady: "false" },
     canvas,
     fallback,
     querySelector(selector) {
@@ -117,6 +118,7 @@ describe("daily streak Rive adapter", () => {
     assert.equal(script.src, "vendor/rive-2.39.2.js");
     assert.equal(script.dataset.riveRuntime, "true");
     assert.equal(constructions, 0);
+    assert.equal(element.dataset.dailyStreakReady, "false");
 
     runtimeGlobal.rive = {
       Rive: FakeRive,
@@ -130,6 +132,7 @@ describe("daily streak Rive adapter", () => {
     assert.equal(riveOptions.src, "assets/rive/dynamic-streak-fire.riv");
     assert.equal(number.value, 8);
     assert.equal(element.fallback.hidden, true);
+    assert.equal(element.dataset.dailyStreakReady, "true");
   });
 
   it("binds the streak number into the approved local Rive animation", async () => {
@@ -156,6 +159,7 @@ describe("daily streak Rive adapter", () => {
     assert.equal(number.value, 7);
     assert.equal(resizeCalls, 1);
     assert.equal(element.fallback.hidden, true);
+    assert.equal(element.dataset.dailyStreakReady, "true");
   });
 
   it("preserves the fallback when the streak data binding is unavailable", async () => {
@@ -170,6 +174,7 @@ describe("daily streak Rive adapter", () => {
     await assert.doesNotReject(() => mountDailyStreak(element, 7, { Rive: FakeRive, reducedMotion: false }));
 
     assert.equal(element.fallback.hidden, false);
+    assert.equal(element.dataset.dailyStreakReady, "true");
   });
 
   it("uses the visible fallback without constructing Rive for reduced motion", async () => {
@@ -181,6 +186,7 @@ describe("daily streak Rive adapter", () => {
 
     assert.equal(constructions, 0);
     assert.equal(element.fallback.hidden, false);
+    assert.equal(element.dataset.dailyStreakReady, "true");
   });
 
   it("keeps the loaded fallback visible when reduced motion is enabled later", () => {
@@ -192,6 +198,12 @@ describe("daily streak Rive adapter", () => {
     assert.ok(reducedRule > hiddenRule);
   });
 
+  it("keeps the streak invisible until its final visual is ready", () => {
+    const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
+
+    assert.match(css, /\.daily-streak\[data-daily-streak-ready="false"\]\{visibility:hidden;opacity:0\}/);
+  });
+
   it("preserves the fallback when Rive construction throws", async () => {
     class ThrowingRive { constructor() { throw new Error("Rive unavailable"); } }
     const element = makeStreakElement();
@@ -199,6 +211,7 @@ describe("daily streak Rive adapter", () => {
     await assert.doesNotReject(() => mountDailyStreak(element, 7, { Rive: ThrowingRive, reducedMotion: false }));
 
     assert.equal(element.fallback.hidden, false);
+    assert.equal(element.dataset.dailyStreakReady, "true");
   });
 
   it("cleans up a loaded Rive instance once", async () => {

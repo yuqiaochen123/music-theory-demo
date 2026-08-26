@@ -347,7 +347,7 @@
 }
 
 @media (min-width: 1200px) {
-  .grade-five-body .quaver-guide { right: clamp(72px, 6vw, 120px); }
+  .grade-five-body .quaver-guide { right: max(20px, env(safe-area-inset-right)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

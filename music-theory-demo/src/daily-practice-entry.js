@@ -1,4 +1,4 @@
-import { bootstrapDailyPractice } from "./daily-practice-ui.js?v=20260826-global1";
+import { bootstrapDailyPractice } from "./daily-practice-ui.js?v=20260826-streak-ready1";
 import { installDailyPracticeOverlay } from "./daily-practice-overlay.js?v=20260826-grade-parity1";
 import { sharedRegistryFromWindow } from "./shared-practice-registry.js";
 

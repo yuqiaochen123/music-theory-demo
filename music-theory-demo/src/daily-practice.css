@@ -31,7 +31,7 @@
 .daily-practice-summary .today-card strong{font-size:15px;line-height:1.15}
 .daily-practice-summary .today-card small{margin-top:2px;color:rgba(255,255,255,.72);font-size:11px}
 .daily-practice-summary .today-card b{font-size:12px}
-.daily-streak{position:relative;display:grid;flex:none;width:52px;height:52px;place-items:center;overflow:visible}.daily-streak canvas,.daily-streak__fallback{position:absolute;inset:0;width:100%;height:100%}.daily-streak__fallback{position:absolute;display:grid;place-items:center;border-radius:50%;background:#f0b55f;color:#631838;font-weight:900}.daily-streak__fallback[hidden]{display:none}
+.daily-streak{position:relative;display:grid;flex:none;width:52px;height:52px;place-items:center;overflow:visible}.daily-streak[data-daily-streak-ready="false"]{visibility:hidden;opacity:0}.daily-streak canvas,.daily-streak__fallback{position:absolute;inset:0;width:100%;height:100%}.daily-streak__fallback{position:absolute;display:grid;place-items:center;border-radius:50%;background:#f0b55f;color:#631838;font-weight:900}.daily-streak__fallback[hidden]{display:none}
 @media(max-width:520px){.daily-practice-summary{width:calc(100% - 20px);margin-bottom:14px}.daily-practice-summary .today-card{grid-template-columns:30px minmax(0,1fr) 46px auto;padding:9px 10px}.daily-practice-summary .today-icon{width:30px;height:30px}.daily-practice-summary .today-card b{grid-column:auto;font-size:11px}}
 @media(max-width:520px){.daily-streak{width:46px;height:46px}}
 .grade-five-page [data-notebook-shortcut]{top:34px}.grade-five-page .curriculum-section:first-child .topic-grid{margin-top:26px}.notebook-shortcut__bubble{right:calc(100% - 26px);top:52px;width:180px}

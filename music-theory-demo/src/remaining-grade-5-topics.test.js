@@ -61,7 +61,7 @@ describe("remaining Grade 5 modules",()=>{
       for(const example of topics[slug].examples){
         assert.ok(example.label);
         assert.ok(example.explanation);
-        assert.ok(example.notation||example.concept);
+        assert.ok(example.notation||example.notationPair||example.concept);
       }
     }
   });
@@ -72,6 +72,51 @@ describe("remaining Grade 5 modules",()=>{
       assert.ok(lesson.examples.length>=4,`${slug} needs at least four focused guide cards`);
       assert.equal(lesson.examples.filter(item=>item.notation).length>=2,true,`${slug} needs notation-led teaching where useful`);
     }
+  });
+
+  it("develops transposition from its general rule into accurate notation and audio comparisons",()=>{
+    const lesson=topics["clef-transposition"];
+    assert.match(lesson.intro,/same musical interval/i);
+    assert.equal(lesson.examples.length,4);
+    assert.deepEqual(
+      Array.from(lesson.examples,item=>item.id),
+      ["pattern","clef","octave","phrase"],
+    );
+    for(const item of lesson.examples){
+      assert.equal(item.notationPair.length,2,`${item.label} needs a source and result staff`);
+      assert.equal(item.parts.length,2,`${item.label} needs matching source and result audio`);
+      assert.equal(item.notationPair.every(panel=>panel.notation.type==="melody"),true);
+    }
+    assert.deepEqual(Array.from(lesson.examples[0].parts[0][1]),[60,64,67]);
+    assert.deepEqual(Array.from(lesson.examples[0].parts[1][1]),[62,66,69]);
+    assert.deepEqual(Array.from(lesson.examples[1].parts[0][1]),[60]);
+    assert.deepEqual(Array.from(lesson.examples[1].parts[1][1]),[60]);
+    assert.deepEqual(Array.from(lesson.examples[2].parts[1][1]),[72,76,79]);
+  });
+
+  it("gives every transposition note its own non-overlapping rhythmic position",()=>{
+    const durationSlots={w:16,h:8,q:4,"8":2,"16":1};
+    for(const item of topics["clef-transposition"].examples){
+      for(const panel of item.notationPair){
+        const notation=panel.notation;
+        assert.equal(notation.notes.length,notation.slots.length,`${panel.label} must place every written pitch`);
+        assert.equal(notation.notes.length,notation.durations.length,`${panel.label} must give every pitch a duration`);
+        notation.slots.forEach((slot,index)=>{
+          assert.ok(slot>=0&&slot<notation.barCount*16,`${panel.label} note ${index+1} must fit inside the bar`);
+          if(index===0)return;
+          const previousEnd=notation.slots[index-1]+durationSlots[notation.durations[index-1]];
+          assert.ok(slot>=previousEnd,`${panel.label} note ${index+1} must not overlap and hide the previous note`);
+        });
+      }
+    }
+  });
+
+  it("renders the expanded transposition guide before preserving the writing editor",()=>{
+    const topicPage=readFileSync(new URL("../topic.html",import.meta.url),"utf8");
+    assert.match(topicPage,/item\.notationPair/);
+    assert.match(topicPage,/lesson-guide-notation-pair/);
+    assert.match(topicPage,/['"]clef-transposition['"]/);
+    assert.match(topicPage,/Write, then transpose\./);
   });
 
   it("uses real clef-aware staves for clef reading and transposing instruments",()=>{

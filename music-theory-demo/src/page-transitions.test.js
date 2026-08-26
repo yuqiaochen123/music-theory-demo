@@ -71,4 +71,17 @@ describe("seamless cross-page navigation", () => {
     assert.doesNotMatch(motion, /createElement\('iframe'\)/);
     assert.match(motion, /window\.location\.assign\(destination\.href\)/);
   });
+
+  it("keeps the fixed Quaver companion out of the grade-page transition flow", () => {
+    const styles = page("src/page-transitions.css");
+    const positionedTransitionRule = styles.match(
+      /\.grade-five-body > \.grade-five-topbar,[\s\S]*?\{([\s\S]*?)\}/,
+    )?.[0] || "";
+
+    assert.doesNotMatch(positionedTransitionRule, /> \.quaver-guide/);
+    assert.match(
+      styles,
+      /\.grade-five-body > \.quaver-guide\s*\{[^}]*position:\s*fixed[^}]*right:\s*max\(20px, env\(safe-area-inset-right\)\)/s,
+    );
+  });
 });

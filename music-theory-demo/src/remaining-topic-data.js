@@ -17,9 +17,23 @@
       {label:'Alto clef',rule:'The centre of the C clef marks middle C on the third line.',explanation:'Alto clef keeps viola-range notes close to the centre of the staff.',notation:{type:'melody',clef:'alto',barCount:2,slots:[1,3,5],notes:['c/4','e/4','g/4']},parts:[]},
       {label:'Tenor clef',rule:'The centre of the C clef marks middle C on the fourth line.',explanation:'Tenor clef moves middle C one line higher than alto clef.',notation:{type:'melody',clef:'tenor',barCount:2,slots:[1,3,5],notes:['c/4','e/4','g/4']},parts:[]}
     ]),
-    "clef-transposition":topic('Transposition','Transpose a melody','Write notes, choose a key, and hear the result.','Changing key moves every note by the same musical interval.',[
-      example('Keep the pitch','C4 → C4','Between clefs','The note sounds the same; only its place on the staff changes.','Use middle C as your reference.'),
-      example('Move an octave','C4 → C5','Same note name','Move up or down eight letter names.','Keep the rhythm and accidentals unchanged.')
+    "clef-transposition":topic('Transposition','Transpose a melody','Understand the pattern first, then write and transpose your own phrase.','Transposition moves a complete musical idea: every pitch travels by the same musical interval, while the rhythm and the relationships between notes stay consistent.',[
+      {id:'pattern',label:'Move the pattern, not isolated notes',rule:'Transposition moves every pitch by the same musical interval.',explanation:'C–E–G becomes D–F-sharp–A. The starting pitch changes, but the contour and interval pattern stay intact.',notationPair:[
+        {label:'Original · C major',notation:{type:'melody',clef:'treble',barCount:1,slots:[0,4,8],durations:['q','q','q'],notes:['c/4','e/4','g/4']}},
+        {label:'Up a major second',notation:{type:'melody',clef:'treble',barCount:1,slots:[0,4,8],durations:['q','q','q'],notes:['d/4','f#/4','a/4']}}
+      ],parts:[['Hear C–E–G',[60,64,67]],['Hear D–F♯–A',[62,66,69]]],audioType:'sequence'},
+      {id:'clef',label:'Changing clef keeps the sounding pitch',rule:'A clef changes how a pitch is written, not the pitch itself.',explanation:'Middle C sounds identical in treble and alto clef. This is re-notating the same pitch, not moving the music into a new key.',notationPair:[
+        {label:'Treble clef · middle C',notation:{type:'melody',clef:'treble',barCount:1,slots:[0],durations:['q'],notes:['c/4']}},
+        {label:'Alto clef · middle C',notation:{type:'melody',clef:'alto',barCount:1,slots:[0],durations:['q'],notes:['c/4']}}
+      ],parts:[['Hear treble-clef C',[60]],['Hear alto-clef C',[60]]],audioType:'sequence'},
+      {id:'octave',label:'An octave keeps the note names',rule:'Move every note twelve semitones while keeping its letter name.',explanation:'C4–E4–G4 becomes C5–E5–G5. The phrase sounds higher, but its intervals and shape remain the same.',notationPair:[
+        {label:'Original register',notation:{type:'melody',clef:'treble',barCount:1,slots:[0,4,8],durations:['q','q','q'],notes:['c/4','e/4','g/4']}},
+        {label:'One octave higher',notation:{type:'melody',clef:'treble',barCount:1,slots:[0,4,8],durations:['q','q','q'],notes:['c/5','e/5','g/5']}}
+      ],parts:[['Hear the original',[60,64,67]],['Hear one octave higher',[72,76,79]]],audioType:'sequence'},
+      {id:'phrase',label:'Preserve the whole musical sentence',rule:'Rhythm, contour and relative distances stay consistent throughout the phrase.',explanation:'Moving F-sharp–A–G–E up a major second gives G-sharp–B–A–F-sharp. The accidentals change so that every note travels by the same interval.',notationPair:[
+        {label:'Original phrase',notation:{type:'melody',clef:'treble',barCount:1,slots:[0,4,8,12],durations:['q','q','q','q'],notes:['f#/4','a/4','g/4','e/4']}},
+        {label:'Up a major second',notation:{type:'melody',clef:'treble',barCount:1,slots:[0,4,8,12],durations:['q','q','q','q'],notes:['g#/4','b/4','a/4','f#/4']}}
+      ],parts:[['Hear the original',[66,69,67,64]],['Hear the transposition',[68,71,69,66]]],audioType:'sequence'}
     ]),
     "transposing-instruments":topic('Transposing instruments','Written pitch and concert pitch','Convert parts for instruments in B-flat, A and F.','Read the instrument name as the concert pitch produced by its written C. Keep written and sounding pitch separate, then move every note by the same interval.',[
       {label:'B-flat instruments',rule:'Written C sounds as concert B-flat: down a major second.',explanation:'Clarinet and trumpet in B-flat sound one tone lower than written.',notation:{type:'melody',clef:'treble',key:'C',barCount:2,slots:[1,3,5],notes:['c/5','d/5','e/5']},parts:[['Written line',[72,74,76]],['Concert line',[70,72,74]]]},

@@ -1,6 +1,6 @@
 import { calculateDailyStreak, dailyDate, flattenExerciseBank, selectDailyChallenge } from "./daily-practice.js";
 import { dailyPracticeStore } from "./daily-practice-store.js";
-import { mountDailyStreak } from "./daily-streak-rive.js";
+import { mountDailyStreak } from "./daily-streak-rive.js?v=20260826-ready1";
 import { groupNotebookHistory, notebookWindowStart } from "./notebook-history.js";
 
 const roleLabels = { weak: "Weak topic", review: "Spaced review", wildcard: "Wildcard" };
@@ -57,7 +57,7 @@ function exerciseFor(registry, item) {
 function streakMarkup(streak = 1, modifier = "") {
   const value = Math.max(1, Math.round(Number(streak) || 1));
   const unit = value === 1 ? "day" : "days";
-  return `<span class="daily-streak${modifier ? ` ${modifier}` : ""}" data-daily-streak role="img" aria-label="${value} ${unit} practice streak" title="Dynamic streak fire by aristote · CC BY"><canvas data-daily-streak-canvas width="96" height="96" aria-hidden="true"></canvas><span class="daily-streak__fallback" data-daily-streak-fallback aria-hidden="true">🔥 <span>${value}</span></span></span>`;
+  return `<span class="daily-streak${modifier ? ` ${modifier}` : ""}" data-daily-streak data-daily-streak-ready="false" role="img" aria-label="${value} ${unit} practice streak" title="Dynamic streak fire by aristote · CC BY"><canvas data-daily-streak-canvas width="96" height="96" aria-hidden="true"></canvas><span class="daily-streak__fallback" data-daily-streak-fallback aria-hidden="true">🔥 <span>${value}</span></span></span>`;
 }
 
 export function summaryMarkup({ challenge, reviewCount = 0, signedOut = false, unavailable = false, loading = false, streak = 1, grade = 5 } = {}) {

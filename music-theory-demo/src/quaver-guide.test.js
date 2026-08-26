@@ -198,7 +198,7 @@ test('uses a readable medium weight for Quaver follow-up messages', async () => 
 test('loads the transparent Quaver styling without a stale cached artboard', async () => {
   for (const file of ['index.html', 'grade.html', 'grade-4.html', 'grade-5.html', 'topic.html', 'practice.html', 'login.html']) {
     const html = await readFile(resolve(root, file), 'utf8');
-    assert.match(html, /src\/quaver-guide\.css\?v=20260826-(?:glass2|wide1)/, file);
+    assert.match(html, /src\/quaver-guide\.css\?v=20260826-(?:glass2|wide1|right-edge1)/, file);
     assert.match(html, /src\/quaver-guide\.js\?v=20260826-phrases1/, file);
   }
 });

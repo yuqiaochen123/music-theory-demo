@@ -97,6 +97,7 @@ describe("daily practice UI", () => {
   it("renders the accessible streak inside the daily practice card after its progress copy", () => {
     const html = summaryMarkup({ challenge, streak: 7 });
     assert.match(html, /data-daily-streak/);
+    assert.match(html, /data-daily-streak-ready="false"/);
     assert.match(html, /role="img"/);
     assert.match(html, /aria-label="7 days practice streak"/);
     assert.match(html, /data-daily-streak-canvas/);
@@ -395,8 +396,8 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260826-(?:grade-parity[12]|global2|wide1)/);
-    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12])/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260826-(?:grade-parity[12]|global2|wide1|streak-ready1)/);
+    assert.match(grade, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12]|streak-ready1)/);
     assert.doesNotMatch(grade, /<script[^>]+src="src\/daily-practice-ui\.js/);
     assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
     assert.match(daily, /src\/daily-practice\.css\?v=20260825-page2/);
@@ -443,11 +444,12 @@ describe("daily practice UI", () => {
     assert.match(css, /\.grade-five-page \.curriculum-tabs\{[^}]*margin-top:-1px/);
   });
 
-  it("pulls the notebook and Quaver inward on wide Grade 5 screens", () => {
+  it("keeps the notebook clear while Quaver stays close to the right edge", () => {
     const dailyCss = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     const quaverCss = readFileSync(new URL("./quaver-guide.css", import.meta.url), "utf8");
     assert.match(dailyCss, /@media\(min-width:1200px\)\{\.global-learning-tools>\[data-notebook-shortcut\]\{right:clamp\(150px,11vw,240px\)\}\}/);
-    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: clamp\(72px, 6vw, 120px\); \}\s*\}/);
+    assert.doesNotMatch(quaverCss, /\.grade-five-body \.quaver-guide \{ right: clamp\(72px, 6vw, 120px\); \}/);
+    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: max\(20px, env\(safe-area-inset-right\)\); \}\s*\}/);
   });
 
   it("keeps the mistake notebook inside a padded, responsive reading column", () => {
@@ -472,7 +474,7 @@ describe("daily practice UI", () => {
     for (const grade of [2, 3, 4, 5]) {
       const page = readFileSync(new URL(`../grade-${grade}.html`, import.meta.url), "utf8");
       assert.match(page, new RegExp(`data-daily-practice-summary[^>]*data-grade="${grade}"`));
-      assert.match(page, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12])/);
+      assert.match(page, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12]|streak-ready1)/);
     }
     const grade4 = readFileSync(new URL("../grade-4.html", import.meta.url), "utf8");
     assert.doesNotMatch(grade4, /class="mastery-callout"/);
