@@ -3,7 +3,7 @@ import {
   eligibleNavigation,
   interactiveClickTarget,
   writeArrivalMarker,
-} from './page-navigation.js?v=20260825-parity1';
+} from './page-navigation.js?v=20260826-quaver-input1';
 import { transitionMode, waitForGradeFiveReady } from './grade-transition.js?v=20260826-curtain1';
 
 const root = document.documentElement;

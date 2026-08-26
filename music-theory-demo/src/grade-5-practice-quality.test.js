@@ -32,6 +32,12 @@ describe("Grade 5 practice quality", () => {
     }
   });
 
+  it("does not reveal a musical-term answer in its pre-answer visual clue", () => {
+    const legato = practice["musical-terms"].exercises.find(item => item.id === "term-4");
+    assert.ok(legato, "the legato exercise must exist");
+    assert.doesNotMatch(legato.concept.detail, /connect|smooth/i);
+  });
+
   it("never prints the answer on metre-identification staves", () => {
     for (const question of practice["time-signatures"].exercises.filter(item => item.interaction !== "matching")) {
       assert.equal(question.showTimeSignature, false);

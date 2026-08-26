@@ -77,11 +77,11 @@ describe("mistake notebook overlay", () => {
     assert.match(css, /@media\(max-width:620px\)\{\.notebook-overlay\{[^}]*\}\.notebook-overlay__panel/);
   });
 
-  it("keeps the status tabs above a separately scrolling exercise list", () => {
+  it("lets the complete notebook content scroll when several exercise cards are present", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
-    assert.match(css, /\.notebook-overlay__content\{[^}]*display:flex[^}]*flex-direction:column[^}]*overflow:hidden/);
-    assert.match(css, /\.notebook-overlay \.notebook-tabs\{[^}]*position:static[^}]*flex:none/);
-    assert.match(css, /\.notebook-overlay \.notebook-list\{[^}]*min-height:0[^}]*flex:1[^}]*overflow-y:auto/);
+    assert.match(css, /\.notebook-overlay__content\{[^}]*display:flex[^}]*flex-direction:column[^}]*overflow-y:auto[^}]*-webkit-overflow-scrolling:touch/);
+    assert.match(css, /\.notebook-overlay \.notebook-tabs\{[^}]*position:sticky[^}]*top:0[^}]*flex:none/);
+    assert.match(css, /\.notebook-overlay \.notebook-list\{[^}]*overflow:visible/);
   });
 
   it("uses a plain grey Grade 5-style tilting close control", () => {

@@ -146,11 +146,11 @@ export function createDailyPracticeStore({ client = null, progressStore = defaul
     return challengeRow(studentId, grade, date, scope);
   }
 
-  async function recordNotebookAnswer({ grade = 5, topicId, exerciseId, exerciseType = "choice", prompt = "", answerGiven = "", correctAnswer = "", date = dailyDate(), isCorrect } = {}) {
+  async function recordNotebookAnswer({ grade = 5, topicId, exerciseId, exerciseType = "choice", prompt = "", answerGiven = "", correctAnswer = "", date = dailyDate(), isCorrect, resolveOnCorrect = false } = {}) {
     const studentId = await progressStore.initializeStudent();
     const current = await notebookRow(studentId, { grade, topicId, exerciseId });
     if (!current && isCorrect) return null;
-    const next = applyNotebookAnswer(current, { date, isCorrect });
+    const next = applyNotebookAnswer(current, { date, isCorrect, resolveOnCorrect });
     const payload = {
       student_id: studentId,
       grade: Number(grade),

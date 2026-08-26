@@ -396,7 +396,7 @@ describe("daily practice UI", () => {
     assert.match(grade, /src\/notebook-shortcut\.js/);
     assert.match(daily, /data-daily-challenge/);
     assert.match(notebook, /data-mistake-notebook/);
-    assert.match(grade, /src\/daily-practice\.css\?v=20260826-(?:grade-parity[12]|global2|wide1|streak-ready1)/);
+    assert.match(grade, /src\/daily-practice\.css\?v=20260826-(?:grade-parity[12]|global2|wide1|streak-ready1|notebook-scroll1)/);
     assert.match(grade, /src\/daily-practice-entry\.js\?v=20260826-(?:grade-parity1|global[12]|streak-ready1)/);
     assert.doesNotMatch(grade, /<script[^>]+src="src\/daily-practice-ui\.js/);
     assert.match(grade, /“Dynamic streak fire” by aristote · CC BY/);
@@ -449,7 +449,7 @@ describe("daily practice UI", () => {
     const quaverCss = readFileSync(new URL("./quaver-guide.css", import.meta.url), "utf8");
     assert.match(dailyCss, /@media\(min-width:1200px\)\{\.global-learning-tools>\[data-notebook-shortcut\]\{right:clamp\(150px,11vw,240px\)\}\}/);
     assert.doesNotMatch(quaverCss, /\.grade-five-body \.quaver-guide \{ right: clamp\(72px, 6vw, 120px\); \}/);
-    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: max\(20px, env\(safe-area-inset-right\)\); \}\s*\}/);
+    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: max\(56px, env\(safe-area-inset-right\)\); \}\s*\}/);
   });
 
   it("keeps the mistake notebook inside a padded, responsive reading column", () => {

@@ -126,6 +126,18 @@ describe("daily practice domain", () => {
     assert.equal(reopened.mistakeCount, 2);
   });
 
+  it("resolves immediately after a correct dedicated notebook retry", () => {
+    const opened = applyNotebookAnswer(null, { date: "2026-08-26", isCorrect: false });
+    const resolved = applyNotebookAnswer(opened, {
+      date: "2026-08-26",
+      isCorrect: true,
+      resolveOnCorrect: true,
+    });
+
+    assert.equal(resolved.status, "resolved");
+    assert.equal(resolved.resolvedDate, "2026-08-26");
+  });
+
   it("formats a local calendar date without UTC rollover", () => {
     assert.equal(dailyDate(new Date(2026, 7, 3, 23, 59)), "2026-08-03");
   });

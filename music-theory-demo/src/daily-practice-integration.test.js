@@ -194,6 +194,7 @@ describe("daily practice integration", () => {
     assert.match(page, /ListeningDeskPracticeShell\.questionsFor/);
     assert.match(page, /challengeDate:params\.get\('daily'\)/);
     assert.match(page, /reviewMode=params\.get\('review'\)==='1'/);
+    assert.match(page, /resolveOnCorrect:reviewMode/);
     assert.match(page, /`grade-\$\{grade\}\.html\?overlay=daily-practice`/);
     assert.doesNotMatch(page, /params\.get\('daily'\)\?'daily-challenge\.html'/);
     assert.match(page, /mistake-notebook\.html/);

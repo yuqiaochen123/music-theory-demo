@@ -11,7 +11,7 @@ const PRISM_SILENT_SELECTOR = [
   ".listen", ".play-row button", ".editor-play", "[data-play]", "[data-play-source]",
   "[data-play-answer]", "[data-play-phrase]", "[data-play-transposed]",
   "[data-key-side]", "[data-key-compare]", "[data-answer]", "[data-check-answer]",
-  "[data-check-matches]",
+  "[data-check-matches]", "[data-quaver-chat] input", "[data-quaver-chat] textarea",
 ].join(",");
 
 export function interactiveClickTarget(target) {

@@ -65,10 +65,10 @@ describe("learning journey pages", () => {
 
   it("uses one restrained motion system across every app page", () => {
     for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html", "vexflow-cadence-proof.html"]) {
-      assert.match(page(file), /type="module" src="src\/motion\.js\?v=2026082[56]-(?:parity|curtain)1"/);
+      assert.match(page(file), /type="module" src="src\/motion\.js\?v=2026082[56]-(?:parity|curtain|quaver-input)1"/);
     }
     const motion = page("src/motion.js");
-    assert.match(motion, /from '.\/page-navigation\.js\?v=20260825-parity1'/);
+    assert.match(motion, /from '.\/page-navigation\.js\?v=20260826-quaver-input1'/);
     assert.match(motion, /document\.addEventListener\('pointerdown',[\s\S]*playPrismClick\(\)/);
     assert.match(motion, /clickAudioContext\.state !== 'running'[\s\S]*void clickAudioContext\.resume\(\)/);
     assert.match(motion, /document\.addEventListener\('click'/);
@@ -152,7 +152,7 @@ describe("learning journey pages", () => {
 
   it("provides a classic-script lesson fallback when opened directly from disk", () => {
     const topic = page("topic.html");
-    assert.match(topic, /location\.protocol==='file:'[\s\S]*src='src\/topic-file-runtime\.bundle\.js\?v=20260826-(?:audio-fallback|timeguide|transposition)1'/);
+    assert.match(topic, /location\.protocol==='file:'[\s\S]*src='src\/topic-file-runtime\.bundle\.js\?v=20260826-(?:audio-fallback1|timeguide1|transposition[12])'/);
     assert.doesNotMatch(topic, /<script src="src\/topic-file-runtime\.bundle\.js/);
     assert.match(page("src/topic-file-runtime.bundle.js"), /file:/);
   });

@@ -52,6 +52,14 @@ describe("curtain navigation helpers", () => {
     }
   });
 
+  it("keeps Quaver's follow-up text field silent while the learner types", () => {
+    const quaverInput = {
+      closest: () => ({ matches: selector => selector.includes("[data-quaver-chat] input") }),
+    };
+
+    assert.equal(interactiveClickTarget(quaverInput), null);
+  });
+
   it("accepts only an unmodified same-origin HTTP page navigation", () => {
     const current = "http://localhost:3000/grade-5.html";
     assert.equal(eligibleNavigation(anchor("topic.html?topic=rhythm-note-values"), click(), current)?.href,

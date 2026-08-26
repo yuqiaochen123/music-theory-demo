@@ -112,7 +112,7 @@ export function selectDailyChallenge({ exercises = [], attempts = [], notebook =
   return selected;
 }
 
-export function applyNotebookAnswer(record, { date = dailyDate(), isCorrect } = {}) {
+export function applyNotebookAnswer(record, { date = dailyDate(), isCorrect, resolveOnCorrect = false } = {}) {
   const current = record ? {
     status: record.status ?? "to_review",
     firstMistakeDate: record.firstMistakeDate ?? record.first_mistake_date,
@@ -137,6 +137,12 @@ export function applyNotebookAnswer(record, { date = dailyDate(), isCorrect } = 
     mistakeCount: current.mistakeCount + 1,
     successfulReviewDates: [],
     resolvedDate: null,
+  };
+  if (resolveOnCorrect && current.latestMistakeDate && current.status !== "hidden") return {
+    ...current,
+    status: "resolved",
+    successfulReviewDates: [...new Set([...current.successfulReviewDates, date])].sort(),
+    resolvedDate: date,
   };
   if (!current.latestMistakeDate || date <= current.latestMistakeDate || current.status === "hidden") return current;
   const successfulReviewDates = [...new Set([...current.successfulReviewDates, date])].sort();
