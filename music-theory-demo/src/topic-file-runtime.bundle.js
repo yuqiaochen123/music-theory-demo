@@ -21831,7 +21831,7 @@ ${suffix}`;
     root.style?.setProperty?.("--playback-volume", `${preferences.volume}%`);
   }
 
-  // src/piano-audio.js?v=20260826-boost3
+  // src/piano-audio.js?v=20260826-audio-fallback1
   var import_meta = {};
   applyPreferences(loadPreferences());
   var SAMPLE_ANCHORS = [
@@ -21881,6 +21881,7 @@ ${suffix}`;
     const buffers = /* @__PURE__ */ new Map();
     let context = null;
     let sampledOutput = null;
+    let samplePlaybackAvailable = true;
     const playbackSettings = () => {
       const preferences = getPreferences?.() || {};
       const savedVolume = Number(preferences.volume);
@@ -21957,7 +21958,14 @@ ${suffix}`;
         const sample = nearestPianoSample(midi);
         return [sample.file, sample];
       })).values()];
-      await Promise.all(samples.map(loadBuffer));
+      if (samplePlaybackAvailable) {
+        try {
+          await Promise.all(samples.map(loadBuffer));
+        } catch {
+          samplePlaybackAvailable = false;
+          buffers.clear();
+        }
+      }
       return audioContext;
     };
     const scheduleBufferedVoice = async (midi, startAt, duration) => {
@@ -22003,7 +22011,7 @@ ${suffix}`;
       oscillator.onended = () => voices.delete(oscillator);
       return oscillator;
     };
-    const scheduleContextVoice = (midi, startAt, duration) => playbackSettings().instrument === "felt-piano" ? scheduleBufferedVoice(midi, startAt, duration) : scheduleSynthVoice(midi, startAt, duration);
+    const scheduleContextVoice = (midi, startAt, duration) => playbackSettings().instrument === "felt-piano" && samplePlaybackAvailable ? scheduleBufferedVoice(midi, startAt, duration) : scheduleSynthVoice(midi, startAt, duration);
     const play = async (midis, { delay = 0, spread = 0, duration = 0.62, startAt } = {}) => {
       const audioContext = await prepare(midis);
       if (audioContext) {

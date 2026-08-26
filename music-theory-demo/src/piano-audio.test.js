@@ -142,3 +142,40 @@ test('uses a synthesized oscillator voice for the organ instrument', async () =>
   assert.equal(oscillators[0].frequency.value, 440);
   assert.ok(gains.some(value => Math.abs(value - 0.425) < 0.000001));
 });
+
+test('falls back to a synthesized voice when felt-piano samples cannot be decoded', async () => {
+  const oscillators = [];
+  const context = {
+    currentTime: 3,
+    state: 'running',
+    destination: {},
+    createOscillator() {
+      const oscillator = {
+        frequency: { value: 0 },
+        connect() { return this; },
+        start(time) { this.startedAt = time; },
+        stop(time) { this.stoppedAt = time; },
+      };
+      oscillators.push(oscillator);
+      return oscillator;
+    },
+    createGain() {
+      return {
+        gain: { setValueAtTime() {}, linearRampToValueAtTime() {} },
+        connect() { return this; },
+      };
+    },
+    async decodeAudioData() { throw new DOMException('Unable to decode audio data', 'EncodingError'); },
+  };
+  const player = createPianoPlayer({
+    AudioContextFactory: class { constructor() { return context; } },
+    fetchArrayBuffer: async () => new ArrayBuffer(8),
+    getPreferences: () => ({ volume: 70, instrument: 'felt-piano' }),
+  });
+
+  await player.play([69], { duration: 0.5 });
+
+  assert.equal(oscillators.length, 1);
+  assert.equal(oscillators[0].frequency.value, 440);
+  assert.equal(oscillators[0].startedAt, 3.06);
+});

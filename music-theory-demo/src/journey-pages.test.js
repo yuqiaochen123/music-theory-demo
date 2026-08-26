@@ -145,7 +145,8 @@ describe("learning journey pages", () => {
 
   it("provides a classic-script lesson fallback when opened directly from disk", () => {
     const topic = page("topic.html");
-    assert.match(topic, /src="src\/topic-file-runtime\.bundle\.js\?v=20260826-intervalback1"/);
+    assert.match(topic, /location\.protocol==='file:'[\s\S]*src='src\/topic-file-runtime\.bundle\.js\?v=20260826-audio-fallback1'/);
+    assert.doesNotMatch(topic, /<script src="src\/topic-file-runtime\.bundle\.js/);
     assert.match(page("src/topic-file-runtime.bundle.js"), /file:/);
   });
 

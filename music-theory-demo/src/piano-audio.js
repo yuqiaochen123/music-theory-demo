@@ -55,6 +55,7 @@ export function createPianoPlayer({
   const buffers = new Map();
   let context = null;
   let sampledOutput = null;
+  let samplePlaybackAvailable = true;
 
   const playbackSettings = () => {
     const preferences = getPreferences?.() || {};
@@ -138,7 +139,14 @@ export function createPianoPlayer({
       const sample = nearestPianoSample(midi);
       return [sample.file, sample];
     })).values()];
-    await Promise.all(samples.map(loadBuffer));
+    if (samplePlaybackAvailable) {
+      try {
+        await Promise.all(samples.map(loadBuffer));
+      } catch {
+        samplePlaybackAvailable = false;
+        buffers.clear();
+      }
+    }
     return audioContext;
   };
 
@@ -187,7 +195,7 @@ export function createPianoPlayer({
     return oscillator;
   };
 
-  const scheduleContextVoice = (midi, startAt, duration) => playbackSettings().instrument === 'felt-piano'
+  const scheduleContextVoice = (midi, startAt, duration) => playbackSettings().instrument === 'felt-piano' && samplePlaybackAvailable
     ? scheduleBufferedVoice(midi, startAt, duration)
     : scheduleSynthVoice(midi, startAt, duration);
 
