@@ -189,6 +189,12 @@ test('uses gradient-free frosted glass for the Quaver bubble on the Grade 5 page
   assert.doesNotMatch(gradeFiveBubbleRule, /gradient/);
 });
 
+test('keeps Quaver on the right with a comfortable large-screen edge inset', async () => {
+  const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
+  const desktopRule = css.match(/@media\s*\(min-width:\s*1200px\)\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+  assert.match(desktopRule, /\.grade-five-body\s+\.quaver-guide\s*\{\s*right:\s*max\(96px,\s*env\(safe-area-inset-right\)\)/);
+});
+
 test('uses a readable medium weight for Quaver follow-up messages', async () => {
   const css = await readFile(resolve(root, 'src/quaver-guide.css'), 'utf8');
   const messageRule = css.match(/\.quaver-chat__message\s*\{([^}]*)\}/s)?.[1] || '';

@@ -444,12 +444,12 @@ describe("daily practice UI", () => {
     assert.match(css, /\.grade-five-page \.curriculum-tabs\{[^}]*margin-top:-1px/);
   });
 
-  it("keeps the notebook clear while Quaver stays close to the right edge", () => {
+  it("keeps the notebook clear while Quaver stays inset on the right", () => {
     const dailyCss = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     const quaverCss = readFileSync(new URL("./quaver-guide.css", import.meta.url), "utf8");
     assert.match(dailyCss, /@media\(min-width:1200px\)\{\.global-learning-tools>\[data-notebook-shortcut\]\{right:clamp\(150px,11vw,240px\)\}\}/);
     assert.doesNotMatch(quaverCss, /\.grade-five-body \.quaver-guide \{ right: clamp\(72px, 6vw, 120px\); \}/);
-    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: max\(56px, env\(safe-area-inset-right\)\); \}\s*\}/);
+    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: max\(96px, env\(safe-area-inset-right\)\); \}\s*\}/);
   });
 
   it("keeps the mistake notebook inside a padded, responsive reading column", () => {
