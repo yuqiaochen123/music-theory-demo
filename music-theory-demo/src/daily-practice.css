@@ -165,8 +165,9 @@
 .notebook-overlay__head h2{margin:0;color:#2a0b1c;font-size:clamp(38px,4.8vw,52px);font-weight:620;line-height:1.03;letter-spacing:-.045em}
 .notebook-overlay__head h2 em{color:#9a2f5a;font-style:normal}
 .notebook-overlay__head>p:last-child{max-width:590px;margin:12px 0 0;color:#74666b;font-size:15px;line-height:1.5}
-.notebook-overlay__content{display:flex;min-width:0;min-height:0;flex:1;flex-direction:column;padding:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch}
-.notebook-overlay .notebook-tabs{position:sticky;top:0;flex:none;margin:0 0 16px}
+.notebook-overlay__content{display:flex;min-width:0;min-height:0;flex:1;flex-direction:column;padding:0;overflow:hidden}
+.notebook-overlay .notebook-tabs{position:static;flex:none;margin:0 0 16px}
+.notebook-overlay .notebook-scroll-region{min-width:0;min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch}
 .notebook-overlay .notebook-list{min-height:0;flex:none;padding:0 6px 12px 0;overflow:visible}
 .notebook-overlay .notebook-tabs a{font-weight:650}
 .notebook-overlay .notebook-card-head{font-weight:650}

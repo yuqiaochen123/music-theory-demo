@@ -135,6 +135,16 @@ describe("Grade 5 practice quality", () => {
     }
   });
 
+  it("uses a meaningful term for the clef-transposition rhythm clue", () => {
+    const exercise = practice["clef-transposition"].exercises.find(item => item.id === "clef-transposition-variety-match");
+    const rhythmTarget = exercise.targets.find(target => target.label === "Durations remain identical.");
+    const expectedLabelId = exercise.expected[rhythmTarget.id];
+    const expectedLabel = exercise.labels.find(label => label.id === expectedLabelId);
+
+    assert.equal(expectedLabel.text, "Same rhythm");
+    assert.notEqual(expectedLabel.text, "No");
+  });
+
   it("gives every time-signature matching excerpt complete timed playback with silent rests", () => {
     const exercise = practice["time-signatures"].exercises.find(item => item.id === "time-signatures-variety-match");
     for (const target of exercise.targets) {

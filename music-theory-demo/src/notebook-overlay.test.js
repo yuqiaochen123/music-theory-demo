@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import * as notebookOverlay from "./notebook-overlay.js";
+import { notebookMarkup } from "./daily-practice-ui.js";
 
-const { notebookOverlayMarkup, notebookStatusFromHref } = notebookOverlay;
+const { notebookOverlayMarkup, notebookOverlayRequested, notebookStatusFromHref } = notebookOverlay;
 
 describe("mistake notebook overlay", () => {
   it("asks for sign-in only when authentication is actually required", () => {
@@ -51,11 +52,25 @@ describe("mistake notebook overlay", () => {
     assert.equal(notebookStatusFromHref("practice.html?topic=clefs"), null);
   });
 
+  it("recognizes a Grade-page return request and preserves the requested notebook tab", () => {
+    assert.equal(notebookOverlayRequested({ search: "?overlay=mistake-notebook" }), "to_review");
+    assert.equal(notebookOverlayRequested({ search: "?overlay=mistake-notebook&status=resolved" }), "resolved");
+    assert.equal(notebookOverlayRequested({ search: "?overlay=daily-practice" }), null);
+    assert.equal(notebookOverlayRequested({ search: "" }), null);
+  });
+
+  it("keeps the notebook tab in every practice-review return route", () => {
+    const toReview = notebookMarkup({ status: "to_review", items: [{ grade: 5, topic_id: "clefs", exercise_id: "c1", mistake_count: 1, prompt: "Read it", latest_mistake_date: "2026-08-26" }], today: "2026-08-26" });
+    const resolved = notebookMarkup({ status: "resolved", items: [{ grade: 5, topic_id: "clefs", exercise_id: "c1", mistake_count: 1, prompt: "Read it", resolved_date: "2026-08-26" }], today: "2026-08-26" });
+    assert.match(toReview, /notebookStatus=to_review/);
+    assert.match(resolved, /notebookStatus=resolved/);
+  });
+
   it("wires the overlay controller into both supported grade pages", () => {
     for (const pageName of ["grade-4.html", "grade-5.html"]) {
       const html = readFileSync(new URL(`../${pageName}`, import.meta.url), "utf8");
       assert.match(html, /src\/notebook-overlay\.js/);
-      assert.match(html, /src\/notebook-overlay\.js\?v=2026082[56]-(?:layout3|global[12])/);
+      assert.match(html, /src\/notebook-overlay\.js\?v=2026082[56]-(?:layout3|global[123])/);
       assert.match(html, /src\/notebook-shortcut\.js\?v=20260825-book2/);
     }
   });
@@ -69,7 +84,7 @@ describe("mistake notebook overlay", () => {
   it("contains long notebook content without border collisions", () => {
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     assert.match(css, /\.notebook-overlay__panel\{[^}]*overflow:hidden/);
-    assert.match(css, /\.notebook-overlay__content\{[^}]*min-width:0[^}]*flex:1[^}]*overflow-y:auto/);
+    assert.match(css, /\.notebook-overlay__content\{[^}]*min-width:0[^}]*flex:1[^}]*overflow:hidden/);
     assert.match(css, /\.notebook-tabs\{[^}]*height:auto[^}]*flex-wrap:wrap/);
     assert.match(css, /\.notebook-tabs a\{[^}]*display:inline-flex[^}]*height:auto[^}]*align-items:center/);
     assert.match(css, /\.notebook-overlay \.notebook-card[^}]*overflow-wrap:anywhere/);
@@ -78,9 +93,12 @@ describe("mistake notebook overlay", () => {
   });
 
   it("lets the complete notebook content scroll when several exercise cards are present", () => {
+    const html = notebookMarkup({ items: [] });
     const css = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
-    assert.match(css, /\.notebook-overlay__content\{[^}]*display:flex[^}]*flex-direction:column[^}]*overflow-y:auto[^}]*-webkit-overflow-scrolling:touch/);
-    assert.match(css, /\.notebook-overlay \.notebook-tabs\{[^}]*position:sticky[^}]*top:0[^}]*flex:none/);
+    assert.match(html, /<\/nav><div class="notebook-scroll-region">/);
+    assert.match(css, /\.notebook-overlay__content\{[^}]*display:flex[^}]*flex-direction:column[^}]*overflow:hidden/);
+    assert.match(css, /\.notebook-overlay \.notebook-tabs\{[^}]*position:static[^}]*flex:none/);
+    assert.match(css, /\.notebook-overlay \.notebook-scroll-region\{[^}]*min-height:0[^}]*flex:1[^}]*overflow-y:auto[^}]*-webkit-overflow-scrolling:touch/);
     assert.match(css, /\.notebook-overlay \.notebook-list\{[^}]*overflow:visible/);
   });
 

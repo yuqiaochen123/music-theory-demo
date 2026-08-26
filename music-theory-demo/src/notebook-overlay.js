@@ -10,6 +10,12 @@ export function notebookStatusFromHref(href) {
   return new URL(String(href), "https://listening-desk.local/").searchParams.get("status") === "resolved" ? "resolved" : "to_review";
 }
 
+export function notebookOverlayRequested(locationObject = globalThis.location) {
+  const params = new URLSearchParams(locationObject?.search ?? "");
+  if (params.get("overlay") !== "mistake-notebook") return null;
+  return params.get("status") === "resolved" ? "resolved" : "to_review";
+}
+
 export function notebookOverlayMarkup() {
   return `<div class="notebook-overlay" data-notebook-overlay><button class="notebook-overlay__backdrop" type="button" data-notebook-overlay-close tabindex="-1" aria-label="Close Mistake Notebook"></button><section class="notebook-overlay__panel" role="dialog" aria-modal="true" aria-labelledby="notebook-overlay-title"><button class="notebook-overlay__close" type="button" data-notebook-overlay-close aria-label="Close Mistake Notebook">×</button><main class="notebook-overlay__sheet"><header class="notebook-overlay__head"><p class="eyebrow">Your learning history</p><h2 id="notebook-overlay-title">Mistake <em>Notebook.</em></h2><p>Return to difficult ideas until they become secure.</p></header><div class="notebook-overlay__content" data-notebook-overlay-content aria-live="polite"><p class="daily-loading">Opening your notebook…</p></div></main></section></div>`;
 }
@@ -36,14 +42,14 @@ async function renderNotebook(root, { status }) {
   }
 }
 
-export function openNotebookOverlay() {
+export function openNotebookOverlay({ initialStatus = "to_review" } = {}) {
   const previousFocus = document.activeElement;
   const wrapper = document.createElement("div");
   wrapper.innerHTML = notebookOverlayMarkup();
   const overlay = wrapper.firstElementChild;
   const panel = overlay.querySelector(".notebook-overlay__panel");
   const content = overlay.querySelector("[data-notebook-overlay-content]");
-  let status = "to_review";
+  let status = initialStatus === "resolved" ? "resolved" : "to_review";
 
   const close = () => {
     document.removeEventListener("keydown", onKeydown);
@@ -125,4 +131,6 @@ if (typeof document !== "undefined") {
     event.stopPropagation();
     if (!document.querySelector("[data-notebook-overlay]")) openNotebookOverlay();
   }, true);
+  const requestedStatus = notebookOverlayRequested(document.defaultView?.location);
+  if (requestedStatus && !document.querySelector("[data-notebook-overlay]")) openNotebookOverlay({ initialStatus: requestedStatus });
 }

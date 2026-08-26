@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { describe, it } from "node:test";
 import { recordAnswer, recordDailyPracticeEnhancements } from "./progress-page.js";
+import { focusedPracticeReturnHref } from "./practice-navigation.js";
 
 function loadPracticeShell() {
   const window = { URLSearchParams };
@@ -32,6 +33,13 @@ describe("daily practice integration", () => {
     const bank = { exercises: [{ id: "one" }, { id: "two" }] };
     assert.deepEqual(Array.from(shell.questionsFor(bank, "two"), item => item.id), ["two"]);
     assert.deepEqual(Array.from(shell.questionsFor(bank, "missing"), item => item.id), ["one", "two"]);
+  });
+
+  it("returns notebook reviews to the grade page with the notebook overlay reopened", () => {
+    assert.equal(focusedPracticeReturnHref({ grade: 5, reviewMode: true }), "grade-5.html?overlay=mistake-notebook&status=to_review");
+    assert.equal(focusedPracticeReturnHref({ grade: 4, reviewMode: true, notebookStatus: "resolved" }), "grade-4.html?overlay=mistake-notebook&status=resolved");
+    assert.equal(focusedPracticeReturnHref({ grade: 2, daily: true }), "grade-2.html?overlay=daily-practice");
+    assert.equal(focusedPracticeReturnHref({ grade: 5, fallback: "topic.html?topic=intervals" }), "topic.html?topic=intervals");
   });
 
   it("records the daily challenge before secondary notebook work", async () => {
@@ -195,8 +203,8 @@ describe("daily practice integration", () => {
     assert.match(page, /challengeDate:params\.get\('daily'\)/);
     assert.match(page, /reviewMode=params\.get\('review'\)==='1'/);
     assert.match(page, /resolveOnCorrect:reviewMode/);
-    assert.match(page, /`grade-\$\{grade\}\.html\?overlay=daily-practice`/);
     assert.doesNotMatch(page, /params\.get\('daily'\)\?'daily-challenge\.html'/);
-    assert.match(page, /mistake-notebook\.html/);
+    assert.match(page, /focusedPracticeReturnHref/);
+    assert.doesNotMatch(page, /reviewMode\?'mistake-notebook\.html'/);
   });
 });

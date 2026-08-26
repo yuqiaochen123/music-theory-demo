@@ -24,3 +24,12 @@ export function createSaveGatedNavigation({ navigate, onWaiting } = {}) {
     },
   };
 }
+
+export function focusedPracticeReturnHref({ grade = 5, reviewMode = false, notebookStatus = "to_review", daily = false, fallback = "" } = {}) {
+  if (reviewMode) {
+    const status = notebookStatus === "resolved" ? "resolved" : "to_review";
+    return `grade-${grade}.html?overlay=mistake-notebook&status=${status}`;
+  }
+  if (daily) return `grade-${grade}.html?overlay=daily-practice`;
+  return fallback;
+}

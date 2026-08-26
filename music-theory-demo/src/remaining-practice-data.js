@@ -3,7 +3,7 @@
   const melody=(notes,clef='treble',key=null,durations=null)=>({type:'melody',notes,slots:notes.map((_,index)=>index*4),durations:durations||notes.map(()=>"q"),clef,key,barCount:Math.max(1,Math.ceil(notes.length/4))});
   const rhythm=(events,meter=[4,4])=>({type:'rhythm',meter,events,showTimeSignature:true});
   const score=(id,prompt,answer,choices,notation,midis)=>({id,prompt,answer,choices,notation,midis});
-  const q=(id,prompt,answer,choices,symbol,detail)=>({id,prompt,answer,choices,musical:false,concept:{symbol,kicker:'Question clue',detail}});
+  const q=(id,prompt,answer,choices,symbol,detail,matchingAnswer)=>({id,prompt,answer,choices,musical:false,concept:{symbol,kicker:'Question clue',detail},matchingAnswer});
   const matching=(id,prompt,labels,targets,expected)=>({id,prompt,answer:'correct',interaction:'matching',labels,targets,expected});
   const entry=(id,prompt,instruction,source,expected)=>({id,prompt,instruction,answer:'correct',interaction:'notation-entry',source,expected});
   const phrase=(notes,key='C',clef='treble')=>({...melody(notes,clef,key),key,clef});
@@ -41,7 +41,7 @@
     entry('ct-3','Rewrite the extract one octave higher.','Preserve each letter name, accidental, and note value.',phrase(['c/4','d/4','f#/4']),phrase(['c/5','d/5','f#/5'])),
     score('ct-4','Which pitch is this note transposed down one octave?','G3',['F3','G3','G5'],melody(['g/4']),[67]),
     score('ct-5','Which pitch is this note transposed up one octave?','B4',['A4','B4','C4'],melody(['b/3']),[59]),
-    q('ct-6','Does octave transposition change rhythm?','No',['Yes','No','Only tied notes'],'♩ = ♩','Durations remain identical.'),
+    q('ct-6','Does octave transposition change rhythm?','No',['Yes','No','Only tied notes'],'♩ = ♩','Durations remain identical.','Same rhythm'),
     score('ct-7','This note is middle C in alto clef. Which line is it on?','Third',['Second','Third','Fourth'],melody(['c/4'],'alto'),[60]),
     score('ct-8','This note is middle C in tenor clef. Which line is it on?','Fourth',['Third','Fourth','Fifth'],melody(['c/4'],'tenor'),[60]),
     score('ct-9','After octave transposition, what happens to the sharp?','It remains',['It disappears','It remains','It becomes flat'],melody(['f#/4']),[66]),
@@ -128,7 +128,7 @@
       unique.some(item=>item.derivedNotation)
         ? 'Match each fresh score or listening excerpt to its musical answer.'
         : 'Match each fresh musical clue to its most appropriate term.',
-      unique.map((item,index)=>({id:`variety-label-${index}`,text:item.answer})),
+      unique.map((item,index)=>({id:`variety-label-${index}`,text:item.matchingAnswer||item.answer})),
       reversed.map((item,index)=>{
         const rhythmEvents=topicId==='time-signatures'?item.events:null;
         const unitSeconds=item.unit?0.44*4/item.unit:0.24;

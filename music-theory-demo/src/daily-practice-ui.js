@@ -95,7 +95,7 @@ export function challengeMarkup({ challenge, registry, preview = false, streak =
 
 function notebookCards(items, { resolved = false } = {}) {
   return items.map(item => {
-    const params = new URLSearchParams({ grade: String(item.grade), topic: item.topic_id, exercise: item.exercise_id, review: "1" });
+    const params = new URLSearchParams({ grade: String(item.grade), topic: item.topic_id, exercise: item.exercise_id, review: "1", notebookStatus: resolved ? "resolved" : "to_review" });
     const topic = String(item.topic_id ?? "practice").replaceAll("-", " ");
     return `<article class="notebook-card"><div class="notebook-card-head"><span>Grade ${escapeHtml(item.grade)} · ${escapeHtml(topic)}</span><small>${resolved ? `Resolved ${escapeHtml(item.resolved_date)}` : `${item.mistake_count} mistake${item.mistake_count === 1 ? "" : "s"}`}</small></div><h2>${escapeHtml(item.prompt || "Review this exercise")}</h2><div class="notebook-actions"><a href="practice.html?${escapeHtml(params.toString())}">${resolved ? "Practise again" : "Practise this"}</a>${resolved ? "" : `<button type="button" data-discard-mistake="${escapeHtml(item.exercise_id)}" data-grade="${escapeHtml(item.grade)}" data-topic="${escapeHtml(item.topic_id)}">Discard</button><span class="notebook-discard-status" data-discard-status aria-live="polite"></span>`}</div></article>`;
   }).join("");
@@ -107,7 +107,7 @@ export function notebookMarkup({ status = "to_review", items = [], today = daily
   const history = groupNotebookHistory({ items, status, today });
   const todayContent = history.today.length ? notebookCards(history.today, { resolved }) : `<div class="notebook-day-empty"><strong>${resolved ? "No mistakes resolved today." : "No mistakes today."}</strong><p>${resolved ? "Resolved exercises from the last week are available below." : "Keep practising—new mistakes will appear here automatically."}</p></div>`;
   const older = history.older.length ? `<button class="notebook-older-toggle" type="button" data-expand-older-mistakes aria-expanded="false" aria-controls="older-mistakes">Expand older mistakes</button><div id="older-mistakes" class="notebook-older" hidden>${history.older.map(group => `<section class="notebook-day"><h2>${escapeHtml(group.label)}</h2><div class="notebook-list">${notebookCards(group.items, { resolved })}</div></section>`).join("")}</div>` : "";
-  return `${tabs}<section class="notebook-day" aria-labelledby="notebook-today"><h2 id="notebook-today">Today</h2><div class="notebook-list">${todayContent}</div></section>${older}`;
+  return `${tabs}<div class="notebook-scroll-region"><section class="notebook-day" aria-labelledby="notebook-today"><h2 id="notebook-today">Today</h2><div class="notebook-list">${todayContent}</div></section>${older}</div>`;
 }
 
 export async function discardNotebookItemFromView({ button, discard } = {}) {
