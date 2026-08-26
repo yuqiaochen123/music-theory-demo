@@ -50,7 +50,7 @@
 .grade-five-page .curriculum-tabs button{padding:7px 12px;font-size:13px}
 .grade-five-page .curriculum{height:calc(100% - 48px)}
 .grade-five-page .curriculum-section{box-sizing:border-box;padding-bottom:108px}
-.grade-five-body .quaver-guide{--quaver-safe-bottom:104px!important}
+.grade-five-body .quaver-guide{--quaver-safe-bottom:84px!important}
 @media(max-width:720px){.grade-five-body .grade-five-topbar{height:54px}.grade-five-body>.grade-five-page{height:calc(100vh - 54px);padding-top:9px}.grade-five-page .daily-practice-summary{bottom:10px;width:calc(100% - 24px)}.grade-five-page .curriculum-tabs{height:36px;margin-bottom:8px}.grade-five-page .curriculum-tabs button{padding:6px 10px}.grade-five-page .curriculum{height:calc(100% - 44px)}.grade-five-page .curriculum-section{padding-bottom:116px}.grade-five-body .quaver-guide{--quaver-safe-bottom:124px!important}}
 @media(prefers-reduced-motion:reduce){.daily-streak canvas{display:none}.daily-streak__fallback[hidden]{display:grid}}
 
@@ -204,7 +204,7 @@
 .global-learning-tools>[data-notebook-shortcut]{position:absolute;right:clamp(18px,3vw,42px);top:clamp(72px,9vh,104px);bottom:auto;left:auto;width:clamp(142px,14vw,184px);transform:none}
 .global-learning-tools .notebook-shortcut__bubble{right:calc(100% - 26px);top:52px}
 .global-learning-tools .daily-practice-summary{position:fixed;bottom:18px;left:50%;z-index:32;width:calc(100% - 32px);max-width:690px;margin:0;transform:translateX(-50%);filter:drop-shadow(0 12px 24px rgba(42,11,28,.24))}
-@media(min-width:1200px){.global-learning-tools>[data-notebook-shortcut]{right:clamp(150px,11vw,240px)}}
+@media(min-width:1200px){.global-learning-tools>[data-notebook-shortcut]{right:clamp(230px,15vw,320px);top:clamp(102px,12vh,134px)}}
 
 .notebook-day{min-width:0}
 .notebook-day>h2{margin:8px 0 14px;color:#631838;font-size:clamp(20px,2.5vw,27px);font-weight:650;letter-spacing:-.02em}

@@ -2,7 +2,7 @@ import {
   NATURAL_PITCHES, addNote, applyAccidental, canPlaceNote, clearPhrase, createEditorState,
   deleteSelected, noteMidi, pitchLabel, placeAtCursor, rhythmicRests, selectNote, undo,
 } from "./clef-transposition-editor.js";
-import { ledgerLineYsForPitch, pitchFromStaffPoint, yForPitch } from "./clef-transposition-editor-ui.js?v=20260825-ledgers1";
+import { ledgerLineYsForPitch, pitchFromStaffPoint, yForPitch } from "./clef-transposition-editor-ui.js?v=20260826-clefhover1";
 import { validateNotationAnswer } from "./notation-answer.js";
 
 export function createNotationPracticeState(exercise) {

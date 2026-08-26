@@ -76,7 +76,7 @@
   <footer id="footer" hidden></footer>
   <script src="vendor/vexflow-5.0.0.js"></script>
   <script type="module" src="src/auth-nav.js"></script>
-  <script src="src/notation.js?v=20260826-cancellation1"></script>
+  <script src="src/notation.js?v=20260826-clefhover1"></script>
   <script src="src/topic-data.js?v=20260826-timeguide1"></script>
   <script src="src/remaining-topic-data.js?v=20260826-transposition2"></script>
   <script src="src/grade-1-topic-data.js?v=20260826-grade1"></script>
@@ -87,7 +87,7 @@
     import { startCurrentLesson } from './src/progress-page.js';
     import { configureIntervalBackLink, initialIntervalOverviewSlide } from './src/interval-navigation.js';
     import { INTERVAL_LESSONS, getIntervalLesson } from './src/intervals.js';
-    import { mountClefTranspositionEditor } from './src/clef-transposition-editor-ui.js?v=20260822-g4abrsm2';
+    import { mountClefTranspositionEditor } from './src/clef-transposition-editor-ui.js?v=20260826-clefhover1';
     import { pianoPlayer } from './src/piano-audio.js?v=20260826-audio-fallback1';
     const query=new URLSearchParams(location.search);const requestedGrade=Number(query.get('grade'));const grade=[1,2,3,4].includes(requestedGrade)?requestedGrade:5;const registries={1:window.ListeningDeskGrade1Topics,2:window.ListeningDeskGrade2Topics,3:window.ListeningDeskGrade3Topics,4:window.ListeningDeskGrade4Topics,5:window.ListeningDeskTopics};const DATA=registries[grade];let topic=query.get('topic');const defaultTopics={1:'note-values-rests',2:'simple-time',3:'compound-time',4:'rhythm-note-values',5:'intervals'};if(!DATA[topic])topic=defaultTopics[grade];const gradeQuery=grade===5?'':`grade=${grade}&`;
     const lessonId=query.get('lesson');const intervalLesson=grade===5&&topic==='intervals'&&lessonId?getIntervalLesson(lessonId):undefined;

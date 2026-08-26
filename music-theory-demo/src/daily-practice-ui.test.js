@@ -429,7 +429,7 @@ describe("daily practice UI", () => {
     assert.match(css, /\.daily-streak__fallback\{[^}]*position:absolute/);
     assert.match(css, /@media\(max-width:520px\)\{[^}]*\.daily-streak\{width:46px;height:46px/);
     assert.match(css, /\.grade-five-page \.curriculum-section\{[^}]*padding-bottom:108px/);
-    assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:104px!important\}/);
+    assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:84px!important\}/);
     assert.match(css, /\.grade-five-page \.daily-practice-summary\{bottom:10px;width:calc\(100% - 24px\)\}/);
     assert.match(css, /\.grade-five-body \.quaver-guide\{--quaver-safe-bottom:124px!important\}/);
   });
@@ -447,9 +447,9 @@ describe("daily practice UI", () => {
   it("keeps the notebook clear while Quaver stays inset on the right", () => {
     const dailyCss = readFileSync(new URL("./daily-practice.css", import.meta.url), "utf8");
     const quaverCss = readFileSync(new URL("./quaver-guide.css", import.meta.url), "utf8");
-    assert.match(dailyCss, /@media\(min-width:1200px\)\{\.global-learning-tools>\[data-notebook-shortcut\]\{right:clamp\(150px,11vw,240px\)\}\}/);
+    assert.match(dailyCss, /@media\(min-width:1200px\)\{\.global-learning-tools>\[data-notebook-shortcut\]\{right:clamp\(230px,15vw,320px\);top:clamp\(102px,12vh,134px\)\}\}/);
     assert.doesNotMatch(quaverCss, /\.grade-five-body \.quaver-guide \{ right: clamp\(72px, 6vw, 120px\); \}/);
-    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: max\(96px, env\(safe-area-inset-right\)\); \}\s*\}/);
+    assert.match(quaverCss, /@media \(min-width: 1200px\) \{\s*\.grade-five-body \.quaver-guide \{ right: max\(156px, env\(safe-area-inset-right\)\); \}\s*\}/);
   });
 
   it("keeps the mistake notebook inside a padded, responsive reading column", () => {

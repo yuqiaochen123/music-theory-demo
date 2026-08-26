@@ -9,8 +9,8 @@ const notationPracticeSource = readFileSync(new URL("./notation-practice.js", im
 
 describe("clef transposition lesson editor", () => {
   it("cache-busts the ledger-line helper through the browser module chain", () => {
-    assert.match(notationPracticeSource, /clef-transposition-editor-ui\.js\?v=20260825-ledgers1/);
-    assert.match(practicePage, /notation-practice\.js\?v=20260825-ledgers1/);
+    assert.match(notationPracticeSource, /clef-transposition-editor-ui\.js\?v=20260826-clefhover1/);
+    assert.match(practicePage, /notation-practice\.js\?v=20260826-clefhover1/);
   });
   it("places accurate ledger lines around hover notes outside the five-line staff", () => {
     const staffLines = [72, 82, 92, 102, 112];
@@ -65,6 +65,21 @@ describe("clef transposition lesson editor", () => {
     const pitchYs = { "c/4": 107, "d/4": 102, "e/4": 97, "f/4": 92 };
     assert.equal(pitchFromStaffPoint(394, rect, pitchYs), "e/4");
     assert.equal(yForPitch("e/4", pitchYs), 97);
+  });
+
+  it("maps hover positions from the engraved pitch grid for bass clef notes", () => {
+    const rect = { top: 100, height: 190 };
+    const bassPitchYs = {
+      "e/2": 122,
+      "f/2": 117,
+      "g/2": 112,
+      "a/2": 107,
+      "b/2": 102,
+      "c/3": 97,
+    };
+    assert.equal(pitchFromStaffPoint(222, rect, bassPitchYs), "e/2");
+    assert.equal(pitchFromStaffPoint(197, rect, bassPitchYs), "c/3");
+    assert.equal(yForPitch("a/2", bassPitchYs), 107);
   });
 
   it("distinguishes occupied note slots from empty staff space", () => {

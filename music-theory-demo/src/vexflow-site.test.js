@@ -16,7 +16,7 @@ describe("site-wide live notation", () => {
 
   it("uses the current notation renderer cache key on direct-file pages", () => {
     for (const page of [read("topic.html"), read("practice.html")]) {
-      assert.match(page, /src\/notation\.js\?v=20260826-(?:scalehover|cancellation)1/);
+      assert.match(page, /src\/notation\.js\?v=20260826-clefhover1/);
       assert.doesNotMatch(page, /src\/notation\.js\?v=20260823-keysignature1/);
     }
   });

@@ -2,11 +2,16 @@ import {
   NATURAL_PITCHES, NOTE_DURATIONS, addBars, applyAccidental, canPlaceNote, clearPhrase,
   createEditorState, deleteSelected, durationLabel, noteMidi, pitchLabel, placeAtCursor, rhythmicRests,
   selectNote, setTargetKey, transposePhrase, transposePhraseAtOctave, undo,
-} from "./clef-transposition-editor.js?v=20260822-g4abrsm1";
+} from "./clef-transposition-editor.js?v=20260826-clefhover1";
+
+const DEFAULT_TREBLE_PITCHES = Object.freeze([
+  "c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4",
+  "c/5", "d/5", "e/5", "f/5", "g/5",
+]);
 
 export function yForPitch(pitch, pitchYs = null) {
   if (pitchYs && Number.isFinite(Number(pitchYs[pitch]))) return Number(pitchYs[pitch]);
-  const pitchIndex = NATURAL_PITCHES.indexOf(pitch);
+  const pitchIndex = DEFAULT_TREBLE_PITCHES.indexOf(pitch);
   return pitchIndex < 0 ? null : 122 - (pitchIndex * 60) / 11;
 }
 
@@ -31,19 +36,21 @@ export function ledgerLineYsForPitch(noteY, staffLineYs = null) {
 export function pitchFromStaffPoint(clientY, rect, pitchYs = null) {
   const engravingY = ((clientY - rect.top) / rect.height) * 190;
   if (pitchYs) {
-    const candidates = NATURAL_PITCHES
-      .map((pitch) => ({ pitch, y: Number(pitchYs[pitch]) }))
+    const candidates = Object.entries(pitchYs)
+      .map(([pitch, y]) => ({ pitch, y: Number(y) }))
       .filter(({ y }) => Number.isFinite(y));
     if (candidates.length) {
+      candidates.sort((left, right) => left.y - right.y);
       const nearest = candidates.reduce((best, candidate) => (
         Math.abs(candidate.y - engravingY) < Math.abs(best.y - engravingY) ? candidate : best
       ));
-      const step = candidates.length > 1 ? Math.abs(candidates[1].y - candidates[0].y) : 5;
+      const steps = candidates.slice(1).map((candidate, index) => Math.abs(candidate.y - candidates[index].y)).filter(step => step > 0);
+      const step = steps.length ? Math.min(...steps) : 5;
       return Math.abs(nearest.y - engravingY) <= step * 0.75 ? nearest.pitch : null;
     }
   }
   if (engravingY < 57 || engravingY > 127) return null;
-  return NATURAL_PITCHES[Math.round(((122 - engravingY) * 11) / 60)] || null;
+  return DEFAULT_TREBLE_PITCHES[Math.round(((122 - engravingY) * 11) / 60)] || null;
 }
 
 export function selectedIndexFromStaffPoint(clientX, rect, noteCount) {
