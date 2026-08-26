@@ -15,6 +15,7 @@ export function buildSharedPracticeRegistry(registries = {}) {
 
 export function sharedRegistryFromWindow(windowObject = globalThis.window) {
   return buildSharedPracticeRegistry({
+    1: windowObject?.ListeningDeskGrade1Practice,
     2: windowObject?.ListeningDeskGrade2Practice,
     3: windowObject?.ListeningDeskGrade3Practice,
     4: windowObject?.ListeningDeskGrade4Practice,

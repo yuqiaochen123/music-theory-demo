@@ -17,6 +17,7 @@ export function normalizePracticeGrade(value) {
 export function registryForGrade(windowObject = globalThis.window, grade = 5) {
   if (windowObject?.ListeningDeskSharedPractice) return windowObject.ListeningDeskSharedPractice;
   const registries = {
+    1: windowObject?.ListeningDeskGrade1Practice,
     2: windowObject?.ListeningDeskGrade2Practice,
     3: windowObject?.ListeningDeskGrade3Practice,
     4: windowObject?.ListeningDeskGrade4Practice,

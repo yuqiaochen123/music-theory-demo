@@ -3,6 +3,8 @@ import { installDailyPracticeOverlay } from "./daily-practice-overlay.js?v=20260
 import { sharedRegistryFromWindow } from "./shared-practice-registry.js";
 
 const scripts = [
+  ["ListeningDeskGrade1Topics", "src/grade-1-topic-data.js"],
+  ["ListeningDeskGrade1Practice", "src/grade-1-practice-data.js"],
   ["ListeningDeskGrade2Topics", "src/grade-2-topic-data.js"],
   ["ListeningDeskGrade2Practice", "src/grade-2-practice-data.js"],
   ["ListeningDeskGrade3Topics", "src/grade-3-topic-data.js"],

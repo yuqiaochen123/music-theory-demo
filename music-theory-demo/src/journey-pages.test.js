@@ -275,9 +275,10 @@ describe("learning journey pages", () => {
     assert.doesNotMatch(styles, /\.grade-picker-page \.grade:nth-child\([45]\)[^}]*margin-left/);
   });
 
-  it("links Grade 5 from the grade selector", () => {
+  it("links active Grade 1 and Grade 5 journeys from the grade selector", () => {
     assert.match(page("index.html"), /href="grade-5\.html"/);
-    assert.match(page("index.html"), /Grade 1[\s\S]*Coming soon/);
+    assert.match(page("index.html"), /href="grade-1\.html"[^>]*><b>Grade 1<\/b><span>Start learning/);
+    assert.doesNotMatch(page("index.html"), /Grade 1[\s\S]*Coming soon/);
   });
 
   it("links active Grade 5 topics to their own topic URLs", () => {

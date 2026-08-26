@@ -9,7 +9,8 @@ const data=fs.readFileSync(new URL('src/grade-4-practice-data.js',root),'utf8');
 const styles=fs.readFileSync(new URL('src/practice.css',root),'utf8');
 
 test('Grade 4 practice routes matching, playback, progress, and tutor context through shared systems',()=>{
-  assert.match(page,/grade===4\?window\.ListeningDeskGrade4Practice/);
+  assert.match(page,/registries=\{1:window\.ListeningDeskGrade1Practice[\s\S]*4:window\.ListeningDeskGrade4Practice/);
+  assert.match(page,/const PRACTICE=registries\[grade\]/);
   assert.match(page,/question\.interaction==='matching'/);
   assert.match(page,/mountMatchingPractice/);
   assert.match(page,/question\.notation\)playNotes\(question\.midis,0,\.24\)/);

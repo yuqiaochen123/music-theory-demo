@@ -28,3 +28,13 @@ test('provides four substantial and playable examples for every Grade 1 topic', 
     });
   });
 });
+
+test('wires Grade 1 through contents, lesson, practice, and production routes', () => {
+  const read = file => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
+  assert.match(read('index.html'), /href="grade-1\.html"/);
+  assert.match(read('grade-1.html'), /data-grade="1"/);
+  assert.match(read('topic.html'), /ListeningDeskGrade1Topics/);
+  assert.match(read('topic.html'), /1:'note-values-rests'/);
+  assert.match(read('practice.html'), /ListeningDeskGrade1Practice/);
+  assert.match(read('vite.config.mjs'), /"grade-1": path\.resolve\(root, "grade-1\.html"\)/);
+});

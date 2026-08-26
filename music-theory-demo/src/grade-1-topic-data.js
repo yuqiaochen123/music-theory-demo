@@ -40,7 +40,7 @@
       ex('Sharp','A sharp raises F by one semitone.',notes(['f/4','f#/4']),'F sharp is one semitone higher than F natural.',[65,66]),
       ex('Flat','A flat lowers B by one semitone.',notes(['b/3','bb/3']),'B flat is one semitone lower than B natural.',[59,58]),
       ex('Natural','A natural sign cancels an earlier sharp or flat.',notes(['f#/4','f/4']),'The second note returns to F natural.',[66,65]),
-      ex('Bar-line reset','An accidental does not automatically continue into the next bar.',rhythm([q(['c#/4'],'h'),q(['c#/4'],'h'),q(['c/4'],'w')],[4,4]),'After the bar line, C is natural again unless the sharp is rewritten.',[61,61,60])
+      ex('Bar-line reset','An accidental does not automatically continue into the next bar.',notes(['c#/4','c/4']),'After the bar line, C is natural again unless the sharp is rewritten.',[61,60])
     ]),
     'major-scale-construction':topic('Major scale construction','Build the major-scale pattern.','T–T–S–T–T–T–S.','Use every letter name once, then place tones and semitones in the major-scale order.','Construction of a major scale using the tone and semitone pattern.',[
       ex('First two tones','C–D and D–E are tones.',notes(['c/4','d/4','e/4']),'Two whole-tone steps begin the major scale.',[60,62,64]),
