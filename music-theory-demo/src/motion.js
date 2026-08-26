@@ -1,7 +1,10 @@
 import {
+  consumeArrivalMarker,
   eligibleNavigation,
   interactiveClickTarget,
+  writeArrivalMarker,
 } from './page-navigation.js?v=20260825-parity1';
+import { transitionMode, waitForGradeFiveReady } from './grade-transition.js?v=20260826-curtain1';
 
 const root = document.documentElement;
 const prefetched = new Set();
@@ -14,25 +17,35 @@ const previewEvent = {
   altKey: false,
 };
 
-// A destination must paint its own complete first frame. Cross-document cover
-// animations made cached local pages look different from production builds.
 document.body.classList.add('is-ready');
-root.classList.remove(
-  'is-transitioning',
-  'is-transition-arriving',
-  'is-grade-dropping',
-  'is-grade-rising',
-);
+const isGradeFive = document.body?.dataset?.grade === '5';
+const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+const arrivingAtGradeFive = isGradeFive && consumeArrivalMarker(window.sessionStorage);
+if (!arrivingAtGradeFive) root.classList.remove('is-transition-arriving');
+root.classList.remove('is-transitioning', 'is-grade-dropping', 'is-grade-rising', 'is-grade-covered', 'is-grade-opening');
 
 if (!document.querySelector('link[href*="page-transitions.css"]')) {
   const transitionStyles = document.createElement('link');
   transitionStyles.rel = 'stylesheet';
-  transitionStyles.href = 'src/page-transitions.css?v=20260825-parity1';
+  transitionStyles.href = 'src/page-transitions.css?v=20260826-curtain1';
   document.head.append(transitionStyles);
 }
 
 const curtain = document.querySelector('.page-transition-curtain');
-if (curtain) curtain.hidden = true;
+if (curtain) curtain.hidden = !arrivingAtGradeFive;
+
+const motionDelay = milliseconds => new Promise(resolve => window.setTimeout(resolve, reducedMotion ? 0 : milliseconds));
+
+if (arrivingAtGradeFive && curtain) {
+  void waitForGradeFiveReady({ documentObject: document }).then(async () => {
+    await new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+    root.classList.add('is-grade-opening');
+    root.classList.remove('is-transition-arriving');
+    await motionDelay(760);
+    curtain.hidden = true;
+    root.classList.remove('is-grade-opening');
+  });
+}
 
 let clickAudioContext = null;
 
@@ -93,6 +106,22 @@ document.addEventListener('click', event => {
 
   link.classList.add('is-pressed');
   event.preventDefault();
+  const mode = transitionMode(link);
+  if (mode === 'grade-rise' && curtain) {
+    writeArrivalMarker(window.sessionStorage);
+    curtain.hidden = false;
+    root.classList.add('is-grade-rising');
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => root.classList.add('is-grade-covered')));
+    void motionDelay(650).then(() => window.location.assign(destination.href));
+    return;
+  }
+  if (mode === 'grade-drop' && isGradeFive) {
+    const underlay = document.querySelector('.grade-transition-underlay');
+    if (underlay) underlay.hidden = false;
+    root.classList.add('is-grade-dropping');
+    void motionDelay(740).then(() => window.location.assign(destination.href));
+    return;
+  }
   window.location.assign(destination.href);
 });
 
@@ -102,5 +131,7 @@ window.addEventListener('pageshow', () => {
     'is-transition-arriving',
     'is-grade-dropping',
     'is-grade-rising',
+    'is-grade-covered',
+    'is-grade-opening',
   );
 });

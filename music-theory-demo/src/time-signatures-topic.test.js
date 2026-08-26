@@ -7,6 +7,19 @@ import { pitchToMidi, validateRhythm } from "./music-validation.js";
 function load(path,globalName){const source=readFileSync(new URL(path,import.meta.url),"utf8");const context={window:{}};vm.runInNewContext(source,context);return {source,data:context.window[globalName]};}
 
 describe("Time signatures and grouping MVP",()=>{
+  it("builds an eight-step guided lesson before practice",()=>{
+    const {data}=load("./topic-data.js","ListeningDeskTopics");
+    const lesson=data["time-signatures"];
+    assert.equal(lesson.examples.length,8);
+    assert.match(lesson.title,/read and hear/i);
+    for(const [index,step] of lesson.examples.entries()){
+      assert.ok(step.rule?.length>=35,`step ${index+1} needs an explicit teaching rule`);
+      assert.ok(step.explanation?.length>=55,`step ${index+1} needs a worked explanation`);
+      assert.ok(step.notation,`step ${index+1} needs matching notation`);
+      assert.ok(step.parts?.length>=2,`step ${index+1} needs guided playback`);
+    }
+    assert.equal(lesson.examples.at(-1).practiceCta,true);
+  });
   it("does not draw a left divider on first-column example cards",()=>{
     const styles=readFileSync(new URL("./responsive-safety.css",import.meta.url),"utf8");
     assert.match(styles,/body\[data-topic="time-signatures"\] \.example:nth-child\(odd\)\s*\{[^}]*border-left:\s*0\s*!important/);

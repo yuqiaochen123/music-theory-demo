@@ -22213,8 +22213,9 @@ ${suffix}`;
         slide.className = "lesson-slide lesson-guide-slide";
         const teaching = item.rule || item.concept?.detail || "";
         const visual = item.notation ? `<div class="lesson-guide-notation" id="lesson-guide-notation-${index}" aria-label="${item.label} staff notation"></div>` : conceptMarkup(item.concept);
-        const controls = item.parts?.length >= 2 ? `<div class="lesson-guide-controls"><button data-guide-index="${index}" data-guide-part="0">\u25B6 ${item.parts[0][0]}</button><button data-guide-index="${index}" data-guide-part="1">\u25B6 ${item.parts[1][0]}</button></div>` : "";
-        slide.innerHTML = `<article class="lesson-guide-card"><header><p class="eyebrow">Quick guide \xB7 ${index + 1} of ${items.length}</p><h2>${item.label}</h2><p class="lesson-guide-rule">${teaching}</p></header>${visual}<div class="lesson-guide-footer"><p>${item.explanation}</p>${controls}</div></article>`;
+        const practiceControl = item.practiceCta ? `<a class="lesson-guide-practice" href="practice.html?${gradeQuery}topic=${topic}">Start practice</a>` : "";
+        const controls = item.parts?.length >= 2 ? `<div class="lesson-guide-controls"><button data-guide-index="${index}" data-guide-part="0">\u25B6 ${item.parts[0][0]}</button><button data-guide-index="${index}" data-guide-part="1">\u25B6 ${item.parts[1][0]}</button>${practiceControl}</div>` : practiceControl;
+        slide.innerHTML = `<article class="lesson-guide-card${topic === "time-signatures" ? " lesson-guide-card--guided" : ""}"><header><p class="eyebrow">${topic === "time-signatures" ? `Guided lesson \xB7 Step ${index + 1} of ${items.length}` : `Quick guide \xB7 ${index + 1} of ${items.length}`}</p><h2>${item.label}</h2><p class="lesson-guide-rule">${teaching}</p></header>${visual}<div class="lesson-guide-footer"><p>${item.explanation}</p>${controls}</div></article>`;
         practice.before(slide);
       });
       items.forEach((item, index) => {
@@ -22233,7 +22234,7 @@ ${suffix}`;
         renderIntervalOverview();
         return;
       }
-      const data = displayedData(), items = data.examples.map((base, index) => activeExample(index));
+      const data = displayedData(), items = topic === "time-signatures" ? data.examples : data.examples.map((base, index) => activeExample(index));
       const conceptOnly = items.every((item) => item.concept);
       $(".compare-head").hidden = conceptOnly;
       $(".continue").hidden = false;
@@ -22252,7 +22253,7 @@ ${suffix}`;
         renderRhythmGuide(items);
         return;
       }
-      if (grade !== 5 || (/* @__PURE__ */ new Set(["clefs", "transposing-instruments", "accidentals", "musical-terms", "ornaments", "voices-instruments", "musical-observation"])).has(topic)) {
+      if (grade !== 5 || (/* @__PURE__ */ new Set(["time-signatures", "clefs", "transposing-instruments", "accidentals", "musical-terms", "ornaments", "voices-instruments", "musical-observation"])).has(topic)) {
         renderLessonGuide(items);
         return;
       }

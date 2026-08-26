@@ -32,10 +32,10 @@
     @media(max-width:720px){.examples{display:block;border:0;background:transparent}.example{border:1px solid var(--line);margin-bottom:16px}.example+.example{border-left:1px solid var(--line)}body[data-topic="scale-degrees"] .example+.example{border-left:1px solid var(--line);border-top:0}body[data-topic="scale-degrees"] .scale-direction{padding-inline:8px}body[data-topic="scale-degrees"] .scale-direction .notation{height:190px}.interval-overview{display:grid;border:1px solid var(--line);grid-template-columns:1fr}.interval-link,.interval-link:nth-child(odd){border-right:0}.compare-head{align-items:start;flex-direction:column}.compare-btn{width:100%}.notation{height:175px}.grouping-control{padding-inline:18px}.grouping-toggle{width:100%}.grouping-option{flex:1 1 auto}body[data-topic="time-signatures"] .example-body>p{min-height:0}body[data-topic="key-signatures"] .key-pair-grid{grid-template-columns:1fr}body[data-topic="key-signatures"] .key-side+.key-side{border-left:0;border-top:1px solid var(--line)}body[data-topic="key-signatures"] .key-side{padding:20px 18px 22px}body[data-topic="key-signatures"] .key-compare{width:calc(100% - 36px);margin-inline:18px}body[data-topic="key-signatures"] .key-explanation{margin-inline:18px}.continue{grid-template-columns:1fr}.practice{text-align:center}.hero h1{font-size:51px}.clef-editor-head{display:block;padding:22px 18px}.note-count{display:inline-block;margin-top:16px}.editor-toolbar,.editor-staff{padding-inline:18px}.editor-field{flex:1 1 130px}.editor-field select{width:100%}.editor-toolbar button{flex:1 1 auto}.editor-staff-label{display:block}.editor-note-list,.editor-status{padding-inline:18px}}
   </style>
   <link rel="stylesheet" href="src/redesign.css?v=20260802-red5">
-  <link rel="stylesheet" href="src/horizontal-flow.css?v=20260826-intervalback1">
+  <link rel="stylesheet" href="src/horizontal-flow.css?v=20260826-timeguide1">
   <link rel="stylesheet" href="src/palette.css?v=20260803-palette1">
   <link rel="stylesheet" href="src/quaver-guide.css?v=20260826-glass2">
-  <link rel="stylesheet" href="src/responsive-safety.css?v=20260824-mobile6">
+  <link rel="stylesheet" href="src/responsive-safety.css?v=20260826-timeguide1">
 </head>
 <body class="lesson-body is-lesson-loading">
   <div class="page-transition-curtain" aria-hidden="true"></div>
@@ -76,9 +76,9 @@
   <footer id="footer" hidden></footer>
   <script src="vendor/vexflow-5.0.0.js"></script>
   <script type="module" src="src/auth-nav.js"></script>
-  <script src="src/notation.js?v=20260826-scalehover1"></script>
-  <script src="src/topic-data.js"></script>
-  <script src="src/remaining-topic-data.js?v=20260802-red3"></script>
+  <script src="src/notation.js?v=20260826-cancellation1"></script>
+  <script src="src/topic-data.js?v=20260826-timeguide1"></script>
+  <script src="src/remaining-topic-data.js?v=20260826-enharmonic1"></script>
   <script src="src/grade-1-topic-data.js?v=20260826-grade1"></script>
   <script src="src/grade-2-topic-data.js?v=20260825-grade2"></script>
   <script src="src/grade-3-topic-data.js?v=20260825-grade3"></script>
@@ -138,8 +138,9 @@
         const visual=item.notation
           ?`<div class="lesson-guide-notation" id="lesson-guide-notation-${index}" aria-label="${item.label} staff notation"></div>`
           :conceptMarkup(item.concept);
-        const controls=item.parts?.length>=2?`<div class="lesson-guide-controls"><button data-guide-index="${index}" data-guide-part="0">▶ ${item.parts[0][0]}</button><button data-guide-index="${index}" data-guide-part="1">▶ ${item.parts[1][0]}</button></div>`:'';
-        slide.innerHTML=`<article class="lesson-guide-card"><header><p class="eyebrow">Quick guide · ${index+1} of ${items.length}</p><h2>${item.label}</h2><p class="lesson-guide-rule">${teaching}</p></header>${visual}<div class="lesson-guide-footer"><p>${item.explanation}</p>${controls}</div></article>`;
+        const practiceControl=item.practiceCta?`<a class="lesson-guide-practice" href="practice.html?${gradeQuery}topic=${topic}">Start practice</a>`:'';
+        const controls=item.parts?.length>=2?`<div class="lesson-guide-controls"><button data-guide-index="${index}" data-guide-part="0">▶ ${item.parts[0][0]}</button><button data-guide-index="${index}" data-guide-part="1">▶ ${item.parts[1][0]}</button>${practiceControl}</div>`:practiceControl;
+        slide.innerHTML=`<article class="lesson-guide-card${topic==='time-signatures'?' lesson-guide-card--guided':''}"><header><p class="eyebrow">${topic==='time-signatures'?`Guided lesson · Step ${index+1} of ${items.length}`:`Quick guide · ${index+1} of ${items.length}`}</p><h2>${item.label}</h2><p class="lesson-guide-rule">${teaching}</p></header>${visual}<div class="lesson-guide-footer"><p>${item.explanation}</p>${controls}</div></article>`;
         practice.before(slide);
       });
       items.forEach((item,index)=>{if(!item.notation)return;const target=document.querySelector(`#lesson-guide-notation-${index}`);try{ListeningDeskNotation.render(target,item.notation,{width:900})}catch(error){console.error(`Unable to render ${item.label} notation`,error);target.textContent='Notation is unavailable in this browser.'}});
@@ -147,8 +148,8 @@
     }
     function render(){
       if(isIntervalOverview){renderIntervalOverview();return}
-      const data=displayedData(),items=data.examples.map((base,index)=>activeExample(index));
-      const conceptOnly=items.every(item=>item.concept);$('.compare-head').hidden=conceptOnly;$('.continue').hidden=false;$('#lesson-topbar-title').textContent=intervalLesson?intervalLesson.label:data.name;$('#eyebrow').textContent=data.name;$('#title').textContent=data.title;$('#subtitle').textContent=data.subtitle;$('#intro').textContent=data.intro;$('#footer').textContent=data.name;$('#practice').href=`practice.html?${gradeQuery}topic=${topic}`;if(grade===5&&topic==='key-signatures'){renderKeySignatureLesson(data);return}if(topic==='rhythm-note-values'){renderRhythmGuide(items);return}if(grade!==5||new Set(['clefs','transposing-instruments','accidentals','musical-terms','ornaments','voices-instruments','musical-observation']).has(topic)){renderLessonGuide(items);return}$('#examples').className='examples'+(conceptOnly?' concept-only':'');
+      const data=displayedData(),items=topic==='time-signatures'?data.examples:data.examples.map((base,index)=>activeExample(index));
+      const conceptOnly=items.every(item=>item.concept);$('.compare-head').hidden=conceptOnly;$('.continue').hidden=false;$('#lesson-topbar-title').textContent=intervalLesson?intervalLesson.label:data.name;$('#eyebrow').textContent=data.name;$('#title').textContent=data.title;$('#subtitle').textContent=data.subtitle;$('#intro').textContent=data.intro;$('#footer').textContent=data.name;$('#practice').href=`practice.html?${gradeQuery}topic=${topic}`;if(grade===5&&topic==='key-signatures'){renderKeySignatureLesson(data);return}if(topic==='rhythm-note-values'){renderRhythmGuide(items);return}if(grade!==5||new Set(['time-signatures','clefs','transposing-instruments','accidentals','musical-terms','ornaments','voices-instruments','musical-observation']).has(topic)){renderLessonGuide(items);return}$('#examples').className='examples'+(conceptOnly?' concept-only':'');
       $('#examples').innerHTML=items.map((item,index)=>`<article class="example"><header><p>Example ${index+1}</p><h3>${item.label}</h3></header>${groupingControls(data.examples[index],item,index)}${item.concept?conceptMarkup(item.concept):topic==='scale-degrees'?scaleDegreeNotation(item,index):`<div class="notation" id="notation-${index}" aria-label="${item.label} notation"></div>`}<div class="example-body"><p>${item.explanation}</p>${item.parts?.length>=2?`<div class="play-row"><button data-index="${index}" data-part="0">▶ ${item.parts[0][0]}</button><button data-index="${index}" data-part="1">▶ ${item.parts[1][0]}</button><button data-index="${index}" data-part="2">▶ ${topic==='time-signatures'?'Hear multiple bars':'Hear together'}</button></div>`:''}</div></article>`).join('');
       items.forEach((item,index)=>{if(item.concept)return;if(topic==='scale-degrees'){renderScaleDegreeNotation(item,index);return}const target=document.querySelector(`#notation-${index}`);try{ListeningDeskNotation.render(target,item.notation,{width:760})}catch(error){target.textContent='Notation is unavailable in this browser.'}});
       $('#examples').querySelectorAll('[data-reveal-grouping]').forEach(button=>button.onclick=()=>{const index=+button.dataset.revealGrouping;if(revealedGroupingSelectors.has(index))revealedGroupingSelectors.delete(index);else revealedGroupingSelectors.add(index);render()});$('#examples').querySelectorAll('[data-grouping]').forEach(button=>button.onclick=()=>{stopRhythmLoop();const index=+button.dataset.index;selectedVariants[index]=button.dataset.grouping;revealedGroupingSelectors.add(index);render()});$('#examples').querySelectorAll('[data-part]').forEach(button=>button.onclick=()=>{const index=+button.dataset.index,part=+button.dataset.part;if(part===2&&topic==='time-signatures')toggleRhythmLoop(index,button);else if(part===2){stopRhythmLoop();playExample(index)}else playPart(index,part)});if(!(window.AudioContext||window.webkitAudioContext))showAudioFallback()
@@ -157,7 +158,7 @@
     if(!isIntervalOverview)$('#compare').onclick=()=>{stopRhythmLoop();playExample(0);setTimeout(()=>playExample(1),topic==='cadences'?2100:['scales','time-signatures'].includes(topic)?2500:1100)};window.ListeningDeskPlayMidis=sound;render();if(topic === 'clef-transposition')mountClefTranspositionEditor({container:$('#clef-editor'),notation:window.ListeningDeskNotation,play:sound,mode:grade===4?'grade4-clef':undefined});setupLessonCarousel();document.body.classList.remove('is-lesson-loading');$('.hero').removeAttribute('aria-busy');
     startCurrentLesson({grade,topicId:topic,lessonId:lessonId||null,statusElement:null,syncElement:document.querySelector('[data-progress-sync]')});
   </script>
-  <script>if(location.protocol==='file:'){const fallback=document.createElement('script');fallback.src='src/topic-file-runtime.bundle.js?v=20260826-audio-fallback1';document.head.append(fallback)}</script>
+  <script>if(location.protocol==='file:'){const fallback=document.createElement('script');fallback.src='src/topic-file-runtime.bundle.js?v=20260826-timeguide1';document.head.append(fallback)}</script>
   <script type="module">
     import { mountGrade4NotationInteractions, renderClefComparison } from './src/grade-4-notation-interactions.js?v=20260822-g4abrsm1';
     import { writtenPitchToMidi } from './src/grade-4-music.js?v=20260822-g4abrsm1';

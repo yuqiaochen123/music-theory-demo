@@ -204,6 +204,7 @@
 .global-learning-tools>[data-notebook-shortcut]{position:absolute;right:clamp(18px,3vw,42px);top:clamp(72px,9vh,104px);bottom:auto;left:auto;width:clamp(142px,14vw,184px);transform:none}
 .global-learning-tools .notebook-shortcut__bubble{right:calc(100% - 26px);top:52px}
 .global-learning-tools .daily-practice-summary{position:fixed;bottom:18px;left:50%;z-index:32;width:calc(100% - 32px);max-width:690px;margin:0;transform:translateX(-50%);filter:drop-shadow(0 12px 24px rgba(42,11,28,.24))}
+@media(min-width:1200px){.global-learning-tools>[data-notebook-shortcut]{right:clamp(150px,11vw,240px)}}
 
 .notebook-day{min-width:0}
 .notebook-day>h2{margin:8px 0 14px;color:#631838;font-size:clamp(20px,2.5vw,27px);font-weight:650;letter-spacing:-.02em}

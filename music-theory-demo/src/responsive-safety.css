@@ -27,7 +27,7 @@ body[data-topic="time-signatures"] .example:nth-child(odd) { border-left:0!impor
   .lesson-guide-card, .rhythm-guide-card { height:auto!important; min-height:100%; overflow:visible!important; }
   .lesson-guide-footer { min-width:0; align-items:stretch!important; flex-direction:column!important; }
   .rhythm-copy { min-width:0; grid-template-columns:1fr!important; }
-  .lesson-guide-controls { display:grid!important; width:100%; grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr)); }
+  .lesson-guide-controls { display:grid!important; width:100%; flex:0 0 auto!important; grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr)); }
   .lesson-guide-controls button { min-width:0; width:100%; white-space:normal; }
   .lesson-guide-notation, .rhythm-notation, .notation, .editor-notation { max-width:100%; overflow-x:auto!important; overscroll-behavior-inline:contain; -webkit-overflow-scrolling:touch; }
   .lesson-dots { max-width:calc(100vw - 32px)!important; }

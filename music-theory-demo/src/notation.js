@@ -7,8 +7,12 @@
 
   function accidentalFor(key) {
     const pitch = key.split("/")[0];
-    const match = pitch.match(/^[a-g](bb|##|b|#)?$/i);
+    const match = pitch.match(/^[a-g](bb|##|b|#|n)?$/i);
     return match?.[1] || null;
+  }
+
+  function vexFlowKey(key) {
+    return key.replace(/^([a-g])n(\/-?\d+)$/i, "$1$2");
   }
 
   const keySignatureCounts = {
@@ -34,7 +38,7 @@
   }
 
   function staveNote(keys, showAccidentals, duration = "q", clef = "treble", keySignature = null) {
-    const note = new VF.StaveNote({ clef, keys, duration });
+    const note = new VF.StaveNote({ clef, keys: keys.map(vexFlowKey), duration });
     if (showAccidentals) {
       keys.forEach((key, index) => {
         const accidental = keySignature ? accidentalForKey(key, keySignature) : accidentalFor(key);
@@ -111,7 +115,11 @@
     const notes = specification.events.map((event) => {
       const dottedDuration = `${event.duration}${"d".repeat(event.dots || 0)}`;
       const duration = event.rest ? `${dottedDuration}r` : dottedDuration;
-      const note = staveNote(event.rest ? ["b/4"] : event.keys, false, duration);
+      const note = staveNote(
+        event.rest ? ["b/4"] : event.keys,
+        !event.rest && (specification.showAccidentals === true || event.showAccidentals === true),
+        duration,
+      );
       if (!event.rest) note.setStemDirection(note.calculateOptimalStemDirection());
       addDotToAll(note, event.dots);
       if (event.accent && !event.rest) note.addModifier(new VF.Articulation("a>"), 0);

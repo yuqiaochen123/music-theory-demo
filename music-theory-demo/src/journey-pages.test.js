@@ -50,6 +50,13 @@ describe("learning journey pages", () => {
     assert.match(styles,/\.lesson-guide-card/);
   });
 
+  it("presents time signatures as a guided lesson rather than a quick guide",()=>{
+    assert.match(topic,/topic==='time-signatures'/);
+    assert.match(topic,/Guided lesson · Step \$\{index\+1\} of \$\{items\.length\}/);
+    assert.match(topic,/item\.practiceCta/);
+    assert.match(responsiveStyles,/\.lesson-guide-controls\s*\{[^}]*flex:0 0 auto!important/);
+  });
+
   it("left-aligns rhythm guide headings and styles note pointer labels",()=>{
     assert.match(styles,/\.rhythm-guide-card header\{[^}]*max-width:none!important/);
     assert.match(styles,/\.rhythm-note-tooltip\{/);
@@ -58,7 +65,7 @@ describe("learning journey pages", () => {
 
   it("uses one restrained motion system across every app page", () => {
     for (const file of ["index.html", "grade.html", "grade-5.html", "topic.html", "practice.html", "login.html", "vexflow-cadence-proof.html"]) {
-      assert.match(page(file), /type="module" src="src\/motion\.js\?v=20260825-parity1"/);
+      assert.match(page(file), /type="module" src="src\/motion\.js\?v=2026082[56]-(?:parity|curtain)1"/);
     }
     const motion = page("src/motion.js");
     assert.match(motion, /from '.\/page-navigation\.js\?v=20260825-parity1'/);
@@ -145,7 +152,7 @@ describe("learning journey pages", () => {
 
   it("provides a classic-script lesson fallback when opened directly from disk", () => {
     const topic = page("topic.html");
-    assert.match(topic, /location\.protocol==='file:'[\s\S]*src='src\/topic-file-runtime\.bundle\.js\?v=20260826-audio-fallback1'/);
+    assert.match(topic, /location\.protocol==='file:'[\s\S]*src='src\/topic-file-runtime\.bundle\.js\?v=20260826-(?:audio-fallback|timeguide)1'/);
     assert.doesNotMatch(topic, /<script src="src\/topic-file-runtime\.bundle\.js/);
     assert.match(page("src/topic-file-runtime.bundle.js"), /file:/);
   });
@@ -379,7 +386,7 @@ describe("learning journey pages", () => {
 
   it("keeps the existing two-card listening controls on every interval lesson",()=>{
     const topic=page("topic.html");
-    assert.match(topic,/const data=displayedData\(\),items=data\.examples\.map/);
+    assert.match(topic,/const data=displayedData\(\),items=topic==='time-signatures'\?data\.examples:data\.examples\.map/);
     assert.match(topic,/topic==='time-signatures'\?'Hear multiple bars':'Hear together'/);
   });
 
@@ -408,12 +415,14 @@ describe("learning journey pages", () => {
     assert.match(topic,/▶ Compare both/);
   });
 
-  it("keeps the one-bar and multiple-bar time-signature controls in separate rows",()=>{
+  it("gives every guided time-signature step explicit playback controls",()=>{
     const data=page("src/topic-data.js");
-    const topic=page("topic.html");
-    assert.match(data,/Hear one bar/);
-    assert.doesNotMatch(data,/Hear beats/);
-    assert.match(topic,/body\[data-topic="time-signatures"\] \.play-row\{grid-template-rows:74px 54px\}/);
+    assert.match(data,/Hear the three minim beats/);
+    assert.match(data,/Hear four crotchet beats/);
+    assert.match(data,/Hear the 3\+3 grouping/);
+    assert.match(data,/Hear 5\/4 as 2\+3/);
+    assert.match(data,/Hear 7\/4 as 3\+2\+2/);
+    assert.match(data,/Hear the 2\+2\+3 reading/);
   });
 
   it("gives ascending and descending scale exercises enough vertical space",()=>{

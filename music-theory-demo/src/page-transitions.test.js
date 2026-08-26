@@ -18,12 +18,12 @@ describe("seamless cross-page navigation", () => {
   it("establishes a non-white root canvas before external styles load", () => {
     for (const filename of entryPages) {
       const html = page(filename);
-      const criticalBackground = html.indexOf("<style>html{background:#f3efec}</style>");
+      const criticalBackground = html.search(/<style>[\s\S]*?html\s*\{\s*background:\s*#f3efec/);
       const firstStylesheet = html.indexOf('rel="stylesheet"');
 
       assert.notEqual(criticalBackground, -1, `${filename} is missing its first-paint background`);
       assert.ok(criticalBackground < firstStylesheet, `${filename} loads external CSS before its first-paint background`);
-      assert.match(html, /href="src\/page-transitions\.css\?v=20260825-parity1"/);
+      assert.match(html, /href="src\/page-transitions\.css\?v=202608\d+-[a-z0-9]+"/);
     }
   });
 
@@ -33,30 +33,31 @@ describe("seamless cross-page navigation", () => {
     assert.doesNotMatch(styles, /@view-transition|::view-transition/);
   });
 
-  it("keeps one inert transition curtain ready for cross-page animation", () => {
-    const curtain = '<div class="page-transition-curtain" aria-hidden="true"></div>';
+  it("keeps one transition curtain ready for cross-page animation", () => {
+    const curtain = /<div class="page-transition-curtain" aria-hidden="true">/;
     const arrivalBootstrap = /sessionStorage\.getItem\('listening-desk:page-transition'\)[\s\S]*is-transition-arriving/;
 
     for (const filename of entryPages) {
       const html = page(filename);
       assert.equal((html.match(/class="page-transition-curtain"/g) || []).length, 1, `${filename} needs one curtain`);
       assert.match(html, arrivalBootstrap, `${filename} needs the early arrival bootstrap`);
-      assert.ok(html.indexOf(curtain) > html.indexOf("<body"), `${filename} curtain must be inside the body`);
+      assert.ok(html.search(curtain) > html.indexOf("<body"), `${filename} curtain must be inside the body`);
     }
   });
 
-  it("keeps the transition curtain inert so navigation never exposes a blank brand-colour frame", () => {
+  it("uses a two-panel curtain that rises and then opens from the centre", () => {
     const styles = page("src/page-transitions.css");
     const motion = page("src/motion.js");
 
-    assert.match(styles, /\.page-transition-curtain\s*\{[^}]*display:\s*none/);
-    assert.doesNotMatch(styles, /html\.is-transitioning \.page-transition-curtain\s*\{[^}]*opacity:\s*1/);
-    assert.doesNotMatch(styles, /html\.is-transition-arriving \.page-transition-curtain\s*\{[^}]*opacity:\s*1/);
-    assert.doesNotMatch(motion, /root\.classList\.add\('is-transitioning'\)/);
-    assert.doesNotMatch(motion, /NAVIGATION_FALLBACK_MS/);
+    assert.match(styles, /\.page-transition-curtain::before/);
+    assert.match(styles, /\.page-transition-curtain::after/);
+    assert.match(styles, /is-grade-rising/);
+    assert.match(styles, /is-grade-opening/);
+    assert.match(motion, /waitForGradeFiveReady/);
+    assert.match(motion, /writeArrivalMarker/);
   });
 
-  it("never inserts a synthetic grade chooser between Grade 5 and the real destination", () => {
+  it("reveals a lightweight grade chooser while Grade 5 drops away", () => {
     const index = page("index.html");
     const gradeFive = page("grade-5.html");
     const motion = page("src/motion.js");
@@ -64,14 +65,10 @@ describe("seamless cross-page navigation", () => {
 
     assert.match(index, /data-grade="5"[^>]*data-page-transition="grade-rise"/);
     assert.match(gradeFive, /class="grade-five-close"[^>]*data-page-transition="grade-drop"/);
-    assert.doesNotMatch(motion, /page-transition-underlay/);
-    assert.doesNotMatch(motion, /page-transition-arrival/);
-    assert.doesNotMatch(motion, /page-transition-grade-preview/);
+    assert.match(gradeFive, /class="grade-transition-underlay"/);
+    assert.match(styles, /\.grade-transition-underlay/);
+    assert.match(styles, /is-grade-dropping/);
     assert.doesNotMatch(motion, /createElement\('iframe'\)/);
-    assert.doesNotMatch(motion, /writeArrivalMarker/);
-    assert.doesNotMatch(motion, /DIRECTIONAL_FALLBACK_MS/);
-    assert.doesNotMatch(styles, /\.page-transition-grade-preview/);
-    assert.doesNotMatch(styles, /page-transition-underlay|page-transition-arrival/);
     assert.match(motion, /window\.location\.assign\(destination\.href\)/);
   });
 });

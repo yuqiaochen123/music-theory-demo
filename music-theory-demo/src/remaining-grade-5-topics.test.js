@@ -91,10 +91,29 @@ describe("remaining Grade 5 modules",()=>{
     assert.deepEqual(Array.from(examples[2].parts[1][1]),[67,65],"G-double-flat must fall two semitones");
     assert.deepEqual(Array.from(examples[3].parts[0][1]),[61],"C-sharp must sound as MIDI 61");
     assert.deepEqual(Array.from(examples[3].parts[1][1]),[61],"D-flat must sound as the same pitch");
+    assert.equal(
+      examples[3].parts[0][1],
+      examples[3].parts[1][1],
+      "C-sharp and D-flat buttons must use the exact same playback source"
+    );
     for(const item of examples){
       assert.equal(item.parts.length,2,`${item.label} needs two labelled audio examples`);
       assert.equal(item.parts.every(([label,midis])=>label.startsWith("Hear ")&&midis.length>0),true);
     }
+  });
+
+  it("engraves both cancellation pairs and labels only the hovered note",()=>{
+    const cancellation=topics.accidentals.examples[1];
+    assert.equal(cancellation.notation.type,"rhythm");
+    assert.equal(cancellation.notation.showAccidentals,true);
+    assert.deepEqual(
+      Array.from(cancellation.notation.events,event=>event.keys[0]),
+      ["f#/4","fn/4","bb/4","bn/4"],
+    );
+    assert.deepEqual(
+      Array.from(cancellation.notation.events,event=>event.hoverLabel),
+      ["F-sharp","F-natural","B-flat","B-natural"],
+    );
   });
 
   it("provides eleven stable practice questions for every new module",()=>{

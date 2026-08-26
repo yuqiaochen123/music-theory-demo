@@ -20,6 +20,8 @@ describe("notation accidental parsing", () => {
     assert.equal(accidentalFor("eb/4"), "b");
     assert.equal(accidentalFor("f#/4"), "#");
     assert.equal(accidentalFor("c/4"), null);
+    assert.equal(accidentalFor("fn/4"), "n");
+    assert.equal(accidentalFor("bn/4"), "n");
   });
 
   it("omits accidentals already supplied by the key signature", () => {

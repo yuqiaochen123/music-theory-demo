@@ -346,6 +346,10 @@
   .quaver-guide__bubble { max-height:96px; overflow-y:auto; }
 }
 
+@media (min-width: 1200px) {
+  .grade-five-body .quaver-guide { right: clamp(72px, 6vw, 120px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .quaver-guide,
   .quaver-guide__stage,
